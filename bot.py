@@ -12,9 +12,9 @@ ADMIN_ID = int(os.getenv('ADMIN_USER_ID', '0'))
 
 @dp.errors_handler()
 async def global_error_handler(update, exception):
-    logging.error(f'⚠️ Unhandled exception: {exception}\n{traceback.format_exc()}')
+    logging.error(f'?? Unhandled exception: {exception}\n{traceback.format_exc()}')
     if isinstance(update, types.Update) and update.message:
-        await update.message.answer('⚠️ אירעה שגיאה זמנית. אנא נסה שוב מאוחר יותר.')
+        await update.message.answer('?? ????? ????? ?????. ??? ??? ??? ????? ????.')
     return True
 
 @dp.message_handler(commands=['cancel'], state='*')
@@ -39,8 +39,8 @@ async def start(msg: types.Message):
             await conn.execute("INSERT INTO users (user_id,lang) VALUES ($1,'en') ON CONFLICT DO NOTHING", msg.from_user.id)
     lang = await get_lang(msg.from_user.id)
     kb = InlineKeyboardMarkup(row_width=2)
-    for code, label in [('he','🇮🇱 עברית'),('en','🇬🇧 English'),('ru','🇷🇺 Русский'),('ar','🇸🇦 العربية'),
-                        ('fr','🇫🇷 Français'),('es','🇪🇸 Español'),('zh','🇨🇳 中文'),('pt','🇧🇷 Português')]:
+    for code, label in [('he','???? ?????'),('en','???? English'),('ru','???? ???????'),('ar','???? ???????'),
+                        ('fr','???? Fran�ais'),('es','???? Espa�ol'),('zh','???? ??'),('pt','???? Portugu�s')]:
         kb.insert(InlineKeyboardButton(label, callback_data=f'lang_{code}'))
     await msg.answer(core.t('choose_lang', lang), reply_markup=kb)
 
@@ -145,8 +145,8 @@ async def edit_price_start(call: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'change_lang_menu')
 async def change_lang_menu(call: types.CallbackQuery):
     kb = InlineKeyboardMarkup(row_width=2)
-    for code, label in [('he','🇮🇱 עברית'),('en','🇬🇧 English'),('ru','🇷🇺 Русский'),('ar','🇸🇦 العربية'),
-                        ('fr','🇫🇷 Français'),('es','🇪🇸 Español'),('zh','🇨🇳 中文'),('pt','🇧🇷 Português')]:
+    for code, label in [('he','???? ?????'),('en','???? English'),('ru','???? ???????'),('ar','???? ???????'),
+                        ('fr','???? Fran�ais'),('es','???? Espa�ol'),('zh','???? ??'),('pt','???? Portugu�s')]:
         kb.insert(InlineKeyboardButton(label, callback_data=f'lang_{code}'))
     await call.message.answer(core.t('choose_lang', 'en'), reply_markup=kb)
     await call.answer()
@@ -158,7 +158,7 @@ async def view_stats_cb(call: types.CallbackQuery):
         users = await conn.fetchval('SELECT COUNT(*) FROM users')
         cards = await conn.fetchval('SELECT COUNT(*) FROM users WHERE card_name IS NOT NULL')
         refs = await conn.fetchval('SELECT COUNT(*) FROM users WHERE ref_id=$1 AND card_name IS NOT NULL', call.from_user.id)
-    await call.message.answer(core.t('status', lang).format(users=users, cards=cards) + f'\n🔗 {core.t("myreferrals", lang).format(refs=refs)}')
+    await call.message.answer(core.t('status', lang).format(users=users, cards=cards) + f'\n?? {core.t("myreferrals", lang).format(refs=refs)}')
     await call.answer()
 
 @dp.message_handler(commands=['share'])
@@ -170,10 +170,10 @@ async def share_card(msg: types.Message):
         await msg.answer(core.t('no_card', lang)); return
     link = f'https://t.me/NFTY_madness_bot?start={msg.from_user.id}'
     kb = InlineKeyboardMarkup(row_width=2)
-    kb.add(InlineKeyboardButton('📱 Telegram', url=f'https://t.me/share/url?url={link}'))
-    kb.add(InlineKeyboardButton('💬 WhatsApp', url=f'https://wa.me/?text={link}'))
-    kb.add(InlineKeyboardButton('💼 LinkedIn', url=f'https://www.linkedin.com/sharing/share-offsite/?url={link}'))
-    kb.add(InlineKeyboardButton('🐦 Twitter/X', url=f'https://twitter.com/intent/tweet?url={link}'))
+    kb.add(InlineKeyboardButton('?? Telegram', url=f'https://t.me/share/url?url={link}'))
+    kb.add(InlineKeyboardButton('?? WhatsApp', url=f'https://wa.me/?text={link}'))
+    kb.add(InlineKeyboardButton('?? LinkedIn', url=f'https://www.linkedin.com/sharing/share-offsite/?url={link}'))
+    kb.add(InlineKeyboardButton('?? Twitter/X', url=f'https://twitter.com/intent/tweet?url={link}'))
     await msg.answer(core.t('share_message', lang).format(link=link), reply_markup=kb)
 
 @dp.message_handler(commands=['setprice'])
@@ -200,7 +200,7 @@ async def market_cmd(msg: types.Message):
     async with core.pool.acquire() as conn:
         sellers = await conn.fetch('SELECT card_name, price FROM users WHERE card_name IS NOT NULL AND price > 0 ORDER BY price DESC LIMIT 10')
     if sellers:
-        rows = '\n'.join(f'👤 {s["card_name"]}  —  {s["price"]} TON' for s in sellers)
+        rows = '\n'.join(f'?? {s["card_name"]}  �  {s["price"]} TON' for s in sellers)
         kb = InlineKeyboardMarkup(row_width=1)
         for s in sellers:
             label = core.t('buy_button', lang).format(price=s['price'])
@@ -208,6 +208,7 @@ async def market_cmd(msg: types.Message):
         await bot.send_message(msg.chat.id, core.t('market', lang).format(sellers=rows), reply_markup=kb)
     else:
         await msg.answer(core.t('market_empty', lang))
+
 @dp.callback_query_handler(lambda c: c.data.startswith('buy_'))
 async def buy_card(call: types.CallbackQuery):
     parts = call.data.split('_')
@@ -221,7 +222,7 @@ async def salesboard_cmd(msg: types.Message):
     async with core.pool.acquire() as conn:
         top = await conn.fetch('SELECT card_name, share_count FROM users WHERE card_name IS NOT NULL ORDER BY share_count DESC LIMIT 10')
     if top:
-        lines = '\n'.join(f'{i+1}. {r["card_name"]} — {r["share_count"]} shares' for i, r in enumerate(top))
+        lines = '\n'.join(f'{i+1}. {r["card_name"]} � {r["share_count"]} shares' for i, r in enumerate(top))
         await msg.answer(f'{core.t("leaderboard_title", lang)}\n\n{lines}')
     else:
         await msg.answer(core.t('market_empty', lang))
@@ -232,7 +233,7 @@ async def myreferrals_cmd(msg: types.Message):
     async with core.pool.acquire() as conn:
         u = await conn.fetchrow('SELECT share_count FROM users WHERE user_id=$1', msg.from_user.id)
         refs = await conn.fetchval('SELECT COUNT(*) FROM users WHERE ref_id=$1 AND card_name IS NOT NULL', msg.from_user.id)
-    await msg.answer(core.t('myreferrals', lang).format(refs=refs) + f'\n📤 Shares: {u["share_count"] if u else 0}')
+    await msg.answer(core.t('myreferrals', lang).format(refs=refs) + f'\n?? Shares: {u["share_count"] if u else 0}')
 
 @dp.message_handler(commands=['status'])
 async def status_cmd(msg: types.Message):
@@ -248,7 +249,7 @@ async def feedback_cmd(msg: types.Message):
     text = msg.get_args()
     if text and ADMIN_ID:
         try:
-            await bot.send_message(ADMIN_ID, f'📬 Feedback from @{msg.from_user.username} ({msg.from_user.id}):\n{text}')
+            await bot.send_message(ADMIN_ID, f'?? Feedback from @{msg.from_user.username} ({msg.from_user.id}):\n{text}')
         except: pass
     await msg.answer(core.t('feedback_sent', lang))
 
@@ -288,14 +289,14 @@ async def leaderboard_cmd(msg: types.Message):
     async with core.pool.acquire() as conn:
         top = await conn.fetch('SELECT card_name, share_count FROM users WHERE card_name IS NOT NULL ORDER BY share_count DESC LIMIT 10')
     if top:
-        lines = '\n'.join(f'{i+1}. {r["card_name"]} — {r["share_count"]} shares' for i, r in enumerate(top))
+        lines = '\n'.join(f'{i+1}. {r["card_name"]} � {r["share_count"]} shares' for i, r in enumerate(top))
         await msg.answer(f'{core.t("leaderboard_title", lang)}\n\n{lines}')
     else:
         await msg.answer(core.t('market_empty', lang))
 
 @dp.message_handler(commands=['broadcast'])
 async def broadcast_cmd(msg: types.Message):
-    if msg.from_user.id != ADMIN_ID: await msg.answer('⛔ Admin only'); return
+    if msg.from_user.id != ADMIN_ID: await msg.answer('? Admin only'); return
     text = msg.get_args()
     if not text: await msg.answer('Usage: /broadcast <message>'); return
     async with core.pool.acquire() as conn:
@@ -307,7 +308,7 @@ async def broadcast_cmd(msg: types.Message):
             sent += 1
             await asyncio.sleep(0.05)
         except: failed += 1
-    await msg.answer(f'✅ Broadcast: {sent} sent, {failed} failed')
+    await msg.answer(f'? Broadcast: {sent} sent, {failed} failed')
 
 @dp.message_handler(commands=['minisite'])
 async def minisite_cmd(msg: types.Message):
@@ -315,11 +316,11 @@ async def minisite_cmd(msg: types.Message):
     if not url: await msg.answer('Usage: /minisite <url>'); return
     async with core.pool.acquire() as conn:
         await conn.execute('UPDATE users SET minisite=$1 WHERE user_id=$2', url, msg.from_user.id)
-    await msg.answer(f'✅ Mini-site set: {url}')
+    await msg.answer(f'? Mini-site set: {url}')
 
 @dp.message_handler(commands=['connect'])
 async def connect_wallet(msg: types.Message):
-    await msg.answer('🔗 Connect TON Wallet\n1. Open Tonkeeper\n2. Copy address (UQ... or EQ...)\n3. Send: /wallet YOUR_ADDRESS', disable_web_page_preview=True)
+    await msg.answer('?? Connect TON Wallet\n1. Open Tonkeeper\n2. Copy address (UQ... or EQ...)\n3. Send: /wallet YOUR_ADDRESS', disable_web_page_preview=True)
 
 @dp.message_handler(commands=['wallet'])
 async def set_wallet(msg: types.Message):
@@ -331,11 +332,11 @@ async def set_wallet(msg: types.Message):
     async with core.pool.acquire() as conn:
         await conn.execute('INSERT INTO wallets (user_id, address, verified) VALUES ($1,$2,FALSE) ON CONFLICT (user_id) DO UPDATE SET address=$2', msg.from_user.id, addr)
         await conn.execute('UPDATE users SET wallet=$1 WHERE user_id=$2', addr, msg.from_user.id)
-    await msg.answer(f'✅ {core.t("wallet_updated", lang)}\n`{addr}`', parse_mode='Markdown')
+    await msg.answer(f'? {core.t("wallet_updated", lang)}\n`{addr}`', parse_mode='Markdown')
 
 @dp.message_handler(commands=['testsuite'])
 async def test_suite(msg: types.Message):
-    if msg.from_user.id != ADMIN_ID: await msg.answer('⛔ Admin only'); return
+    if msg.from_user.id != ADMIN_ID: await msg.answer('? Admin only'); return
     required = [
         'welcome','choose_lang','create_card','my_card','premium','earnings','leaderboard','help','settings_menu',
         'card_name','card_prof','card_wallet','card_done','my_card_info','no_card','setprice_prompt','setprice_done',
@@ -351,14 +352,14 @@ async def test_suite(msg: types.Message):
                 missing.append(f'{lang}:{key}')
     if missing:
         for i in range(0, len(missing), 20):
-            await msg.answer('❌ Missing:\n' + '\n'.join(missing[i:i+20]))
+            await msg.answer('? Missing:\n' + '\n'.join(missing[i:i+20]))
     else:
-        await msg.answer('✅ All languages complete!')
+        await msg.answer('? All languages complete!')
 
 @dp.message_handler(commands=['commands'])
 async def list_commands(msg: types.Message):
-    if msg.from_user.id != ADMIN_ID: await msg.answer('⛔ Admin only'); return
-    await msg.answer('🔧 All Commands\n/start /language /connect /wallet /setprice /market /salesboard /leaderboard /earnings /myreferrals /status /feedback /cancel /broadcast /minisite /testsuite /commands')
+    if msg.from_user.id != ADMIN_ID: await msg.answer('? Admin only'); return
+    await msg.answer('?? All Commands\n/start /language /connect /wallet /setprice /market /salesboard /leaderboard /earnings /myreferrals /status /feedback /cancel /broadcast /minisite /testsuite /commands')
 
 @dp.message_handler(commands=['claim'])
 async def claim_free_card(msg: types.Message):
@@ -374,17 +375,17 @@ async def claim_free_card(msg: types.Message):
             if already: await msg.answer('You already claimed a free card.'); return
             await conn.execute("UPDATE settings SET value = CAST(CAST(value AS int) + 1 AS text) WHERE key='free_cards_claimed'")
             await conn.execute('INSERT INTO promo_claims (user_id, wallet) VALUES ($1, NULL)', msg.from_user.id)
-            await msg.answer(f'✅ Free card activated! ({claimed+1}/{max_cards})')
+            await msg.answer(f'? Free card activated! ({claimed+1}/{max_cards})')
 
 @dp.message_handler(commands=['simulate_purchase'])
 async def simulate_purchase(msg: types.Message):
-    if msg.from_user.id != ADMIN_ID: await msg.answer('⛔ Admin only'); return
+    if msg.from_user.id != ADMIN_ID: await msg.answer('? Admin only'); return
     args = msg.get_args().split()
     try: amount = float(args[0]) if args else 10.0
     except: amount = 10.0
     fee = core.platform_fee(amount)
     net = core.seller_amount(amount)
-    await msg.answer(f'💸 Simulation\nAmount: {amount} TON\nFee (20%): {fee} TON\nSeller gets: {net} TON')
+    await msg.answer(f'?? Simulation\nAmount: {amount} TON\nFee (20%): {fee} TON\nSeller gets: {net} TON')
 
 @dp.message_handler(lambda m: core.LANG and m.text in [core.t('my_card', l) for l in core.LANG])
 async def my_card_btn(msg: types.Message):
@@ -471,7 +472,7 @@ async def process_wallet(msg: types.Message, state: FSMContext):
 async def on_startup(dp):
     await core.create_pool()
     core.load_lang()
-    logging.info('✅ NIFTI Bot started')
+    logging.info('? NIFTI Bot started')
 
 async def on_shutdown(dp):
     logging.info('Shutting down...')
@@ -479,14 +480,7 @@ async def on_shutdown(dp):
     await dp.storage.wait_closed()
     if core.pool:
         await core.pool.close()
-    logging.info('✅ All connections closed.')
+    logging.info('? All connections closed.')
 
 if __name__ == '__main__':
-    try:
-        executor.start_polling(dp, skip_updates=True, on_startup=on_startup, on_shutdown=on_shutdown)
-    except KeyboardInterrupt:
-        print('Shutting down...')
-    finally:
-        loop = asyncio.get_event_loop()
-        loop.close()
-        print('✅ Clean exit')
+    executor.start_polling(dp, skip_updates=True, on_startup=on_startup, on_shutdown=on_shutdown)
