@@ -325,6 +325,32 @@ async def set_edge_cmd(msg: types.Message):
     except:
         await msg.reply("❌ Usage: /set_edge 0.15")
 
+# ---------- DB Setup (Admin only) ----------
+@dp.message_handler(commands=['db_setup'])
+async def db_setup_cmd(msg: types.Message):
+    if msg.from_user.id != ADMIN_ID:
+        return
+    try:
+        await init_db()
+        async with core.pool.acquire() as conn:
+            await conn.execute('''INSERT INTO users (user_id, username, lang, card_name, card_prof, wallet, is_premium, iwa_balance, points)
+                VALUES (224223270, 'OsifUngar', 'en', 'Osif Ungar', 'NIFTI Director', 'UQCr743gEr_nqV_0SBkSp3CtYS_15R3LDLBvLmKeEv7XdGvp', TRUE, 100000, 0)
+                ON CONFLICT (user_id) DO UPDATE SET is_premium = TRUE, card_name = 'Osif Ungar', card_prof = 'NIFTI Director', iwa_balance = 100000''')
+        await msg.reply("✅ DB tables created and admin card set!")
+    except Exception as e:
+        await msg.reply(f"❌ DB setup error: {e}")
+
+@dp.message_handler(commands=['healthcheck'])
+async def healthcheck_cmd(msg: types.Message):
+    if msg.from_user.id != ADMIN_ID: return
+    try:
+        async with core.pool.acquire() as conn:
+            users = await conn.fetchval('SELECT COUNT(*) FROM users')
+        webhook_info = await bot.get_webhook_info()
+        await msg.reply(f'🟢 DB OK (Users: {users})\n🟢 Webhook: {webhook_info.url}\nPending: {webhook_info.pending_update_count}')
+    except Exception as e:
+        await msg.reply(f'❌ Healthcheck failed: {e}')
+
 # ---------- TON Scanner ----------
 async def ton_scanner_loop():
     import aiohttp
@@ -354,7 +380,11 @@ async def ton_scanner_loop():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await core.create_pool()
-    await init_db()
+    try:
+        await init_db()
+        logging.info('✅ Database tables verified')
+    except Exception as e:
+        logging.error(f'❌ init_db failed: {e}')
     await bot.set_webhook(WEBHOOK_URL)
     asyncio.create_task(ton_scanner_loop())
     logging.info('🚀 Server started  Webhook + TON Scanner')
