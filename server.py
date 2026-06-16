@@ -46,6 +46,7 @@ async def init_db():
         await conn.execute('''CREATE TABLE IF NOT EXISTS casino_settings (id SERIAL PRIMARY KEY, house_edge FLOAT DEFAULT 0.15, is_active BOOLEAN DEFAULT TRUE)''')
         await conn.execute('''INSERT INTO casino_settings (house_edge, is_active) SELECT 0.15, TRUE WHERE NOT EXISTS (SELECT 1 FROM casino_settings)''')
         await conn.execute('''ALTER TABLE users ADD COLUMN IF NOT EXISTS points FLOAT DEFAULT 0''')
+        await conn.execute('''ALTER TABLE users ADD COLUMN IF NOT EXISTS iwa_balance FLOAT DEFAULT 0''')
 
 async def get_lang(user_id):
     async with core.pool.acquire() as conn:
@@ -55,14 +56,16 @@ async def get_lang(user_id):
 REFERRAL_LEVEL1_REWARD = 0.04
 PURCHASE_BONUS_LEVEL1 = 0.094
 WITHDRAWAL_FEE = 0.05
+IWA_REFERRAL_BONUS = 100
 
 async def add_referral(user_id, ref_id):
     async with core.pool.acquire() as conn:
         async with conn.transaction():
             await conn.execute('INSERT INTO referrals (user_id, ref_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', user_id, ref_id)
             await conn.execute('UPDATE users SET balance = COALESCE(balance,0) + $1 WHERE user_id=$2', REFERRAL_LEVEL1_REWARD, ref_id)
+            await conn.execute('UPDATE users SET iwa_balance = COALESCE(iwa_balance,0) + $1 WHERE user_id=$2', IWA_REFERRAL_BONUS, ref_id)
             await conn.execute('UPDATE users SET share_count = (SELECT COUNT(*) FROM referrals WHERE ref_id=$1) WHERE user_id=$1', ref_id)
-            try: await bot.send_message(ref_id, f'🎉 New referral! +{REFERRAL_LEVEL1_REWARD} TON.')
+            try: await bot.send_message(ref_id, f'🎉 New referral! +{REFERRAL_LEVEL1_REWARD} TON + 100 IWA.')
             except: pass
 
 def get_level(shares):
@@ -217,6 +220,13 @@ async def referrals_cmd(msg: types.Message):
     link = f'https://t.me/NFTY_madness_bot?start={msg.from_user.id}'
     await msg.answer(t('referrals', msg.from_user.id, count=count, link=link), parse_mode='Markdown')
 
+@dp.message_handler(commands=['invite'])
+async def invite_cmd(msg: types.Message):
+    async with core.pool.acquire() as conn:
+        count = await conn.fetchval('SELECT COUNT(*) FROM referrals WHERE ref_id=$1', msg.from_user.id)
+    link = f'https://t.me/NFTY_madness_bot?start={msg.from_user.id}'
+    await msg.answer(f'🔗 Your referral link:\n{link}\n\n👥 Joined: {count}\n\nShare and earn 0.04 TON + 100 IWA per friend!')
+
 @dp.message_handler(commands=['set_price'])
 async def set_price_cmd(msg: types.Message):
     try:
@@ -281,15 +291,19 @@ async def airdrop_cmd(msg: types.Message):
 async def handle_spin(msg: types.Message):
     async with core.pool.acquire() as conn:
         user_data = await conn.fetchrow('SELECT is_premium, points FROM users WHERE user_id=$1', msg.from_user.id)
-        if not user_data or not user_data['is_premium']:
-            await msg.reply("❌ This command is for premium users only! Purchase a card to become premium.")
+        if not user_data:
+            await msg.reply('Please /start first.')
             return
-        dice_msg = await bot.send_dice(msg.chat.id, emoji='🎰')
-        result_value = dice_msg.dice.value
+        is_prem = user_data['is_premium']
         edge_row = await conn.fetchrow('SELECT house_edge FROM casino_settings LIMIT 1')
         house_edge = edge_row['house_edge'] if edge_row else 0.15
         WINNING_NUMBERS = {1, 22, 43, 64}
-        real_win_prob = len(WINNING_NUMBERS) / 64 * (1 - house_edge)
+        if is_prem:
+            real_win_prob = len(WINNING_NUMBERS) / 64 * (1 - house_edge)
+        else:
+            real_win_prob = len(WINNING_NUMBERS) / 64 * (1 - house_edge) * 0.5
+        dice_msg = await bot.send_dice(msg.chat.id, emoji='🎰')
+        result_value = dice_msg.dice.value
         if random.random() < real_win_prob:
             points_won = 100
             await conn.execute('UPDATE users SET points = COALESCE(points,0) + $1 WHERE user_id = $2', points_won, msg.from_user.id)
