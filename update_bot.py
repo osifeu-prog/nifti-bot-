@@ -5,10 +5,10 @@ import json
 with open('bot.py', 'r', encoding='utf-8') as f:
     code = f.read()
 
-# 1. וודא שה-regex ב-is_valid_ton נקי
+# 1. ×•×•×“× ×©×”-regex ×‘-is_valid_ton × ×§×™
 code = code.replace(r'^[UE]Q[A-Za-z0-9_-]{46}\$', r'^[UE]Q[A-Za-z0-9_-]{46}$')
 
-# 2. הוספת פונקציית get_lang (אם לא קיימת)
+# 2. ×”×•×¡×¤×ª ×¤×•× ×§×¦×™×™×ª get_lang (×× ×œ× ×§×™×™×ž×ª)
 if 'async def get_lang' not in code:
     get_lang_func = '''
 async def get_lang(user_id):
@@ -16,13 +16,13 @@ async def get_lang(user_id):
         u = await conn.fetchrow("SELECT lang FROM users WHERE user_id=$1", user_id)
         return u["lang"] if u else "en"
 '''
-    # מכניסים אחרי הפונקציה my_card_cmd (או לפני main)
+    # ×ž×›× ×™×¡×™× ××—×¨×™ ×”×¤×•× ×§×¦×™×” my_card_cmd (××• ×œ×¤× ×™ main)
     insert_point = code.find('async def main():')
     if insert_point == -1:
         insert_point = code.find('if __name__')
     code = code[:insert_point] + get_lang_func + '\n' + code[insert_point:]
 
-# 3. רשימת כל תוויות התפריט (לסינון FSM)
+# 3. ×¨×©×™×ž×ª ×›×œ ×ª×•×•×™×•×ª ×”×ª×¤×¨×™×˜ (×œ×¡×™× ×•×Ÿ FSM)
 menu_keys = ["create_card","my_card","premium","earnings","leaderboard","settings_menu","help"]
 menu_labels_code = '''
 # Auto-generated menu labels
@@ -31,7 +31,7 @@ for lang in LANG:
     for key in ["create_card","my_card","premium","earnings","leaderboard","settings_menu","help"]:
         MENU_LABELS.add(LANG[lang].get(key, ""))
 '''
-# מכניסים אחרי load_lang
+# ×ž×›× ×™×¡×™× ××—×¨×™ load_lang
 if 'MENU_LABELS' not in code:
     code = code.replace('def load_lang():', 'def load_lang():\n    global MENU_LABELS\n    ' + menu_keys.__str__() + '  # placeholder\n')  # not needed, simpler: just insert the block after load_lang
     # Insert after load_lang function
@@ -40,7 +40,7 @@ if 'MENU_LABELS' not in code:
         load_lang_end = code.find('# ==========')
     code = code[:load_lang_end] + menu_labels_code + '\n' + code[load_lang_end:]
 
-# 4. הוספת handlers לכפתורי התפריט
+# 4. ×”×•×¡×¤×ª handlers ×œ×›×¤×ª×•×¨×™ ×”×ª×¤×¨×™×˜
 new_handlers = '''
 
 # ---------- Menu Button Handlers (auto) ----------
@@ -77,30 +77,30 @@ async def wallet_cmd(msg: types.Message):
         u = await conn.fetchrow("SELECT lang, wallet FROM users WHERE user_id=$1", msg.from_user.id)
         lang = u["lang"] if u else "en"
     if u and u["wallet"]:
-        await msg.answer(f"🔗 {t('your_wallet', lang)}: <code>{u['wallet']}</code>", parse_mode="HTML")
+        await msg.answer(f"ðŸ”— {t('your_wallet', lang)}: <code>{u['wallet']}</code>", parse_mode="HTML")
     else:
         await msg.answer(t("no_wallet", lang) + "\\n" + t("add_wallet_hint", lang))
 '''
 
-# מכניסים אחרי process_wallet (או לפני main)
+# ×ž×›× ×™×¡×™× ××—×¨×™ process_wallet (××• ×œ×¤× ×™ main)
 insert_after = code.find('async def process_wallet(msg: types.Message, state: FSMContext):')
 if insert_after != -1:
-    # נמצא סוף הפונקציה
+    # × ×ž×¦× ×¡×•×£ ×”×¤×•× ×§×¦×™×”
     end_of_func = code.find('\n# ========== /share ==========', insert_after)
     if end_of_func == -1:
         end_of_func = code.find('async def main():', insert_after)
     code = code[:end_of_func] + new_handlers + '\n' + code[end_of_func:]
 
-# 5. הגנת FSM: במידה והטקסט הוא תווית תפריט – צא מה-FSM
-# נוסיף בדיקה בתחילת כל handler של FSM.
+# 5. ×”×’× ×ª FSM: ×‘×ž×™×“×” ×•×”×˜×§×¡×˜ ×”×•× ×ª×•×•×™×ª ×ª×¤×¨×™×˜ â€“ ×¦× ×ž×”-FSM
+# × ×•×¡×™×£ ×‘×“×™×§×” ×‘×ª×—×™×œ×ª ×›×œ handler ×©×œ FSM.
 for state_func in ['async def process_name', 'async def process_prof', 'async def process_wallet']:
-    # מוצאים את השורה "async def process_..."
+    # ×ž×•×¦××™× ××ª ×”×©×•×¨×” "async def process_..."
     start = code.find(state_func)
     if start == -1: continue
-    # מוצאים את תחילת גוף הפונקציה (אחרי השורה של def)
+    # ×ž×•×¦××™× ××ª ×ª×—×™×œ×ª ×’×•×£ ×”×¤×•× ×§×¦×™×” (××—×¨×™ ×”×©×•×¨×” ×©×œ def)
     body_start = code.find('\n', start) + 1
-    indent = '    '  # הנחה שהזחה של 4 רווחים
-    # נוסיף קוד בדיקה
+    indent = '    '  # ×”× ×—×” ×©×”×–×—×” ×©×œ 4 ×¨×•×•×—×™×
+    # × ×•×¡×™×£ ×§×•×“ ×‘×“×™×§×”
     protection_code = f'''    # FSM protection: cancel if menu label pressed
     data = await state.get_data()
     lang = data.get("lang", "en")
@@ -111,44 +111,44 @@ for state_func in ['async def process_name', 'async def process_prof', 'async de
 '''
     code = code[:body_start] + protection_code + code[body_start:]
 
-# 6. תיקון קובץ lang.json – תרגומים אמיתיים (אם ריק)
+# 6. ×ª×™×§×•×Ÿ ×§×•×‘×¥ lang.json â€“ ×ª×¨×’×•×ž×™× ××ž×™×ª×™×™× (×× ×¨×™×§)
 try:
     with open('lang.json', 'r', encoding='utf-8') as f:
         lang_data = json.load(f)
 except:
     lang_data = {}
 
-# מוודא שיש מפתחות בסיסיים
+# ×ž×•×•×“× ×©×™×© ×ž×¤×ª×—×•×ª ×‘×¡×™×¡×™×™×
 required_keys = {
-    "welcome": {"en": "Welcome!", "he": "ברוך הבא!"},
-    "choose_lang": {"en": "Choose language:", "he": "בחר שפה:"},
-    "help_text": {"en": "I am NIFTI, your digital business card.", "he": "אני NIFTI, כרטיס הביקור הדיגיטלי שלך."},
-    "create_card": {"en": "Create Free Card", "he": "צור כרטיס חינם"},
-    "my_card": {"en": "My Card", "he": "הכרטיס שלי"},
-    "premium": {"en": "Premium Products", "he": "מוצרי פרימיום"},
-    "earnings": {"en": "My Earnings", "he": "הרווחים שלי"},
-    "leaderboard": {"en": "Leaderboard", "he": "לוח מובילים"},
-    "settings_menu": {"en": "Settings", "he": "הגדרות"},
-    "help": {"en": "Help", "he": "עזרה"},
-    "card_name": {"en": "What name?", "he": "מה השם?"},
-    "card_prof": {"en": "Profession?", "he": "מקצוע?"},
-    "card_wallet": {"en": "TON wallet address", "he": "כתובת ארנק TON"},
-    "card_done": {"en": "Card created!", "he": "הכרטיס נוצר!"},
-    "no_card": {"en": "No card yet.", "he": "אין כרטיס עדיין."},
-    "cancel_msg": {"en": "Cancelled.", "he": "בוטל."},
-    "cancelled_due_to_menu": {"en": "Cancelled, returning to menu.", "he": "בוטל, חוזר לתפריט."},
-    "premium_info": {"en": "Premium features coming soon.", "he": "תכונות פרימיום בקרוב."},
-    "your_wallet": {"en": "Your wallet", "he": "הארנק שלך"},
-    "no_wallet": {"en": "No wallet connected.", "he": "אין ארנק מחובר."},
-    "add_wallet_hint": {"en": "Use /settings to add one.", "he": "השתמש ב-/settings כדי להוסיף."},
-    "invalid_wallet": {"en": "Invalid TON address.", "he": "כתובת TON לא תקינה."},
-    "wallet_updated": {"en": "Wallet updated!", "he": "הארנק עודכן!"},
-    "name_updated": {"en": "Name updated.", "he": "השם עודכן."},
-    "prof_updated": {"en": "Profession updated.", "he": "המקצוע עודכן."},
-    "setprice_prompt": {"en": "Your current price: {price} TON", "he": "המחיר הנוכחי: {price} TON"},
-    "setprice_done": {"en": "Price set to {price} TON.", "he": "המחיר נקבע ל-{price} TON."},
-    "market": {"en": "Market:\\n{sellers}", "he": "שוק:\\n{sellers}"},
-    "market_empty": {"en": "No cards for sale yet.", "he": "אין כרטיסים למכירה עדיין."},
+    "welcome": {"en": "Welcome!", "he": "×‘×¨×•×š ×”×‘×!"},
+    "choose_lang": {"en": "Choose language:", "he": "×‘×—×¨ ×©×¤×”:"},
+    "help_text": {"en": "I am NIFTI, your digital business card.", "he": "×× ×™ NIFTI, ×›×¨×˜×™×¡ ×”×‘×™×§×•×¨ ×”×“×™×’×™×˜×œ×™ ×©×œ×š."},
+    "create_card": {"en": "Create Free Card", "he": "×¦×•×¨ ×›×¨×˜×™×¡ ×—×™× ×"},
+    "my_card": {"en": "My Card", "he": "×”×›×¨×˜×™×¡ ×©×œ×™"},
+    "premium": {"en": "Premium Products", "he": "×ž×•×¦×¨×™ ×¤×¨×™×ž×™×•×"},
+    "earnings": {"en": "My Earnings", "he": "×”×¨×•×•×—×™× ×©×œ×™"},
+    "leaderboard": {"en": "Leaderboard", "he": "×œ×•×— ×ž×•×‘×™×œ×™×"},
+    "settings_menu": {"en": "Settings", "he": "×”×’×“×¨×•×ª"},
+    "help": {"en": "Help", "he": "×¢×–×¨×”"},
+    "card_name": {"en": "What name?", "he": "×ž×” ×”×©×?"},
+    "card_prof": {"en": "Profession?", "he": "×ž×§×¦×•×¢?"},
+    "card_wallet": {"en": "TON wallet address", "he": "×›×ª×•×‘×ª ××¨× ×§ TON"},
+    "card_done": {"en": "Card created!", "he": "×”×›×¨×˜×™×¡ × ×•×¦×¨!"},
+    "no_card": {"en": "No card yet.", "he": "××™×Ÿ ×›×¨×˜×™×¡ ×¢×“×™×™×Ÿ."},
+    "cancel_msg": {"en": "Cancelled.", "he": "×‘×•×˜×œ."},
+    "cancelled_due_to_menu": {"en": "Cancelled, returning to menu.", "he": "×‘×•×˜×œ, ×—×•×–×¨ ×œ×ª×¤×¨×™×˜."},
+    "premium_info": {"en": "Premium features coming soon.", "he": "×ª×›×•× ×•×ª ×¤×¨×™×ž×™×•× ×‘×§×¨×•×‘."},
+    "your_wallet": {"en": "Your wallet", "he": "×”××¨× ×§ ×©×œ×š"},
+    "no_wallet": {"en": "No wallet connected.", "he": "××™×Ÿ ××¨× ×§ ×ž×—×•×‘×¨."},
+    "add_wallet_hint": {"en": "Use /settings to add one.", "he": "×”×©×ª×ž×© ×‘-/settings ×›×“×™ ×œ×”×•×¡×™×£."},
+    "invalid_wallet": {"en": "Invalid TON address.", "he": "×›×ª×•×‘×ª TON ×œ× ×ª×§×™× ×”."},
+    "wallet_updated": {"en": "Wallet updated!", "he": "×”××¨× ×§ ×¢×•×“×›×Ÿ!"},
+    "name_updated": {"en": "Name updated.", "he": "×”×©× ×¢×•×“×›×Ÿ."},
+    "prof_updated": {"en": "Profession updated.", "he": "×”×ž×§×¦×•×¢ ×¢×•×“×›×Ÿ."},
+    "setprice_prompt": {"en": "Your current price: {price} TON", "he": "×”×ž×—×™×¨ ×”× ×•×›×—×™: {price} TON"},
+    "setprice_done": {"en": "Price set to {price} TON.", "he": "×”×ž×—×™×¨ × ×§×‘×¢ ×œ-{price} TON."},
+    "market": {"en": "Market:\\n{sellers}", "he": "×©×•×§:\\n{sellers}"},
+    "market_empty": {"en": "No cards for sale yet.", "he": "××™×Ÿ ×›×¨×˜×™×¡×™× ×œ×ž×›×™×¨×” ×¢×“×™×™×Ÿ."},
 }
 
 for key, translations in required_keys.items():
@@ -162,10 +162,11 @@ for key, translations in required_keys.items():
 with open('lang.json', 'w', encoding='utf-8') as f:
     json.dump(lang_data, f, ensure_ascii=False, indent=2)
 
-print("✅ lang.json updated")
+print("âœ… lang.json updated")
 
 # --- write back bot.py ---
 with open('bot.py', 'w', encoding='utf-8') as f:
     f.write(code)
 
-print("✅ bot.py fully upgraded!")
+print("âœ… bot.py fully upgraded!")
+

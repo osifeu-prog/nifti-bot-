@@ -1,4 +1,4 @@
-﻿import asyncio, asyncpg, os
+import asyncio, asyncpg, os
 
 async def show():
     pool = await asyncpg.create_pool(os.getenv('DATABASE_URL'), server_settings={'client_encoding': 'UTF8'})
@@ -13,9 +13,10 @@ async def show():
         if not rows:
             print('No pending purchases.')
         else:
-            print('📋 Pending purchases:')
+            print('?? Pending purchases:')
             for r in rows:
                 print(f'{r["invoice_id"]}  |  {r["amount_ton"]} TON  |  {r["name"]}  |  {r["created_at"]}')
     await pool.close()
 
 asyncio.run(show())
+

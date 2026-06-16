@@ -1,4 +1,4 @@
-﻿"""
+"""
 Universal Payment Gate for SLH Bots.
 
 Usage with aiogram:
@@ -221,6 +221,7 @@ class PaymentGate:
         )
         await message.answer(text, parse_mode="Markdown")
         return False
+
 
 
 

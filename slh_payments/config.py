@@ -1,4 +1,4 @@
-﻿"""Payment configuration shared across all SLH bots."""
+"""Payment configuration shared across all SLH bots."""
 import os
 import json
 from dataclasses import dataclass, field
@@ -77,6 +77,7 @@ BOT_PRICING = {
 
 # System bus group
 SYSTEM_BUS_LINK = "https://t.me/+qon4jktYobA3Mjlk"
+
 
 
 

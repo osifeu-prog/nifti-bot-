@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 SLH shared_db_core
 Single source of truth for PostgreSQL connection pool.
@@ -59,6 +59,7 @@ async def close_db_pool() -> None:
     if _pool is not None:
         await _pool.close()
         _pool = None
+
 
 
 

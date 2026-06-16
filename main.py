@@ -1,4 +1,4 @@
-﻿import os, logging
+import os, logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,11 +15,11 @@ pool = None
 async def lifespan(app: FastAPI):
     global pool
     pool = await asyncpg.create_pool(DB_URL)
-    logger.info("✅ FastAPI connected to PostgreSQL")
+    logger.info("? FastAPI connected to PostgreSQL")
     yield
     if pool:
         await pool.close()
-        logger.info("🛑 DB pool closed")
+        logger.info("?? DB pool closed")
 
 app = FastAPI(title="NIFTI SaaS API", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
@@ -69,3 +69,4 @@ async def verify_payment(data: dict):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+

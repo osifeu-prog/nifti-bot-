@@ -1,4 +1,4 @@
-﻿"""Shared payment database operations - works with any bot's Postgres."""
+"""Shared payment database operations - works with any bot's Postgres."""
 import os
 import asyncpg
 from typing import Optional
@@ -230,6 +230,7 @@ async def get_pending_access_requests() -> list:
                FROM access_requests WHERE status='pending' ORDER BY created_at""",
         )
     return [dict(r) for r in rows]
+
 
 
 

@@ -1,0 +1,53 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:15
+    container_name: nifti_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: slh_secure_2026
+      POSTGRES_DB: slh_main
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  redis:
+    image: redis:7-alpine
+    container_name: nifti_redis
+    restart: always
+    ports:
+      - "6380:6379"
+  bot:
+    build: .
+    container_name: nifti_bot
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: nifti_api
+    restart: always
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: nifti_worker
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - db
+volumes:
+  pgdata:

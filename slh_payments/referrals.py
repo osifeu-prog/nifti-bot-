@@ -1,4 +1,4 @@
-﻿"""
+"""
 SLH Referral System.
 
 Tracks referrals across all bots, calculates commissions,
@@ -225,6 +225,7 @@ class ReferralEngine:
 
 # Global singleton
 referral_engine = ReferralEngine()
+
 
 
 

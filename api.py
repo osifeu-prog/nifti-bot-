@@ -1,4 +1,4 @@
-﻿import asyncpg
+import asyncpg
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
@@ -45,7 +45,7 @@ body {{ font-family: Arial; background: #111; color: #fff; padding: 20px; text-a
 <div class="card">
 <h1>{name}</h1>
 <p>{prof}</p>
-<p>💎 Wallet: <code>{wallet}</code></p>
+<p>?? Wallet: <code>{wallet}</code></p>
 {"<p><a href='" + minisite + "'>Mini-Site</a></p>" if minisite else ""}
 </div>
 <p>Powered by NIFTI</p>
@@ -55,3 +55,4 @@ body {{ font-family: Arial; background: #111; color: #fff; padding: 20px; text-a
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+

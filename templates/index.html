@@ -1,75 +1,15 @@
 ﻿<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NIFTI - Real E2E Testing</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <style>
-        :root { --bg-color: #0d0f12; --card-bg: #161b22; --accent-color: #0088cc; --text-color: #f0f6fc; --text-muted: #8b949e; }
-        body { font-family: -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 450px; display: flex; flex-direction: column; gap: 20px; }
-        .nifti-card { background: var(--card-bg); border: 1px solid #30363d; border-radius: 16px; padding: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
-        .wallet-address { font-size: 11px; font-family: monospace; color: #00ffcc; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 6px; word-break: break-all; margin-top: 15px; }
-        .status-box { width: 100%; background: #161b22; border-radius: 12px; padding: 12px; font-size: 13px; text-align: center; border: 1px solid #21262d; }
-    </style>
-</head>
+<html>
+<head><meta charset="UTF-8"><title>NIFTI Dashboard</title></head>
 <body>
-    <div class="container">
-        <div style="text-align:center;">
-            <h2>NIFTI E2E Testing Environment</h2>
-            <div id="ton-connect-btn" style="margin-bottom: 15px;"></div>
-            <div id="connection-status" class="status-box">ממתין ל-Telegram WebApp...</div>
-        </div>
-        
-        <div class="nifti-card">
-            <div style="color:var(--accent-color); font-weight:bold; font-size:12px;">TELEGRAM USER DATA</div>
-            <div id="tg-name" style="font-size:20px; font-weight:bold; margin-top:10px;">טוען פרופיל טלגרם...</div>
-            <div id="tg-username" style="color:var(--text-muted); font-size:14px;">@username</div>
-            <div id="user-wallet" class="wallet-address">ארנק: לא מחובר</div>
-        </div>
-    </div>
-
-    <script>
-        // אתחול ה-WebApp של טלגרם
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand(); // הגדלה למסך מלא לחוויית נייטיב
-
-        // שליפת הנתונים האמיתיים מתוך ה-InitData שטלגרם מזריקה
-        const user = tg.initDataUnsafe?.user;
-        
-        if (user) {
-            document.getElementById('tg-name').innerText = \ \;
-            document.getElementById('tg-username').innerText = user.username ? @\ : ID: \;
-            document.getElementById('connection-status').innerText = "✅ נתוני טלגרם נשלפו בהצלחה";
-            document.getElementById('connection-status').style.color = "#238636";
-        } else {
-            document.getElementById('connection-status').innerText = "⚠️ רץ מחוץ לטלגרם - מצב סימולציה";
-            document.getElementById('connection-status').style.color = "#ffa500";
-            document.getElementById('tg-name').innerText = "אקספלורר מקומי";
-        }
-
-        // אתחול TON Connect עם תמיכה מובנית ב-WebApps
-        const tonConnectUI = new TONConnectUI.TonConnectUI({
-            manifestUrl: 'https://nikon-founder-sms-fairy.trycloudflare.com/tonconnect-manifest.json',
-            buttonRootId: 'ton-connect-btn',
-            twaReturnUrl: 'https://t.me/YOUR_BOT_USERNAME/app_name' // הקישור הישיר למיני אפ שלך בבוט
-        });
-
-        tonConnectUI.onStatusChange(wallet => {
-            if (wallet) {
-                // הפעלת רטט אמיתי במכשיר הנייד של המשתמש דרך טלגרם כשהארנק מתחבר!
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                
-                const rawAddress = wallet.account.address;
-                document.getElementById('user-wallet').innerText = ארנק: \...\;
-            } else {
-                document.getElementById('user-wallet').innerText = 'ארנק: לא מחובר';
-            }
-        });
-    </script>
+<h1>ברוך הבא ל-NIFTI</h1>
+<p>טען את הנתונים שלך...</p>
+<script>
+fetch('/api/user/' + new URLSearchParams(window.location.search).get('user_id'))
+  .then(r => r.json())
+  .then(u => {
+    document.body.innerHTML = `<h1>👤 ${u.card_name || 'אורח'}</h1><p>💰 מחיר: ${u.price || 0} TON</p>`;
+  });
+</script>
 </body>
 </html>

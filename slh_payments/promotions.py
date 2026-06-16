@@ -1,4 +1,4 @@
-﻿"""
+"""
 SLH Promotions & Deals Engine.
 
 Provides time-limited promotions, bundle deals, and seasonal discounts
@@ -200,6 +200,7 @@ class PromoEngine:
 
 # Global singleton
 promo_engine = PromoEngine()
+
 
 
 
