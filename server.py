@@ -4,11 +4,10 @@ from datetime import datetime, timedelta
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from aiogram import Bot, Dispatcher, types
-from aiogram.contrib.fsm_storage.redis import RedisStorage2
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 import nifti_core as core
-import redis as redis_lib
 import uvicorn
 
 logging.basicConfig(level=logging.INFO)
@@ -17,16 +16,10 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID = int(os.getenv("ADMIN_USER_ID", "0"))
 TON_WALLET = os.getenv("TON_WALLET")
 WEBHOOK_URL = "https://bot-production-c2a5.up.railway.app/webhook"
-REDIS_URL = os.getenv("REDIS_URL", "redis://default:nYMxEGsFqUjIoYETlzRGcuPmWMuPTrlz@thomas.proxy.rlwy.net:53766")
 
-# Redis client for caching / rate limit
-redis_client = redis_lib.Redis.from_url(REDIS_URL, decode_responses=True)
-
-# Aiogram storage over Redis
-storage = RedisStorage2(host='thomas.proxy.rlwy.net', port=53766, password='nYMxEGsFqUjIoYETlzRGcuPmWMuPTrlz', ssl=True, db=0)
 bot = Bot(token=BOT_TOKEN)
 Bot.set_current(bot)
-dp = Dispatcher(bot, storage=storage)
+dp = Dispatcher(bot, storage=MemoryStorage())
 
 with open("lang.json", "r", encoding="utf-8-sig") as f:
     LOCALES = json.load(f)
@@ -65,15 +58,15 @@ async def get_lang(user_id):
         u = await conn.fetchrow('SELECT lang FROM users WHERE user_id=$1', user_id)
         return u['lang'] if u else 'en'
 
-# Rate limiting via Redis
+# Rate limiting (in‑memory  fast and stable)
+user_last_action = {}
 RATE_LIMIT_SECONDS = 1
 async def apply_rate_limit(user_id):
-    key = f"rl:{user_id}"
-    last = redis_client.get(key)
-    if last:
-        if (datetime.now() - datetime.fromtimestamp(float(last))).total_seconds() < RATE_LIMIT_SECONDS:
+    now = datetime.now()
+    if user_id in user_last_action:
+        if (now - user_last_action[user_id]) < timedelta(seconds=RATE_LIMIT_SECONDS):
             raise ValueError("Rate limit")
-    redis_client.set(key, datetime.now().timestamp(), ex=2)
+    user_last_action[user_id] = now
 
 async def is_admin(user_id):
     async with core.pool.acquire() as conn:
@@ -115,6 +108,7 @@ class EditForm(StatesGroup):
     editing_name = State()
     editing_prof = State()
 
+# ---------- Dynamic menu ----------
 async def main_menu(msg: types.Message):
     async with core.pool.acquire() as conn:
         u = await conn.fetchrow('SELECT card_name FROM users WHERE user_id=$1', msg.from_user.id)
@@ -200,6 +194,7 @@ async def menu_commands(call: types.CallbackQuery):
     await call.message.answer(t('commands_list', call.from_user.id))
     await call.answer()
 
+# ---------- Edit Card ----------
 @dp.callback_query_handler(lambda c: c.data == 'menu_edit')
 async def menu_edit(call: types.CallbackQuery):
     kb = types.InlineKeyboardMarkup(row_width=1)
@@ -226,6 +221,7 @@ async def edit_photo_start(call: types.CallbackQuery):
     await call.message.answer("Send me a photo to set as your profile picture.")
     await call.answer()
 
+# ---------- FSM for editing ----------
 @dp.message_handler(state=EditForm.editing_name)
 async def process_edit_name(msg: types.Message, state: FSMContext):
     name = msg.text.strip()
@@ -245,6 +241,7 @@ async def process_edit_prof(msg: types.Message, state: FSMContext):
     await msg.answer(t('prof_updated', msg.from_user.id, prof=prof))
     await state.finish()
 
+# ---------- Photo upload ----------
 @dp.message_handler(commands=['set_photo'])
 async def set_photo_cmd(msg: types.Message):
     await msg.answer("Send me the photo now.")
@@ -264,6 +261,7 @@ async def handle_photo(msg: types.Message):
     else:
         await msg.answer("I didn't expect a photo. Use /set_photo first.")
 
+# ---------- Show my card with photo ----------
 async def my_card(msg: types.Message):
     async with core.pool.acquire() as conn:
         u = await conn.fetchrow('SELECT * FROM users WHERE user_id=$1', msg.from_user.id)
@@ -278,6 +276,7 @@ async def my_card(msg: types.Message):
     else:
         await msg.answer(caption)
 
+# ---------- Other handlers (unchanged) ----------
 @dp.message_handler(state=CardForm.waiting_name)
 async def process_name(msg: types.Message, state: FSMContext):
     name = msg.text.strip()
@@ -512,8 +511,7 @@ async def healthcheck_cmd(msg: types.Message):
         async with core.pool.acquire() as conn:
             users = await conn.fetchval('SELECT COUNT(*) FROM users')
         webhook_info = await bot.get_webhook_info()
-        redis_ok = redis_client.ping()
-        await msg.reply(f'🟢 DB OK (Users: {users})\n🟢 Webhook: {webhook_info.url}\n🟢 Redis: {"OK" if redis_ok else "FAIL"}\nPending: {webhook_info.pending_update_count}')
+        await msg.reply(f'🟢 DB OK (Users: {users})\n🟢 Webhook: {webhook_info.url}\nPending: {webhook_info.pending_update_count}')
     except Exception as e:
         await msg.reply(f'❌ Healthcheck failed: {e}')
 
@@ -528,12 +526,10 @@ async def check_cmd(msg: types.Message):
             refs = await conn.fetchval('SELECT COUNT(*) FROM referrals')
             premium = await conn.fetchval('SELECT COUNT(*) FROM users WHERE is_premium = TRUE')
         webhook_info = await bot.get_webhook_info()
-        redis_ok = redis_client.ping()
         status = f'''🟢 **System Check**
 ━━━━━━━━━━━━━━━━━
 🟢 DB: OK (Users: {users}, Cards: {cards})
 🟢 Webhook: {webhook_info.url}
-🟢 Redis: {"OK" if redis_ok else "FAIL"}
 🟢 Pending Updates: {webhook_info.pending_update_count}
 💰 Volume: {await conn.fetchval('SELECT COALESCE(SUM(balance),0) FROM users')} TON
 👥 Premium: {premium}
@@ -581,7 +577,7 @@ async def lifespan(app: FastAPI):
         logging.error(f'❌ init_db failed: {e}')
     await bot.set_webhook(WEBHOOK_URL)
     asyncio.create_task(ton_scanner_loop())
-    logging.info('🚀 Server started  Webhook + Redis + TON Scanner')
+    logging.info('🚀 Server started  Webhook + TON Scanner')
     yield
     logging.info('Server shutting down')
 
