@@ -1,4 +1,4 @@
-import asyncio, os, logging, uuid, json
+﻿import asyncio, os, logging, uuid, json, random
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
@@ -20,7 +20,6 @@ bot = Bot(token=BOT_TOKEN)
 Bot.set_current(bot)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-# ---------- Localization ----------
 with open("locales.json", "r", encoding="utf-8-sig") as f:
     LOCALES = json.load(f)
 
@@ -35,48 +34,24 @@ def t(key, user_id=None, **kwargs):
         except: pass
     return text
 
-# ---------- Database init ----------
 async def init_db():
     async with core.pool.acquire() as conn:
-        await conn.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                user_id BIGINT PRIMARY KEY,
-                username TEXT,
-                lang TEXT DEFAULT 'en',
-                card_name TEXT,
-                card_prof TEXT,
-                wallet TEXT,
-                balance FLOAT DEFAULT 0,
-                price FLOAT DEFAULT 1,
-                share_count INT DEFAULT 0,
-                is_premium BOOLEAN DEFAULT FALSE,
-                iwa_balance FLOAT DEFAULT 0,
-                created_at TIMESTAMP DEFAULT NOW()
-            )
-        ''')
-        await conn.execute('''
-            CREATE TABLE IF NOT EXISTS referrals (
-                user_id BIGINT,
-                ref_id BIGINT,
-                PRIMARY KEY (user_id, ref_id)
-            )
-        ''')
-        await conn.execute('''
-            CREATE TABLE IF NOT EXISTS premium_users (
-                id SERIAL PRIMARY KEY,
-                user_id BIGINT,
-                bot_name TEXT,
-                amount FLOAT,
-                tx_hash TEXT
-            )
-        ''')
+        await conn.execute('''CREATE TABLE IF NOT EXISTS users (
+            user_id BIGINT PRIMARY KEY, username TEXT, lang TEXT DEFAULT 'en',
+            card_name TEXT, card_prof TEXT, wallet TEXT, balance FLOAT DEFAULT 0,
+            price FLOAT DEFAULT 1, share_count INT DEFAULT 0, is_premium BOOLEAN DEFAULT FALSE,
+            iwa_balance FLOAT DEFAULT 0, points FLOAT DEFAULT 0, created_at TIMESTAMP DEFAULT NOW())''')
+        await conn.execute('''CREATE TABLE IF NOT EXISTS referrals (user_id BIGINT, ref_id BIGINT, PRIMARY KEY (user_id, ref_id))''')
+        await conn.execute('''CREATE TABLE IF NOT EXISTS premium_users (id SERIAL PRIMARY KEY, user_id BIGINT, bot_name TEXT, amount FLOAT, tx_hash TEXT)''')
+        await conn.execute('''CREATE TABLE IF NOT EXISTS casino_settings (id SERIAL PRIMARY KEY, house_edge FLOAT DEFAULT 0.15, is_active BOOLEAN DEFAULT TRUE)''')
+        await conn.execute('''INSERT INTO casino_settings (house_edge, is_active) SELECT 0.15, TRUE WHERE NOT EXISTS (SELECT 1 FROM casino_settings)''')
+        await conn.execute('''ALTER TABLE users ADD COLUMN IF NOT EXISTS points FLOAT DEFAULT 0''')
 
 async def get_lang(user_id):
     async with core.pool.acquire() as conn:
         u = await conn.fetchrow('SELECT lang FROM users WHERE user_id=$1', user_id)
         return u['lang'] if u else 'en'
 
-# ---------- Referral Engine ----------
 REFERRAL_LEVEL1_REWARD = 0.04
 PURCHASE_BONUS_LEVEL1 = 0.094
 WITHDRAWAL_FEE = 0.05
@@ -102,7 +77,6 @@ class CardForm(StatesGroup):
     waiting_prof = State()
     waiting_wallet = State()
 
-# ---------- Handlers ----------
 @dp.message_handler(commands=['start'])
 async def start(msg: types.Message):
     ref = int(msg.get_args()) if msg.get_args() and msg.get_args().isdigit() else None
@@ -148,7 +122,7 @@ async def menu_leaderboard(call: types.CallbackQuery):
 
 @dp.callback_query_handler(lambda c: c.data == 'menu_settings')
 async def menu_settings(call: types.CallbackQuery):
-    await call.message.answer('⚙️ Settings – coming soon.')
+    await call.message.answer('⚙️ Settings  coming soon.')
     await call.answer()
 
 @dp.message_handler(state=CardForm.waiting_name)
@@ -231,7 +205,7 @@ async def leaderboard(msg: types.Message):
     async with core.pool.acquire() as conn:
         top = await conn.fetch('SELECT card_name, share_count FROM users WHERE card_name IS NOT NULL ORDER BY share_count DESC LIMIT 10')
     if top:
-        lines = '\n'.join(f'{i+1}. {r["card_name"]} – {get_level(r["share_count"])} ({r["share_count"]} refs)' for i, r in enumerate(top))
+        lines = '\n'.join(f'{i+1}. {r["card_name"]}  {get_level(r["share_count"])} ({r["share_count"]} refs)' for i, r in enumerate(top))
         await msg.answer(f'🏆 **Leaderboard**\n\n{lines}')
     else:
         await msg.answer('No cards yet.')
@@ -254,7 +228,6 @@ async def set_price_cmd(msg: types.Message):
     except:
         await msg.answer('❌ Usage: /set_price 5.0')
 
-# Admin commands
 @dp.message_handler(commands=['admin'])
 async def admin_panel_cmd(msg: types.Message):
     if msg.from_user.id != ADMIN_ID:
@@ -303,6 +276,41 @@ async def airdrop_cmd(msg: types.Message):
     except:
         await msg.answer('❌ Usage: /airdrop 5.0')
 
+# ---------- Casino Slot Machine ----------
+@dp.message_handler(commands=['spin'])
+async def handle_spin(msg: types.Message):
+    async with core.pool.acquire() as conn:
+        user_data = await conn.fetchrow('SELECT is_premium, points FROM users WHERE user_id=$1', msg.from_user.id)
+        if not user_data or not user_data['is_premium']:
+            await msg.reply("❌ This command is for premium users only! Purchase a card to become premium.")
+            return
+        dice_msg = await bot.send_dice(msg.chat.id, emoji='🎰')
+        result_value = dice_msg.dice.value
+        edge_row = await conn.fetchrow('SELECT house_edge FROM casino_settings LIMIT 1')
+        house_edge = edge_row['house_edge'] if edge_row else 0.15
+        WINNING_NUMBERS = {1, 22, 43, 64}
+        real_win_prob = len(WINNING_NUMBERS) / 64 * (1 - house_edge)
+        if random.random() < real_win_prob:
+            points_won = 100
+            await conn.execute('UPDATE users SET points = COALESCE(points,0) + $1 WHERE user_id = $2', points_won, msg.from_user.id)
+            await msg.reply(f"🎉 Jackpot! You won {points_won} points!")
+        else:
+            await msg.reply("💸 No luck this time. Try again!")
+
+@dp.message_handler(commands=['set_edge'])
+async def set_edge_cmd(msg: types.Message):
+    if msg.from_user.id != ADMIN_ID:
+        return
+    try:
+        new_edge = float(msg.get_args())
+        if not 0 <= new_edge <= 1:
+            raise ValueError
+        async with core.pool.acquire() as conn:
+            await conn.execute('UPDATE casino_settings SET house_edge = $1', new_edge)
+        await msg.reply(f"✅ House edge updated to {new_edge*100}%")
+    except:
+        await msg.reply("❌ Usage: /set_edge 0.15")
+
 # ---------- TON Scanner ----------
 async def ton_scanner_loop():
     import aiohttp
@@ -332,10 +340,10 @@ async def ton_scanner_loop():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await core.create_pool()
-    await init_db()                       # <--- יוצר טבלאות אוטומטית
-    await bot.set_webhook(WEBHOOK_URL)   # <--- רושם webhook
+    await init_db()
+    await bot.set_webhook(WEBHOOK_URL)
     asyncio.create_task(ton_scanner_loop())
-    logging.info('🚀 Server started – Webhook + TON Scanner')
+    logging.info('🚀 Server started  Webhook + TON Scanner')
     yield
     logging.info('Server shutting down')
 
@@ -347,9 +355,14 @@ async def index():
 
 @app.post('/webhook')
 async def webhook(request: Request):
-    data = await request.json()
-    update = types.Update(**data)
-    await dp.process_update(update)
+    Bot.set_current(bot)
+    Dispatcher.set_current(dp)
+    try:
+        data = await request.json()
+        update = types.Update(**data)
+        await dp.process_update(update)
+    except Exception as e:
+        logging.error(f"Webhook error: {e}")
     return {'ok': True}
 
 @app.get('/admin')
@@ -372,8 +385,7 @@ async def card_page(user_id: int):
     amount_nano = int(float(price) * 1e9)
     refs = u['share_count']
     iwa = u.get('iwa_balance', 0)
-    html = f'''
-    <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    html = f'''<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{u['card_name']} - NIFTI</title>
     <style>
         body {{ font-family: -apple-system, sans-serif; background: #1a1a2e; color: white; text-align: center; padding: 20px; }}
