@@ -42,7 +42,7 @@ async def init_db():
             card_name TEXT, card_prof TEXT, wallet TEXT, balance FLOAT DEFAULT 0,
             price FLOAT DEFAULT 1, share_count INT DEFAULT 0, is_premium BOOLEAN DEFAULT FALSE,
             iwa_balance FLOAT DEFAULT 0, points FLOAT DEFAULT 0, role TEXT DEFAULT 'user',
-            created_at TIMESTAMP DEFAULT NOW())''')
+            photo_file_id TEXT, created_at TIMESTAMP DEFAULT NOW())''')
         await conn.execute('''CREATE TABLE IF NOT EXISTS referrals (user_id BIGINT, ref_id BIGINT, PRIMARY KEY (user_id, ref_id))''')
         await conn.execute('''CREATE TABLE IF NOT EXISTS premium_users (id SERIAL PRIMARY KEY, user_id BIGINT, bot_name TEXT, amount FLOAT, tx_hash TEXT)''')
         await conn.execute('''CREATE TABLE IF NOT EXISTS casino_settings (id SERIAL PRIMARY KEY, house_edge FLOAT DEFAULT 0.15, is_active BOOLEAN DEFAULT TRUE)''')
@@ -51,6 +51,7 @@ async def init_db():
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS points FLOAT DEFAULT 0")
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS iwa_balance FLOAT DEFAULT 0")
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'user'")
+        await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS photo_file_id TEXT")
 
 async def get_lang(user_id):
     async with core.pool.acquire() as conn:
@@ -102,7 +103,36 @@ class CardForm(StatesGroup):
     waiting_prof = State()
     waiting_wallet = State()
 
-# ---------- Handlers ----------
+class EditForm(StatesGroup):
+    editing_name = State()
+    editing_prof = State()
+
+# ---------- Dynamic menu ----------
+async def main_menu(msg: types.Message):
+    async with core.pool.acquire() as conn:
+        u = await conn.fetchrow('SELECT card_name FROM users WHERE user_id=$1', msg.from_user.id)
+    has_card = u and u.get('card_name')
+    kb = types.InlineKeyboardMarkup(row_width=2)
+    if has_card:
+        kb.add(types.InlineKeyboardButton(t('my_card', msg.from_user.id), callback_data='menu_mycard'),
+               types.InlineKeyboardButton(t('edit_card', msg.from_user.id), callback_data='menu_edit'))
+        kb.add(types.InlineKeyboardButton(t('market', msg.from_user.id), callback_data='menu_market'),
+               types.InlineKeyboardButton(t('earnings', msg.from_user.id), callback_data='menu_earnings'))
+        kb.add(types.InlineKeyboardButton(t('leaderboard', msg.from_user.id), callback_data='menu_leaderboard'),
+               types.InlineKeyboardButton(t('my_profile', msg.from_user.id), callback_data='menu_profile'))
+        kb.add(types.InlineKeyboardButton(t('settings', msg.from_user.id), callback_data='menu_settings'),
+               types.InlineKeyboardButton(t('commands', msg.from_user.id), callback_data='menu_commands'))
+    else:
+        kb.add(types.InlineKeyboardButton(t('create_card', msg.from_user.id), callback_data='menu_create'),
+               types.InlineKeyboardButton(t('my_card', msg.from_user.id), callback_data='menu_mycard'))
+        kb.add(types.InlineKeyboardButton(t('market', msg.from_user.id), callback_data='menu_market'),
+               types.InlineKeyboardButton(t('earnings', msg.from_user.id), callback_data='menu_earnings'))
+        kb.add(types.InlineKeyboardButton(t('leaderboard', msg.from_user.id), callback_data='menu_leaderboard'),
+               types.InlineKeyboardButton(t('my_profile', msg.from_user.id), callback_data='menu_profile'))
+        kb.add(types.InlineKeyboardButton(t('settings', msg.from_user.id), callback_data='menu_settings'),
+               types.InlineKeyboardButton(t('commands', msg.from_user.id), callback_data='menu_commands'))
+    await msg.answer(t('welcome', msg.from_user.id), reply_markup=kb)
+
 @dp.message_handler(commands=['start'])
 async def start(msg: types.Message):
     ref = int(msg.get_args()) if msg.get_args() and msg.get_args().isdigit() else None
@@ -111,17 +141,9 @@ async def start(msg: types.Message):
     lang = await get_lang(msg.from_user.id)
     async with core.pool.acquire() as conn:
         await conn.execute('INSERT INTO users (user_id, lang) VALUES ($1, $2) ON CONFLICT DO NOTHING', msg.from_user.id, lang)
-    kb = types.InlineKeyboardMarkup(row_width=2)
-    kb.add(types.InlineKeyboardButton(t('create_card', msg.from_user.id), callback_data='menu_create'),
-           types.InlineKeyboardButton(t('my_card', msg.from_user.id), callback_data='menu_mycard'))
-    kb.add(types.InlineKeyboardButton(t('market', msg.from_user.id), callback_data='menu_market'),
-           types.InlineKeyboardButton(t('earnings', msg.from_user.id), callback_data='menu_earnings'))
-    kb.add(types.InlineKeyboardButton(t('leaderboard', msg.from_user.id), callback_data='menu_leaderboard'),
-           types.InlineKeyboardButton(t('my_profile', msg.from_user.id), callback_data='menu_profile'))
-    kb.add(types.InlineKeyboardButton(t('settings', msg.from_user.id), callback_data='menu_settings'),
-           types.InlineKeyboardButton(t('commands', msg.from_user.id), callback_data='menu_commands'))
-    await msg.answer(t('welcome', msg.from_user.id), reply_markup=kb)
+    await main_menu(msg)
 
+# ---------- Card creation FSM ----------
 @dp.callback_query_handler(lambda c: c.data == 'menu_create')
 async def menu_create(call: types.CallbackQuery, state: FSMContext):
     await call.message.answer(t('name_prompt', call.from_user.id))
@@ -172,6 +194,89 @@ async def menu_commands(call: types.CallbackQuery):
     await call.message.answer(t('commands_list', call.from_user.id))
     await call.answer()
 
+# ---------- Edit Card ----------
+@dp.callback_query_handler(lambda c: c.data == 'menu_edit')
+async def menu_edit(call: types.CallbackQuery):
+    kb = types.InlineKeyboardMarkup(row_width=1)
+    kb.add(types.InlineKeyboardButton(t('change_name', call.from_user.id), callback_data='edit_name'),
+           types.InlineKeyboardButton(t('change_prof', call.from_user.id), callback_data='edit_prof'),
+           types.InlineKeyboardButton(t('change_photo', call.from_user.id), callback_data='edit_photo'))
+    await call.message.answer("Choose what to edit:", reply_markup=kb)
+    await call.answer()
+
+@dp.callback_query_handler(lambda c: c.data == 'edit_name')
+async def edit_name_start(call: types.CallbackQuery, state: FSMContext):
+    await call.message.answer(t('edit_name_prompt', call.from_user.id))
+    await EditForm.editing_name.set()
+    await call.answer()
+
+@dp.callback_query_handler(lambda c: c.data == 'edit_prof')
+async def edit_prof_start(call: types.CallbackQuery, state: FSMContext):
+    await call.message.answer(t('edit_prof_prompt', call.from_user.id))
+    await EditForm.editing_prof.set()
+    await call.answer()
+
+@dp.callback_query_handler(lambda c: c.data == 'edit_photo')
+async def edit_photo_start(call: types.CallbackQuery):
+    await call.message.answer("Send me a photo to set as your profile picture.")
+    await call.answer()
+
+# ---------- FSM for editing ----------
+@dp.message_handler(state=EditForm.editing_name)
+async def process_edit_name(msg: types.Message, state: FSMContext):
+    name = msg.text.strip()
+    if len(name) < 2:
+        await msg.answer(t('min_2_chars', msg.from_user.id))
+        return
+    async with core.pool.acquire() as conn:
+        await conn.execute('UPDATE users SET card_name=$1 WHERE user_id=$2', name, msg.from_user.id)
+    await msg.answer(t('name_updated', msg.from_user.id, name=name))
+    await state.finish()
+
+@dp.message_handler(state=EditForm.editing_prof)
+async def process_edit_prof(msg: types.Message, state: FSMContext):
+    prof = msg.text.strip()
+    async with core.pool.acquire() as conn:
+        await conn.execute('UPDATE users SET card_prof=$1 WHERE user_id=$2', prof, msg.from_user.id)
+    await msg.answer(t('prof_updated', msg.from_user.id, prof=prof))
+    await state.finish()
+
+# ---------- Photo upload ----------
+@dp.message_handler(commands=['set_photo'])
+async def set_photo_cmd(msg: types.Message):
+    await msg.answer("Send me the photo now.")
+    await dp.current_state(user=msg.from_user.id).set_state("waiting_photo")
+    await dp.current_state(user=msg.from_user.id).set_data({"awaiting": "photo"})
+
+@dp.message_handler(content_types=['photo'])
+async def handle_photo(msg: types.Message):
+    state = dp.current_state(user=msg.from_user.id)
+    data = await state.get_data()
+    if data.get("awaiting") == "photo":
+        file_id = msg.photo[-1].file_id
+        async with core.pool.acquire() as conn:
+            await conn.execute('UPDATE users SET photo_file_id=$1 WHERE user_id=$2', file_id, msg.from_user.id)
+        await msg.answer(t('photo_updated', msg.from_user.id))
+        await state.finish()
+    else:
+        await msg.answer("I didn't expect a photo. Use /set_photo first.")
+
+# ---------- Show my card with photo ----------
+async def my_card(msg: types.Message):
+    async with core.pool.acquire() as conn:
+        u = await conn.fetchrow('SELECT * FROM users WHERE user_id=$1', msg.from_user.id)
+    if not u or not u.get('card_name'):
+        await msg.answer(t('no_card', msg.from_user.id))
+        return
+    level = get_level(u['share_count'])
+    caption = t('card_view', msg.from_user.id,
+                name=u['card_name'], prof=u.get('card_prof',''), price=u.get('price',1), level=level)
+    if u.get('photo_file_id'):
+        await bot.send_photo(msg.chat.id, u['photo_file_id'], caption=caption)
+    else:
+        await msg.answer(caption)
+
+# ---------- Other handlers (unchanged) ----------
 @dp.message_handler(state=CardForm.waiting_name)
 async def process_name(msg: types.Message, state: FSMContext):
     name = msg.text.strip()
@@ -204,15 +309,6 @@ async def status(msg: types.Message):
         users = await conn.fetchval('SELECT COUNT(*) FROM users')
         cards = await conn.fetchval('SELECT COUNT(*) FROM users WHERE card_name IS NOT NULL')
     await msg.answer(f'📊 Users: {users} | Cards: {cards}')
-
-async def my_card(msg: types.Message):
-    async with core.pool.acquire() as conn:
-        u = await conn.fetchrow('SELECT * FROM users WHERE user_id=$1', msg.from_user.id)
-    if not u or not u.get('card_name'):
-        await msg.answer(t('no_card', msg.from_user.id))
-        return
-    level = get_level(u['share_count'])
-    await msg.answer(f'💳 {u["card_name"]}\nProfession: {u.get("card_prof","")}\nPrice: {u.get("price",1)} TON\n🏅 Level: {level}')
 
 async def earnings(msg: types.Message):
     async with core.pool.acquire() as conn:
