@@ -21,7 +21,6 @@ bot = Bot(token=BOT_TOKEN)
 Bot.set_current(bot)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-# ---------- Localization (9 languages from lang.json) ----------
 with open("lang.json", "r", encoding="utf-8-sig") as f:
     LOCALES = json.load(f)
 
@@ -36,7 +35,6 @@ def t(key, user_id=None, **kwargs):
         except: pass
     return text
 
-# ---------- Database init (תוקן!) ----------
 async def init_db():
     async with core.pool.acquire() as conn:
         await conn.execute('''CREATE TABLE IF NOT EXISTS users (
@@ -50,7 +48,6 @@ async def init_db():
         await conn.execute('''CREATE TABLE IF NOT EXISTS casino_settings (id SERIAL PRIMARY KEY, house_edge FLOAT DEFAULT 0.15, is_active BOOLEAN DEFAULT TRUE)''')
         await conn.execute('''CREATE TABLE IF NOT EXISTS admin_logs (id SERIAL PRIMARY KEY, admin_id BIGINT, action TEXT, details TEXT, ts TIMESTAMP DEFAULT NOW())''')
         await conn.execute('''INSERT INTO casino_settings (house_edge, is_active) SELECT 0.15, TRUE WHERE NOT EXISTS (SELECT 1 FROM casino_settings)''')
-        # Alter tables  safe with double quotes
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS points FLOAT DEFAULT 0")
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS iwa_balance FLOAT DEFAULT 0")
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'user'")
@@ -60,7 +57,6 @@ async def get_lang(user_id):
         u = await conn.fetchrow('SELECT lang FROM users WHERE user_id=$1', user_id)
         return u['lang'] if u else 'en'
 
-# ---------- Rate Limiting ----------
 user_last_action = {}
 RATE_LIMIT_SECONDS = 1
 async def apply_rate_limit(user_id):
@@ -70,7 +66,6 @@ async def apply_rate_limit(user_id):
             raise ValueError("Rate limit")
     user_last_action[user_id] = now
 
-# ---------- RBAC & Audit ----------
 async def is_admin(user_id):
     async with core.pool.acquire() as conn:
         role = await conn.fetchval('SELECT role FROM users WHERE user_id=$1', user_id)
@@ -80,7 +75,6 @@ async def log_action(admin_id, action, details=""):
     async with core.pool.acquire() as conn:
         await conn.execute("INSERT INTO admin_logs (admin_id, action, details) VALUES ($1, $2, $3)", admin_id, action, details)
 
-# ---------- Referral Engine ----------
 REFERRAL_LEVEL1_REWARD = 0.04
 PURCHASE_BONUS_LEVEL1 = 0.094
 WITHDRAWAL_FEE = 0.05
@@ -123,7 +117,9 @@ async def start(msg: types.Message):
     kb.add(types.InlineKeyboardButton(t('market', msg.from_user.id), callback_data='menu_market'),
            types.InlineKeyboardButton(t('earnings', msg.from_user.id), callback_data='menu_earnings'))
     kb.add(types.InlineKeyboardButton(t('leaderboard', msg.from_user.id), callback_data='menu_leaderboard'),
-           types.InlineKeyboardButton(t('settings', msg.from_user.id), callback_data='menu_settings'))
+           types.InlineKeyboardButton(t('my_profile', msg.from_user.id), callback_data='menu_profile'))
+    kb.add(types.InlineKeyboardButton(t('settings', msg.from_user.id), callback_data='menu_settings'),
+           types.InlineKeyboardButton(t('commands', msg.from_user.id), callback_data='menu_commands'))
     await msg.answer(t('welcome', msg.from_user.id), reply_markup=kb)
 
 @dp.callback_query_handler(lambda c: c.data == 'menu_create')
@@ -152,9 +148,28 @@ async def menu_leaderboard(call: types.CallbackQuery):
     await leaderboard(call.message)
     await call.answer()
 
+@dp.callback_query_handler(lambda c: c.data == 'menu_profile')
+async def menu_profile(call: types.CallbackQuery):
+    async with core.pool.acquire() as conn:
+        u = await conn.fetchrow('SELECT * FROM users WHERE user_id=$1', call.from_user.id)
+    if not u or not u.get('card_name'):
+        await call.message.answer(t('no_card', call.from_user.id))
+        await call.answer()
+        return
+    level = get_level(u['share_count'])
+    await call.message.answer(t('profile_text', call.from_user.id,
+        name=u['card_name'], prof=u.get('card_prof',''), price=u.get('price',1),
+        balance=u['balance'] or 0, iwa=u.get('iwa_balance',0), points=u.get('points',0), level=level))
+    await call.answer()
+
 @dp.callback_query_handler(lambda c: c.data == 'menu_settings')
 async def menu_settings(call: types.CallbackQuery):
     await call.message.answer('⚙️ Settings  coming soon.')
+    await call.answer()
+
+@dp.callback_query_handler(lambda c: c.data == 'menu_commands')
+async def menu_commands(call: types.CallbackQuery):
+    await call.message.answer(t('commands_list', call.from_user.id))
     await call.answer()
 
 @dp.message_handler(state=CardForm.waiting_name)
@@ -177,6 +192,7 @@ async def process_prof(msg: types.Message, state: FSMContext):
 async def process_wallet(msg: types.Message, state: FSMContext):
     data = await state.get_data()
     async with core.pool.acquire() as conn:
+        await conn.execute('INSERT INTO users (user_id, lang) VALUES ($1, $2) ON CONFLICT DO NOTHING', msg.from_user.id, 'en')
         await conn.execute('UPDATE users SET card_name=$1, card_prof=$2, wallet=$3, price=1.0 WHERE user_id=$4',
                            data['name'], data['prof'], msg.text.strip(), msg.from_user.id)
     await msg.answer(t('card_created', msg.from_user.id, name=data['name'], prof=data['prof']))
@@ -257,6 +273,10 @@ async def invite_cmd(msg: types.Message):
     qr_url = f'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={link}'
     await msg.answer_photo(qr_url, caption=f'🔗 Your referral link:\n{link}\n\n👥 Joined: {count}\n\nShare and earn 0.04 TON + 100 IWA per friend!')
 
+@dp.message_handler(commands=['commands'])
+async def commands_cmd(msg: types.Message):
+    await msg.answer(t('commands_list', msg.from_user.id))
+
 @dp.message_handler(commands=['set_price'])
 async def set_price_cmd(msg: types.Message):
     try:
@@ -268,7 +288,7 @@ async def set_price_cmd(msg: types.Message):
     except:
         await msg.answer('❌ Usage: /set_price 5.0')
 
-# ---------- Admin Commands (with RBAC) ----------
+# ---------- Admin Commands ----------
 @dp.message_handler(commands=['admin'])
 async def admin_panel_cmd(msg: types.Message):
     if not await is_admin(msg.from_user.id):
@@ -373,7 +393,7 @@ async def set_edge_cmd(msg: types.Message):
     except:
         await msg.reply("❌ Usage: /set_edge 0.15")
 
-# ---------- DB Setup (Admin only) ----------
+# ---------- DB Setup ----------
 @dp.message_handler(commands=['db_setup'])
 async def db_setup_cmd(msg: types.Message):
     if msg.from_user.id != ADMIN_ID:
@@ -398,6 +418,32 @@ async def healthcheck_cmd(msg: types.Message):
         await msg.reply(f'🟢 DB OK (Users: {users})\n🟢 Webhook: {webhook_info.url}\nPending: {webhook_info.pending_update_count}')
     except Exception as e:
         await msg.reply(f'❌ Healthcheck failed: {e}')
+
+# ---------- System Check ----------
+@dp.message_handler(commands=['check'])
+async def check_cmd(msg: types.Message):
+    if not await is_admin(msg.from_user.id): return
+    try:
+        async with core.pool.acquire() as conn:
+            users = await conn.fetchval('SELECT COUNT(*) FROM users')
+            cards = await conn.fetchval('SELECT COUNT(*) FROM users WHERE card_name IS NOT NULL')
+            refs = await conn.fetchval('SELECT COUNT(*) FROM referrals')
+            premium = await conn.fetchval('SELECT COUNT(*) FROM users WHERE is_premium = TRUE')
+        webhook_info = await bot.get_webhook_info()
+        status = f'''🟢 **System Check**
+━━━━━━━━━━━━━━━━━
+🟢 DB: OK (Users: {users}, Cards: {cards})
+🟢 Webhook: {webhook_info.url}
+🟢 Pending Updates: {webhook_info.pending_update_count}
+💰 Volume: {await conn.fetchval('SELECT COALESCE(SUM(balance),0) FROM users')} TON
+👥 Premium: {premium}
+🔗 Referrals: {refs}
+🎰 Casino: Active (House Edge: {await conn.fetchval('SELECT house_edge FROM casino_settings LIMIT 1')*100}%)
+
+✅ All systems operational'''
+        await msg.answer(status, parse_mode='Markdown')
+    except Exception as e:
+        await msg.answer(f'❌ System check failed: {e}')
 
 # ---------- TON Scanner ----------
 async def ton_scanner_loop():
