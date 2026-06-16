@@ -1,0 +1,42 @@
+{
+  "he": {
+    "welcome": "✅ **ברוך הבא ל-NIFTI!**",
+    "create_card": "🆕 צור כרטיס",
+    "my_card": "💳 הכרטיס שלי",
+    "market": "🛒 שוק",
+    "earnings": "💰 הרווחים",
+    "leaderboard": "🏆 מובילים",
+    "settings": "⚙️ הגדרות",
+    "no_card": "אין לך כרטיס. צור חדש.",
+    "card_created": "🎉 כרטיס נוצר!\nשם: {name}\nמקצוע: {prof}",
+    "balance": "💰 יתרה: {balance} TON\nמחיר: {price} TON\nעמלה: {fee} TON\nאתה מקבל: {net} TON",
+    "referrals": "🔗 **הפניות שלך**\n\nנרשמים: {count}\nקישור:\n`{link}`",
+    "admin_only": "⛔ אדמין בלבד.",
+    "send_start": "שלח /start",
+    "min_2_chars": "❌ מינימום 2 תווים.",
+    "price_updated": "✅ המחיר עודכן ל-{price} TON",
+    "name_prompt": "שם (לפחות 2 תווים):",
+    "prof_prompt": "מקצוע:",
+    "wallet_prompt": "ארנק TON:"
+  },
+  "en": {
+    "welcome": "✅ **Welcome to NIFTI!**",
+    "create_card": "🆕 Create Card",
+    "my_card": "💳 My Card",
+    "market": "🛒 Market",
+    "earnings": "💰 Earnings",
+    "leaderboard": "🏆 Leaderboard",
+    "settings": "⚙️ Settings",
+    "no_card": "You don't have a card. Create one.",
+    "card_created": "🎉 Card created!\nName: {name}\nProfession: {prof}",
+    "balance": "💰 Balance: {balance} TON\nPrice: {price} TON\nFee: {fee} TON\nYou receive: {net} TON",
+    "referrals": "🔗 **Your Referrals**\n\nRegistered: {count}\nLink:\n`{link}`",
+    "admin_only": "⛔ Admin only.",
+    "send_start": "Send /start",
+    "min_2_chars": "❌ Minimum 2 characters.",
+    "price_updated": "✅ Price updated to {price} TON",
+    "name_prompt": "Name (min 2 characters):",
+    "prof_prompt": "Profession:",
+    "wallet_prompt": "TON Wallet:"
+  }
+}
