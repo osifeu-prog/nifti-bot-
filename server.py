@@ -1,5 +1,6 @@
-﻿import asyncio, os, logging, uuid, json, random
+﻿import asyncio, os, logging, uuid, json, random, time
 from contextlib import asynccontextmanager
+from datetime import datetime, timedelta
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from aiogram import Bot, Dispatcher, types
@@ -20,7 +21,8 @@ bot = Bot(token=BOT_TOKEN)
 Bot.set_current(bot)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-with open("locales.json", "r", encoding="utf-8-sig") as f:
+# ---------- Localization (9 languages from lang.json) ----------
+with open("lang.json", "r", encoding="utf-8-sig") as f:
     LOCALES = json.load(f)
 
 def t(key, user_id=None, **kwargs):
@@ -34,25 +36,50 @@ def t(key, user_id=None, **kwargs):
         except: pass
     return text
 
+# ---------- Database init ----------
 async def init_db():
     async with core.pool.acquire() as conn:
         await conn.execute('''CREATE TABLE IF NOT EXISTS users (
             user_id BIGINT PRIMARY KEY, username TEXT, lang TEXT DEFAULT 'en',
             card_name TEXT, card_prof TEXT, wallet TEXT, balance FLOAT DEFAULT 0,
             price FLOAT DEFAULT 1, share_count INT DEFAULT 0, is_premium BOOLEAN DEFAULT FALSE,
-            iwa_balance FLOAT DEFAULT 0, points FLOAT DEFAULT 0, created_at TIMESTAMP DEFAULT NOW())''')
+            iwa_balance FLOAT DEFAULT 0, points FLOAT DEFAULT 0, role TEXT DEFAULT 'user',
+            created_at TIMESTAMP DEFAULT NOW())''')
         await conn.execute('''CREATE TABLE IF NOT EXISTS referrals (user_id BIGINT, ref_id BIGINT, PRIMARY KEY (user_id, ref_id))''')
         await conn.execute('''CREATE TABLE IF NOT EXISTS premium_users (id SERIAL PRIMARY KEY, user_id BIGINT, bot_name TEXT, amount FLOAT, tx_hash TEXT)''')
         await conn.execute('''CREATE TABLE IF NOT EXISTS casino_settings (id SERIAL PRIMARY KEY, house_edge FLOAT DEFAULT 0.15, is_active BOOLEAN DEFAULT TRUE)''')
+        await conn.execute('''CREATE TABLE IF NOT EXISTS admin_logs (id SERIAL PRIMARY KEY, admin_id BIGINT, action TEXT, details TEXT, ts TIMESTAMP DEFAULT NOW())''')
         await conn.execute('''INSERT INTO casino_settings (house_edge, is_active) SELECT 0.15, TRUE WHERE NOT EXISTS (SELECT 1 FROM casino_settings)''')
         await conn.execute('''ALTER TABLE users ADD COLUMN IF NOT EXISTS points FLOAT DEFAULT 0''')
         await conn.execute('''ALTER TABLE users ADD COLUMN IF NOT EXISTS iwa_balance FLOAT DEFAULT 0''')
+        await conn.execute('''ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'user''')
 
 async def get_lang(user_id):
     async with core.pool.acquire() as conn:
         u = await conn.fetchrow('SELECT lang FROM users WHERE user_id=$1', user_id)
         return u['lang'] if u else 'en'
 
+# ---------- Rate Limiting (Middleware Replacement) ----------
+user_last_action = {}
+RATE_LIMIT_SECONDS = 1
+async def apply_rate_limit(user_id):
+    now = datetime.now()
+    if user_id in user_last_action:
+        if (now - user_last_action[user_id]) < timedelta(seconds=RATE_LIMIT_SECONDS):
+            raise ValueError("Rate limit")
+    user_last_action[user_id] = now
+
+# ---------- RBAC & Audit ----------
+async def is_admin(user_id):
+    async with core.pool.acquire() as conn:
+        role = await conn.fetchval('SELECT role FROM users WHERE user_id=$1', user_id)
+        return role in ('admin', 'superadmin')
+
+async def log_action(admin_id, action, details=""):
+    async with core.pool.acquire() as conn:
+        await conn.execute("INSERT INTO admin_logs (admin_id, action, details) VALUES ($1, $2, $3)", admin_id, action, details)
+
+# ---------- Referral Engine ----------
 REFERRAL_LEVEL1_REWARD = 0.04
 PURCHASE_BONUS_LEVEL1 = 0.094
 WITHDRAWAL_FEE = 0.05
@@ -80,6 +107,7 @@ class CardForm(StatesGroup):
     waiting_prof = State()
     waiting_wallet = State()
 
+# ---------- Handlers ----------
 @dp.message_handler(commands=['start'])
 async def start(msg: types.Message):
     ref = int(msg.get_args()) if msg.get_args() and msg.get_args().isdigit() else None
@@ -225,7 +253,9 @@ async def invite_cmd(msg: types.Message):
     async with core.pool.acquire() as conn:
         count = await conn.fetchval('SELECT COUNT(*) FROM referrals WHERE ref_id=$1', msg.from_user.id)
     link = f'https://t.me/NFTY_madness_bot?start={msg.from_user.id}'
-    await msg.answer(f'🔗 Your referral link:\n{link}\n\n👥 Joined: {count}\n\nShare and earn 0.04 TON + 100 IWA per friend!')
+    # QR code generation using external API
+    qr_url = f'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={link}'
+    await msg.answer_photo(qr_url, caption=f'🔗 Your referral link:\n{link}\n\n👥 Joined: {count}\n\nShare and earn 0.04 TON + 100 IWA per friend!')
 
 @dp.message_handler(commands=['set_price'])
 async def set_price_cmd(msg: types.Message):
@@ -238,9 +268,10 @@ async def set_price_cmd(msg: types.Message):
     except:
         await msg.answer('❌ Usage: /set_price 5.0')
 
+# ---------- Admin Commands (with RBAC) ----------
 @dp.message_handler(commands=['admin'])
 async def admin_panel_cmd(msg: types.Message):
-    if msg.from_user.id != ADMIN_ID:
+    if not await is_admin(msg.from_user.id):
         await msg.answer(t('admin_only', msg.from_user.id))
         return
     async with core.pool.acquire() as conn:
@@ -248,10 +279,11 @@ async def admin_panel_cmd(msg: types.Message):
         cards = await conn.fetchval('SELECT COUNT(*) FROM users WHERE card_name IS NOT NULL')
         volume = await conn.fetchval('SELECT COALESCE(SUM(balance),0) FROM users')
     await msg.answer(f'🛡️ **Admin Panel**\n👥 Users: {users}\n💳 Cards: {cards}\n💰 Volume: {volume} TON', parse_mode='Markdown')
+    await log_action(msg.from_user.id, 'admin_panel_viewed')
 
 @dp.message_handler(commands=['broadcast'])
 async def broadcast_cmd(msg: types.Message):
-    if msg.from_user.id != ADMIN_ID: return
+    if not await is_admin(msg.from_user.id): return
     text = msg.get_args()
     if not text:
         await msg.answer('Usage: /broadcast <message>')
@@ -262,20 +294,22 @@ async def broadcast_cmd(msg: types.Message):
         try: await bot.send_message(u['user_id'], text)
         except: pass
     await msg.answer(f'✅ Sent to {len(all_users)} users.')
+    await log_action(msg.from_user.id, 'broadcast', text)
 
 @dp.message_handler(commands=['stats'])
 async def stats_cmd(msg: types.Message):
-    if msg.from_user.id != ADMIN_ID: return
+    if not await is_admin(msg.from_user.id): return
     async with core.pool.acquire() as conn:
         total_users = await conn.fetchval('SELECT COUNT(*) FROM users')
         total_cards = await conn.fetchval('SELECT COUNT(*) FROM users WHERE card_name IS NOT NULL')
         total_volume = await conn.fetchval('SELECT COALESCE(SUM(balance),0) FROM users')
         referral_count = await conn.fetchval('SELECT COUNT(*) FROM referrals')
     await msg.answer(f'📊 System Stats\n━━━━━━━━━━━━━━━━━\n👥 Total Users: {total_users}\n💳 Cards: {total_cards}\n💰 Volume: {total_volume} TON\n🔗 Referrals: {referral_count}')
+    await log_action(msg.from_user.id, 'stats_viewed')
 
 @dp.message_handler(commands=['airdrop'])
 async def airdrop_cmd(msg: types.Message):
-    if msg.from_user.id != ADMIN_ID: return
+    if not await is_admin(msg.from_user.id): return
     try:
         amount = float(msg.get_args())
         async with core.pool.acquire() as conn:
@@ -283,8 +317,21 @@ async def airdrop_cmd(msg: types.Message):
             for u in users:
                 await conn.execute('UPDATE users SET balance = COALESCE(balance,0) + $1 WHERE user_id = $2', amount, u['user_id'])
         await msg.answer(f'✅ {amount} TON sent to {len(users)} users!')
+        await log_action(msg.from_user.id, 'airdrop', f'{amount} TON to {len(users)} users')
     except:
         await msg.answer('❌ Usage: /airdrop 5.0')
+
+@dp.message_handler(commands=['grant_admin'])
+async def grant_admin_cmd(msg: types.Message):
+    if msg.from_user.id != ADMIN_ID: return
+    try:
+        target_id = int(msg.get_args())
+        async with core.pool.acquire() as conn:
+            await conn.execute("UPDATE users SET role = 'admin' WHERE user_id=$1", target_id)
+        await msg.answer(f'✅ User {target_id} promoted to admin.')
+        await log_action(msg.from_user.id, 'grant_admin', str(target_id))
+    except:
+        await msg.answer('❌ Usage: /grant_admin <user_id>')
 
 # ---------- Casino Slot Machine ----------
 @dp.message_handler(commands=['spin'])
@@ -313,7 +360,7 @@ async def handle_spin(msg: types.Message):
 
 @dp.message_handler(commands=['set_edge'])
 async def set_edge_cmd(msg: types.Message):
-    if msg.from_user.id != ADMIN_ID:
+    if not await is_admin(msg.from_user.id):
         return
     try:
         new_edge = float(msg.get_args())
@@ -322,6 +369,7 @@ async def set_edge_cmd(msg: types.Message):
         async with core.pool.acquire() as conn:
             await conn.execute('UPDATE casino_settings SET house_edge = $1', new_edge)
         await msg.reply(f"✅ House edge updated to {new_edge*100}%")
+        await log_action(msg.from_user.id, 'set_edge', str(new_edge))
     except:
         await msg.reply("❌ Usage: /set_edge 0.15")
 
@@ -333,16 +381,16 @@ async def db_setup_cmd(msg: types.Message):
     try:
         await init_db()
         async with core.pool.acquire() as conn:
-            await conn.execute('''INSERT INTO users (user_id, username, lang, card_name, card_prof, wallet, is_premium, iwa_balance, points)
-                VALUES (224223270, 'OsifUngar', 'en', 'Osif Ungar', 'NIFTI Director', 'UQCr743gEr_nqV_0SBkSp3CtYS_15R3LDLBvLmKeEv7XdGvp', TRUE, 100000, 0)
-                ON CONFLICT (user_id) DO UPDATE SET is_premium = TRUE, card_name = 'Osif Ungar', card_prof = 'NIFTI Director', iwa_balance = 100000''')
+            await conn.execute('''INSERT INTO users (user_id, username, lang, card_name, card_prof, wallet, is_premium, iwa_balance, points, role)
+                VALUES (224223270, 'OsifUngar', 'en', 'Osif Ungar', 'NIFTI Director', 'UQCr743gEr_nqV_0SBkSp3CtYS_15R3LDLBvLmKeEv7XdGvp', TRUE, 100000, 0, 'admin')
+                ON CONFLICT (user_id) DO UPDATE SET is_premium = TRUE, card_name = 'Osif Ungar', card_prof = 'NIFTI Director', iwa_balance = 100000, role = 'admin' ''')
         await msg.reply("✅ DB tables created and admin card set!")
     except Exception as e:
         await msg.reply(f"❌ DB setup error: {e}")
 
 @dp.message_handler(commands=['healthcheck'])
 async def healthcheck_cmd(msg: types.Message):
-    if msg.from_user.id != ADMIN_ID: return
+    if not await is_admin(msg.from_user.id): return
     try:
         async with core.pool.acquire() as conn:
             users = await conn.fetchval('SELECT COUNT(*) FROM users')
@@ -404,6 +452,15 @@ async def webhook(request: Request):
     try:
         data = await request.json()
         update = types.Update(**data)
+        # Apply rate limit and role injection
+        if update.message:
+            try:
+                await apply_rate_limit(update.message.from_user.id)
+            except ValueError:
+                return {'ok': True}  # silently drop
+            async with core.pool.acquire() as conn:
+                role = await conn.fetchval('SELECT role FROM users WHERE user_id=$1', update.message.from_user.id)
+                update.message.role = role or 'user'
         await dp.process_update(update)
     except Exception as e:
         logging.error(f"Webhook error: {e}")
