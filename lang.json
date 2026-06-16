@@ -47,7 +47,14 @@
     "earnings_details": "{earnings}\n\nיתרה: {balance} TON\nהמחיר שלך: {price} TON\nעמלת פלטפורמה (20%): {fee} TON\nאתה מקבל: {net} TON\nשיתופים: {shares}",
     "leaderboard_title": "🏆 לוח מובילים",
     "connect_wallet": "🔗 חבר ארנק TON",
-    "level_up": "🎉 עלית רמה!"
+    "level_up": "🎉 עלית רמה!",
+    "name_prompt": "Name (min 2 characters):",
+    "prof_prompt": "Profession:",
+    "wallet_prompt": "TON Wallet:",
+    "card_created": "🎉 Card created!\nName: {name}\nProfession: {prof}",
+    "min_2_chars": "❌ Minimum 2 characters.",
+    "send_start": "Send /start",
+    "settings": "⚙️ Settings"
   },
   "en": {
     "welcome": "Welcome to NIFTI!",
@@ -97,7 +104,14 @@
     "earnings_details": "{earnings}\n\nBalance: {balance} TON\nYour price: {price} TON\nPlatform fee (20%): {fee} TON\nYou receive: {net} TON\nShares: {shares}",
     "leaderboard_title": "🏆 Leaderboard",
     "connect_wallet": "🔗 Connect TON Wallet",
-    "level_up": "🎉 Level Up!"
+    "level_up": "🎉 Level Up!",
+    "name_prompt": "Name (min 2 characters):",
+    "prof_prompt": "Profession:",
+    "wallet_prompt": "TON Wallet:",
+    "card_created": "🎉 Card created!\nName: {name}\nProfession: {prof}",
+    "min_2_chars": "❌ Minimum 2 characters.",
+    "send_start": "Send /start",
+    "settings": "⚙️ Settings"
   },
   "ru": {
     "welcome": "Добро пожаловать в NIFTI!",
@@ -147,7 +161,14 @@
     "earnings_details": "{earnings}\n\nБаланс: {balance} TON\nВаша цена: {price} TON\nКомиссия платформы (20%): {fee} TON\nВы получаете: {net} TON\nШеры: {shares}",
     "leaderboard_title": "🏆 Таблица лидеров",
     "connect_wallet": "🔗 Подключить кошелёк TON",
-    "level_up": "🎉 Повышение уровня!"
+    "level_up": "🎉 Повышение уровня!",
+    "name_prompt": "Name (min 2 characters):",
+    "prof_prompt": "Profession:",
+    "wallet_prompt": "TON Wallet:",
+    "card_created": "🎉 Card created!\nName: {name}\nProfession: {prof}",
+    "min_2_chars": "❌ Minimum 2 characters.",
+    "send_start": "Send /start",
+    "settings": "⚙️ Settings"
   },
   "ar": {
     "welcome": "Welcome to NIFTI!",
@@ -197,7 +218,14 @@
     "earnings_details": "{earnings}\n\nBalance: {balance} TON\nYour price: {price} TON\nPlatform fee (20%): {fee} TON\nYou receive: {net} TON\nShares: {shares}",
     "leaderboard_title": "🏆 Leaderboard",
     "connect_wallet": "🔗 Connect TON Wallet",
-    "level_up": "🎉 Level Up!"
+    "level_up": "🎉 Level Up!",
+    "name_prompt": "Name (min 2 characters):",
+    "prof_prompt": "Profession:",
+    "wallet_prompt": "TON Wallet:",
+    "card_created": "🎉 Card created!\nName: {name}\nProfession: {prof}",
+    "min_2_chars": "❌ Minimum 2 characters.",
+    "send_start": "Send /start",
+    "settings": "⚙️ Settings"
   },
   "fr": {
     "welcome": "Welcome to NIFTI!",
@@ -247,7 +275,14 @@
     "earnings_details": "{earnings}\n\nBalance: {balance} TON\nYour price: {price} TON\nPlatform fee (20%): {fee} TON\nYou receive: {net} TON\nShares: {shares}",
     "leaderboard_title": "🏆 Leaderboard",
     "connect_wallet": "🔗 Connect TON Wallet",
-    "level_up": "🎉 Level Up!"
+    "level_up": "🎉 Level Up!",
+    "name_prompt": "Name (min 2 characters):",
+    "prof_prompt": "Profession:",
+    "wallet_prompt": "TON Wallet:",
+    "card_created": "🎉 Card created!\nName: {name}\nProfession: {prof}",
+    "min_2_chars": "❌ Minimum 2 characters.",
+    "send_start": "Send /start",
+    "settings": "⚙️ Settings"
   },
   "es": {
     "welcome": "Welcome to NIFTI!",
@@ -297,7 +332,14 @@
     "earnings_details": "{earnings}\n\nBalance: {balance} TON\nYour price: {price} TON\nPlatform fee (20%): {fee} TON\nYou receive: {net} TON\nShares: {shares}",
     "leaderboard_title": "🏆 Leaderboard",
     "connect_wallet": "🔗 Connect TON Wallet",
-    "level_up": "🎉 Level Up!"
+    "level_up": "🎉 Level Up!",
+    "name_prompt": "Name (min 2 characters):",
+    "prof_prompt": "Profession:",
+    "wallet_prompt": "TON Wallet:",
+    "card_created": "🎉 Card created!\nName: {name}\nProfession: {prof}",
+    "min_2_chars": "❌ Minimum 2 characters.",
+    "send_start": "Send /start",
+    "settings": "⚙️ Settings"
   },
   "zh": {
     "welcome": "Welcome to NIFTI!",
@@ -347,7 +389,14 @@
     "earnings_details": "{earnings}\n\nBalance: {balance} TON\nYour price: {price} TON\nPlatform fee (20%): {fee} TON\nYou receive: {net} TON\nShares: {shares}",
     "leaderboard_title": "🏆 Leaderboard",
     "connect_wallet": "🔗 Connect TON Wallet",
-    "level_up": "🎉 Level Up!"
+    "level_up": "🎉 Level Up!",
+    "name_prompt": "Name (min 2 characters):",
+    "prof_prompt": "Profession:",
+    "wallet_prompt": "TON Wallet:",
+    "card_created": "🎉 Card created!\nName: {name}\nProfession: {prof}",
+    "min_2_chars": "❌ Minimum 2 characters.",
+    "send_start": "Send /start",
+    "settings": "⚙️ Settings"
   },
   "pt": {
     "welcome": "Welcome to NIFTI!",
@@ -397,7 +446,14 @@
     "earnings_details": "{earnings}\n\nBalance: {balance} TON\nYour price: {price} TON\nPlatform fee (20%): {fee} TON\nYou receive: {net} TON\nShares: {shares}",
     "leaderboard_title": "🏆 Leaderboard",
     "connect_wallet": "🔗 Connect TON Wallet",
-    "level_up": "🎉 Level Up!"
+    "level_up": "🎉 Level Up!",
+    "name_prompt": "Name (min 2 characters):",
+    "prof_prompt": "Profession:",
+    "wallet_prompt": "TON Wallet:",
+    "card_created": "🎉 Card created!\nName: {name}\nProfession: {prof}",
+    "min_2_chars": "❌ Minimum 2 characters.",
+    "send_start": "Send /start",
+    "settings": "⚙️ Settings"
   },
   "de": {
     "welcome": "Welcome to NIFTI!",
@@ -447,6 +503,13 @@
     "earnings_details": "{earnings}\n\nBalance: {balance} TON\nYour price: {price} TON\nPlatform fee (20%): {fee} TON\nYou receive: {net} TON\nShares: {shares}",
     "leaderboard_title": "🏆 Leaderboard",
     "connect_wallet": "🔗 Connect TON Wallet",
-    "level_up": "🎉 Level Up!"
+    "level_up": "🎉 Level Up!",
+    "name_prompt": "Name (min 2 characters):",
+    "prof_prompt": "Profession:",
+    "wallet_prompt": "TON Wallet:",
+    "card_created": "🎉 Card created!\nName: {name}\nProfession: {prof}",
+    "min_2_chars": "❌ Minimum 2 characters.",
+    "send_start": "Send /start",
+    "settings": "⚙️ Settings"
   }
 }
