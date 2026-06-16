@@ -2,41 +2,53 @@
 
 async def migrate():
     conn = await asyncpg.connect(os.getenv('DATABASE_URL'))
-    # Stores table
     await conn.execute('''
-        CREATE TABLE IF NOT EXISTS stores (
+        CREATE TABLE IF NOT EXISTS users (
+            user_id BIGINT PRIMARY KEY,
+            username TEXT,
+            balance REAL DEFAULT 0,
+            ref_id BIGINT,
+            created_at TIMESTAMPTZ DEFAULT NOW(),
+            lang TEXT DEFAULT 'en',
+            card_name TEXT,
+            card_prof TEXT,
+            wallet TEXT,
+            price REAL DEFAULT 1.0,
+            share_count INTEGER DEFAULT 0,
+            level TEXT DEFAULT 'free',
+            minisite TEXT,
+            is_premium BOOLEAN DEFAULT FALSE,
+            role TEXT DEFAULT 'user'
+        )
+    ''')
+    await conn.execute('''
+        CREATE TABLE IF NOT EXISTS referrals (
             id SERIAL PRIMARY KEY,
-            user_id BIGINT UNIQUE NOT NULL,
-            store_name TEXT DEFAULT 'My Store',
-            description TEXT,
+            user_id BIGINT,
+            ref_id BIGINT,
+            created_at TIMESTAMPTZ DEFAULT NOW(),
+            UNIQUE(user_id)
+        )
+    ''')
+    await conn.execute('''
+        CREATE TABLE IF NOT EXISTS premium_users (
+            user_id BIGINT,
+            bot_name TEXT,
+            amount REAL,
+            tx_hash TEXT PRIMARY KEY,
             created_at TIMESTAMPTZ DEFAULT NOW()
         )
     ''')
-    # Payment methods table
     await conn.execute('''
-        CREATE TABLE IF NOT EXISTS payment_methods (
+        CREATE TABLE IF NOT EXISTS admin_logs (
             id SERIAL PRIMARY KEY,
-            user_id BIGINT NOT NULL,
-            method_type TEXT NOT NULL,  -- 'TON', 'BANK', 'PAYPAL'
-            details TEXT NOT NULL,      -- wallet address, IBAN, etc.
-            is_active BOOLEAN DEFAULT TRUE,
+            admin_id BIGINT,
+            action TEXT,
+            details TEXT,
             created_at TIMESTAMPTZ DEFAULT NOW()
         )
     ''')
-    # Products table (extends cards)
-    await conn.execute('''
-        CREATE TABLE IF NOT EXISTS products (
-            id SERIAL PRIMARY KEY,
-            user_id BIGINT NOT NULL,
-            name TEXT NOT NULL,
-            description TEXT,
-            price REAL NOT NULL,
-            payment_methods TEXT,  -- comma-separated method IDs or 'all'
-            is_active BOOLEAN DEFAULT TRUE,
-            created_at TIMESTAMPTZ DEFAULT NOW()
-        )
-    ''')
-    print("✅ Migration complete: stores, payment_methods, products")
+    print("✅ Migration complete")
     await conn.close()
 
 asyncio.run(migrate())
