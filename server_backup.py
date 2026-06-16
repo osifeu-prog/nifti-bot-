@@ -29,53 +29,7 @@ async def get_lang(user_id):
         u = await conn.fetchrow("SELECT lang FROM users WHERE user_id=$1", user_id)
         return u["lang"] if u else "en"
 
-
-# ====================== VIRAL REFERRALS (with Ledger) ======================
-REFERRAL_REWARD = 10.0  # TON reward for referrer (adjustable via /set_referral_reward)
-
-@dp.message_handler(commands=["set_referral_reward"])
-async def set_referral_reward_cmd(msg: types.Message):
-    if msg.from_user.id != ADMIN_ID:
-        await msg.answer("⛔ אדמין בלבד.")
-        return
-    try:
-        global REFERRAL_REWARD
-        REFERRAL_REWARD = float(msg.get_args())
-        await msg.answer(f"✅ Referral reward set to {REFERRAL_REWARD} TON")
-    except:
-        await msg.answer("❌ Usage: /set_referral_reward 15.0")
-
-# Modify start handler to credit rewards
-@dp.message_handler(commands=["start"])
-async def start(msg: types.Message):
-    ref = int(msg.get_args()) if msg.get_args() and msg.get_args().isdigit() else None
-    if ref and ref != msg.from_user.id:
-        async with core.pool.acquire() as conn:
-            await conn.execute("UPDATE users SET share_count = share_count + 1 WHERE user_id = # ====================== HANDLERS ======================", ref)
-            await conn.execute("INSERT INTO referrals (user_id, ref_id) VALUES (# ====================== HANDLERS ======================, $2) ON CONFLICT DO NOTHING", msg.from_user.id, ref)
-            # Credit referrer with reward
-            await conn.execute("UPDATE users SET balance = COALESCE(balance,0) + # ====================== HANDLERS ====================== WHERE user_id = $2", REFERRAL_REWARD, ref)
-            await conn.execute("UPDATE users SET balance = COALESCE(balance,0) + # ====================== HANDLERS ====================== WHERE user_id = $2", REFERRAL_REWARD/2, msg.from_user.id)  # bonus for new user
-    lang = await get_lang(msg.from_user.id)
-    async with core.pool.acquire() as conn:
-        await conn.execute("INSERT INTO users (user_id, lang) VALUES (# ====================== HANDLERS ======================, $2) ON CONFLICT DO NOTHING", msg.from_user.id, lang)
-    kb = types.InlineKeyboardMarkup(row_width=2)
-    kb.add(types.InlineKeyboardButton("🆕 צור כרטיס", callback_data="menu_create"), types.InlineKeyboardButton("💳 הכרטיס שלי", callback_data="menu_mycard"))
-    kb.add(types.InlineKeyboardButton("🛒 שוק", callback_data="menu_market"), types.InlineKeyboardButton("💰 הרווחים", callback_data="menu_earnings"))
-    kb.add(types.InlineKeyboardButton("🏆 מובילים", callback_data="menu_leaderboard"), types.InlineKeyboardButton("⚙️ הגדרות", callback_data="menu_settings"))
-    await msg.answer("✅ **ברוך הבא ל-NIFTI!**", reply_markup=kb)
-
-@dp.message_handler(commands=["top_referrers"])
-async def top_referrers_cmd(msg: types.Message):
-    async with core.pool.acquire() as conn:
-        top = await conn.fetch("SELECT user_id, share_count FROM users WHERE share_count > 0 ORDER BY share_count DESC LIMIT 10")
-    if top:
-        lines = "\n".join(f"{i+1}. ID {r['user_id']}  {r['share_count']} הפניות" for i, r in enumerate(top))
-        await msg.answer(f"🏆 **Top Referrers**\n\n{lines}")
-    else:
-        await msg.answer("אין עדיין הפניות.")
-
-
+# ====================== HANDLERS ======================
 @dp.message_handler(commands=["start"])
 async def start(msg: types.Message):
     ref = int(msg.get_args()) if msg.get_args() and msg.get_args().isdigit() else None
@@ -244,56 +198,7 @@ async def diagnostics(msg: types.Message):
         volume = await conn.fetchval("SELECT COALESCE(SUM(balance),0) FROM users")
     await msg.answer(f"📊 **Diagnostics**\n👥 Users: {users}\n💳 Cards: {cards}\n💰 Volume: {volume} TON\n🟢 TON Scanner: Active\n📦 Bot v2.0", parse_mode="Markdown")
 
-
-# ====================== POWER COMMANDS (ADMIN) ======================
-
-@dp.message_handler(commands=["stats"])
-async def stats_cmd(msg: types.Message):
-    if msg.from_user.id != ADMIN_ID:
-        await msg.answer("⛔ אדמין בלבד.")
-        return
-    async with core.pool.acquire() as conn:
-        total_users = await conn.fetchval("SELECT COUNT(*) FROM users")
-        today_users = await conn.fetchval("SELECT COUNT(*) FROM users WHERE created_at::date = CURRENT_DATE")
-        total_cards = await conn.fetchval("SELECT COUNT(*) FROM users WHERE card_name IS NOT NULL")
-        total_volume = await conn.fetchval("SELECT COALESCE(SUM(balance),0) FROM users")
-        referral_count = await conn.fetchval("SELECT COUNT(*) FROM referrals")
-    await msg.answer(
-        f"📊 **System Stats**\n"
-        f"━━━━━━━━━━━━━━━━━\n"
-        f"👥 Total Users: {total_users}\n"
-        f"🆕 Today: {today_users}\n"
-        f"💳 Cards: {total_cards}\n"
-        f"💰 Volume: {total_volume} TON\n"
-        f"🔗 Referrals: {referral_count}",
-        parse_mode="Markdown"
-    )
-
-@dp.message_handler(commands=["export_data"])
-async def export_data(msg: types.Message):
-    if msg.from_user.id != ADMIN_ID:
-        await msg.answer("⛔ אדמין בלבד.")
-        return
-    what = msg.get_args().strip().lower()
-    if not what:
-        await msg.answer("שימוש: /export_data users|referrals|all")
-        return
-    async with core.pool.acquire() as conn:
-        if what in ("users", "all"):
-            users = await conn.fetch("SELECT * FROM users ORDER BY user_id")
-            csv = "user_id,username,card_name,card_prof,wallet,balance,price,share_count,is_premium\n"
-            for u in users:
-                csv += f"{u['user_id']},{u['username']},{u['card_name']},{u['card_prof']},{u['wallet']},{u['balance']},{u['price']},{u['share_count']},{u['is_premium']}\n"
-            await msg.answer_document(csv.encode(), caption="users.csv")
-        if what in ("referrals", "all"):
-            referrals = await conn.fetch("SELECT * FROM referrals ORDER BY user_id")
-            csv = "user_id,ref_id\n"
-            for r in referrals:
-                csv += f"{r['user_id']},{r['ref_id']}\n"
-            await msg.answer_document(csv.encode(), caption="referrals.csv")
-    await msg.answer("✅ ייצוא הושלם")
-
-
+# ====================== Polling Fallback ======================
 async def start_polling():
     try:
         await dp.skip_updates()
@@ -368,9 +273,3 @@ async def health():
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
-
-
-
-
-
