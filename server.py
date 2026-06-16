@@ -1,4 +1,4 @@
-﻿import asyncio, os, logging, uuid, json, random, time
+﻿import asyncio, os, logging, uuid, json, random
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 from fastapi import FastAPI, Request
@@ -36,7 +36,7 @@ def t(key, user_id=None, **kwargs):
         except: pass
     return text
 
-# ---------- Database init ----------
+# ---------- Database init (תוקן!) ----------
 async def init_db():
     async with core.pool.acquire() as conn:
         await conn.execute('''CREATE TABLE IF NOT EXISTS users (
@@ -50,16 +50,17 @@ async def init_db():
         await conn.execute('''CREATE TABLE IF NOT EXISTS casino_settings (id SERIAL PRIMARY KEY, house_edge FLOAT DEFAULT 0.15, is_active BOOLEAN DEFAULT TRUE)''')
         await conn.execute('''CREATE TABLE IF NOT EXISTS admin_logs (id SERIAL PRIMARY KEY, admin_id BIGINT, action TEXT, details TEXT, ts TIMESTAMP DEFAULT NOW())''')
         await conn.execute('''INSERT INTO casino_settings (house_edge, is_active) SELECT 0.15, TRUE WHERE NOT EXISTS (SELECT 1 FROM casino_settings)''')
-        await conn.execute('''ALTER TABLE users ADD COLUMN IF NOT EXISTS points FLOAT DEFAULT 0''')
-        await conn.execute('''ALTER TABLE users ADD COLUMN IF NOT EXISTS iwa_balance FLOAT DEFAULT 0''')
-        await conn.execute('''ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'user''')
+        # Alter tables  safe with double quotes
+        await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS points FLOAT DEFAULT 0")
+        await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS iwa_balance FLOAT DEFAULT 0")
+        await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'user'")
 
 async def get_lang(user_id):
     async with core.pool.acquire() as conn:
         u = await conn.fetchrow('SELECT lang FROM users WHERE user_id=$1', user_id)
         return u['lang'] if u else 'en'
 
-# ---------- Rate Limiting (Middleware Replacement) ----------
+# ---------- Rate Limiting ----------
 user_last_action = {}
 RATE_LIMIT_SECONDS = 1
 async def apply_rate_limit(user_id):
@@ -253,7 +254,6 @@ async def invite_cmd(msg: types.Message):
     async with core.pool.acquire() as conn:
         count = await conn.fetchval('SELECT COUNT(*) FROM referrals WHERE ref_id=$1', msg.from_user.id)
     link = f'https://t.me/NFTY_madness_bot?start={msg.from_user.id}'
-    # QR code generation using external API
     qr_url = f'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={link}'
     await msg.answer_photo(qr_url, caption=f'🔗 Your referral link:\n{link}\n\n👥 Joined: {count}\n\nShare and earn 0.04 TON + 100 IWA per friend!')
 
@@ -452,12 +452,11 @@ async def webhook(request: Request):
     try:
         data = await request.json()
         update = types.Update(**data)
-        # Apply rate limit and role injection
         if update.message:
             try:
                 await apply_rate_limit(update.message.from_user.id)
             except ValueError:
-                return {'ok': True}  # silently drop
+                return {'ok': True}
             async with core.pool.acquire() as conn:
                 role = await conn.fetchval('SELECT role FROM users WHERE user_id=$1', update.message.from_user.id)
                 update.message.role = role or 'user'
