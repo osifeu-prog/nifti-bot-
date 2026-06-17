@@ -552,6 +552,85 @@ async def market_cmd(msg: types.Message):
         return
     await show_market_card(msg, cards, 0)
 
+
+# ---------- Edit Wizard (Robust) ----------
+@dp.callback_query_handler(lambda c: c.data == 'menu_edit')
+async def menu_edit_wizard(call: types.CallbackQuery):
+    await dp.current_state(user=call.from_user.id).set_state("editing_card")
+    kb = types.InlineKeyboardMarkup(row_width=2)
+    kb.add(types.InlineKeyboardButton("📝 Name", callback_data="wizard_name"),
+           types.InlineKeyboardButton("💼 Prof.", callback_data="wizard_prof"))
+    kb.add(types.InlineKeyboardButton("💰 Price", callback_data="wizard_price"),
+           types.InlineKeyboardButton("🖼 Photo", callback_data="wizard_photo"))
+    kb.add(types.InlineKeyboardButton("❌ Cancel", callback_data="wizard_cancel"))
+    await call.message.answer("What would you like to edit?", reply_markup=kb)
+    await call.answer()
+
+@dp.callback_query_handler(lambda c: c.data in ['wizard_name', 'wizard_prof', 'wizard_price', 'wizard_photo', 'wizard_cancel'])
+async def handle_wizard(call: types.CallbackQuery):
+    await call.answer()  # immediate feedback
+    action = call.data.split('_')[1]
+    if action == 'cancel':
+        await dp.current_state(user=call.from_user.id).finish()
+        await call.message.answer("Editing cancelled.")
+        return
+    await dp.current_state(user=call.from_user.id).set_data({"action": action})
+    prompts = {'name': t('edit_name_prompt', call.from_user.id), 'prof': t('edit_prof_prompt', call.from_user.id)}
+    if action in prompts:
+        await call.message.answer(prompts[action])
+    elif action == 'price':
+        await call.message.answer("Enter new price:")
+    elif action == 'photo':
+        await call.message.answer("Send me a photo.")
+
+@dp.message_handler(state="editing_card")
+async def process_wizard_input(msg: types.Message):
+    data = await dp.current_state(user=msg.from_user.id).get_data()
+    action = data.get('action')
+    if not action: return
+    async with core.pool.acquire() as conn:
+        if action == 'name':
+            name = msg.text.strip()
+            if len(name) < 2:
+                await msg.answer(t('min_2_chars', msg.from_user.id))
+                return
+            await conn.execute('UPDATE users SET card_name=$1 WHERE user_id=$2', name, msg.from_user.id)
+            await msg.answer(t('name_updated', msg.from_user.id, name=name))
+        elif action == 'prof':
+            prof = msg.text.strip()
+            await conn.execute('UPDATE users SET card_prof=$1 WHERE user_id=$2', prof, msg.from_user.id)
+            await msg.answer(t('prof_updated', msg.from_user.id, prof=prof))
+        elif action == 'price':
+            try:
+                price = float(msg.text.strip())
+                await conn.execute('UPDATE users SET price=$1 WHERE user_id=$2', price, msg.from_user.id)
+                await msg.answer(f"✅ Price set to {price} TON.")
+            except:
+                await msg.answer("❌ Invalid price.")
+                return
+        elif action == 'photo':
+            await dp.current_state(user=msg.from_user.id).set_data({"awaiting": "photo"})
+            await msg.answer("Send a photo now.")
+            return
+    await dp.current_state(user=msg.from_user.id).finish()
+    await msg.answer("✅ Updated. Use /start to return to menu.")
+
+@dp.message_handler(content_types=['photo'], state="editing_card")
+async def handle_wizard_photo(msg: types.Message):
+    data = await dp.current_state(user=msg.from_user.id).get_data()
+    if data.get('action') == 'photo':
+        file_id = msg.photo[-1].file_id
+        async with core.pool.acquire() as conn:
+            await conn.execute('UPDATE users SET photo_file_id=$1 WHERE user_id=$2', file_id, msg.from_user.id)
+        await msg.answer(t('photo_updated', msg.from_user.id))
+        await dp.current_state(user=msg.from_user.id).finish()
+    else:
+        await msg.answer("I didn't expect a photo.")
+
+# פקודת /edit_card (למקרה שמשתמש מקליד)
+@dp.message_handler(commands=['edit_card'])
+async def edit_card_cmd(msg: types.Message):
+    await menu_edit_wizard(types.CallbackQuery(message=msg, from_user=msg.from_user, data='menu_edit'))
 async def show_market_card(msg: types.Message, cards, index):
     c = cards[index]
     text = f"🖼️ **NIFTI MARKETPLACE**\n──────────────────────\nCard: {c['card_name']}\nProfession: {c['card_prof']}\nPrice: {c['price']} TON\nLevel: {c['level']}"
