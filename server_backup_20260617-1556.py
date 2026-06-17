@@ -37,40 +37,6 @@ def t(key, user_id=None, **kwargs):
     return text
 
 # ---------- Database ----------
-
-# ---------- Analytics ----------
-async def log_event(user_id, event_type, metadata=None):
-    async with core.pool.acquire() as conn:
-        await conn.execute('''INSERT INTO analytics (user_id, event_type, metadata) VALUES ($1, $2, $3)''',
-                           user_id, event_type, json.dumps(metadata) if metadata else None)
-
-@dp.message_handler(commands=['stats'])
-async def stats_cmd(msg: types.Message):
-    if not await is_admin(msg.from_user.id): return
-    async with core.pool.acquire() as conn:
-        total_users = await conn.fetchval('SELECT COUNT(*) FROM users')
-        total_cards = await conn.fetchval('SELECT COUNT(*) FROM users WHERE card_name IS NOT NULL')
-        total_volume = await conn.fetchval('SELECT COALESCE(SUM(balance),0) FROM users')
-        referral_count = await conn.fetchval('SELECT COUNT(*) FROM referrals')
-        # Analytics metrics
-        created_cards = await conn.fetchval("SELECT COUNT(*) FROM analytics WHERE event_type = 'card_created'")
-        started_cards = await conn.fetchval("SELECT COUNT(*) FROM analytics WHERE event_type = 'wizard_started'")
-        community_joins = await conn.fetchval("SELECT COUNT(*) FROM analytics WHERE event_type = 'community_join'")
-        conversion = (created_cards / started_cards * 100) if started_cards > 0 else 0
-    report = (
-        f'📊 **NIFTI SYSTEM STATS**\n'
-        f'━━━━━━━━━━━━━━━━━━\n'
-        f'👥 Total Users: {total_users}\n'
-        f'💳 Cards: {total_cards}\n'
-        f'💰 Volume: {total_volume} TON\n'
-        f'🔗 Referrals: {referral_count}\n'
-        f'✨ Cards Created (log): {created_cards}\n'
-        f'🚀 Conversion Rate: {conversion:.1f}%\n'
-        f'🤝 Community Joins: {community_joins}\n'
-    )
-    await msg.answer(report, parse_mode='Markdown')
-    await log_action(msg.from_user.id, 'stats_viewed')
-
 async def init_db():
     async with core.pool.acquire() as conn:
         await conn.execute('''CREATE TABLE IF NOT EXISTS users (
@@ -89,10 +55,7 @@ async def init_db():
             price FLOAT, photo_file_id TEXT, level TEXT DEFAULT 'Newbie',
             created_at TIMESTAMP DEFAULT NOW())''')
         await conn.execute('''INSERT INTO casino_settings (house_edge, is_active) SELECT 0.15, TRUE WHERE NOT EXISTS (SELECT 1 FROM casino_settings)''')
-                await conn.execute('''CREATE TABLE IF NOT EXISTS analytics (
-            id SERIAL PRIMARY KEY, user_id BIGINT, event_type VARCHAR(50),
-            metadata JSONB, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
-await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS points FLOAT DEFAULT 0")
+        await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS points FLOAT DEFAULT 0")
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS iwa_balance FLOAT DEFAULT 0")
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'user'")
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS photo_file_id TEXT")
@@ -257,7 +220,7 @@ async def dashboard_actions(call: types.CallbackQuery):
 
 # ---------- Card Creation ----------
 async def menu_create_cb(call: types.CallbackQuery):
-        await log_event(call.from_user.id, 'wizard_started')\nawait call.message.answer(t('name_prompt', call.from_user.id))
+    await call.message.answer(t('name_prompt', call.from_user.id))
     await CardForm.waiting_name.set()
     await call.answer()
 
@@ -284,7 +247,7 @@ async def process_wallet(msg: types.Message, state: FSMContext):
         await conn.execute('INSERT INTO users (user_id, lang) VALUES ($1, $2) ON CONFLICT DO NOTHING', msg.from_user.id, 'en')
         await conn.execute('UPDATE users SET card_name=$1, card_prof=$2, wallet=$3, price=1.0 WHERE user_id=$4',
                            data['name'], data['prof'], msg.text.strip(), msg.from_user.id)
-        await log_event(msg.from_user.id, 'card_created')\nawait msg.answer(t('card_created', msg.from_user.id, name=data['name'], prof=data['prof']))
+    await msg.answer(t('card_created', msg.from_user.id, name=data['name'], prof=data['prof']))
     await state.finish()
 
 # ---------- Edit Wizard ----------
