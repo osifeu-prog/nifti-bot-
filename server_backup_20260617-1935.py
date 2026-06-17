@@ -469,37 +469,6 @@ async def spin_cmd(msg: types.Message):
             except: await msg.reply("💸 No luck this time. Try again!")
 
 # ---------- Wallet ----------
-
-@dp.message_handler(commands=['set_name'])
-async def set_name_cmd(msg: types.Message):
-    name = msg.get_args().strip()
-    if not name or len(name) < 2:
-        await msg.answer("Usage: /set_name <name> (min 2 chars)")
-        return
-    async with core.pool.acquire() as conn:
-        await conn.execute('UPDATE users SET card_name=$1 WHERE user_id=$2', name, msg.from_user.id)
-    await msg.answer(f"✅ Name updated to {name}")
-
-@dp.message_handler(commands=['set_prof'])
-async def set_prof_cmd(msg: types.Message):
-    prof = msg.get_args().strip()
-    if not prof:
-        await msg.answer("Usage: /set_prof <profession>")
-        return
-    async with core.pool.acquire() as conn:
-        await conn.execute('UPDATE users SET card_prof=$1 WHERE user_id=$2', prof, msg.from_user.id)
-    await msg.answer(f"✅ Profession updated to {prof}")
-
-@dp.message_handler(commands=['set_price'])
-async def set_price_cmd(msg: types.Message):
-    try:
-        price = float(msg.get_args().strip())
-        if price <= 0: raise ValueError
-        async with core.pool.acquire() as conn:
-            await conn.execute('UPDATE users SET price=$1 WHERE user_id=$2', price, msg.from_user.id)
-        await msg.answer(f"✅ Price set to {price} TON")
-    except:
-        await msg.answer("Usage: /set_price <amount> (e.g., 5.0)")
 @dp.message_handler(commands=['wallet'])
 async def wallet_cmd(msg: types.Message):
     async with core.pool.acquire() as conn:
