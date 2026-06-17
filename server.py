@@ -1,4 +1,7 @@
 ﻿import asyncio, os, logging, uuid, json, random
+    uvicorn.run(app, host='0.0.0.0', port=port)
+from audit_core import SystemAudit
+import asyncio, os, logging, uuid, json, random
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 from fastapi import HTTPException, FastAPI, Request
