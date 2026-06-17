@@ -10,7 +10,7 @@ function App() {
     const userId = WebApp.initDataUnsafe?.user?.id;
     
     if (userId) {
-      axios.get(https://nifti-bot-production.up.railway.app/api/card/\)
+      axios.get(https://bot-production-c2a5.up.railway.app/api/card/\)
         .then(res => {
           setUserData(res.data);
           setLoading(false);
