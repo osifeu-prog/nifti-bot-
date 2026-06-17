@@ -1,2 +1,2 @@
-﻿# NIFTI UI/UX Manifesto (v1.0)
+﻿# NIFTI UI/UX Manifesto (v1.1)
 ...
