@@ -257,7 +257,7 @@ async def dashboard_actions(call: types.CallbackQuery):
     if data == 'menu_mycard':
         await my_card_cmd(call.message)
     elif data == 'menu_edit':
-        await menu_edit_wizard(call)
+        await call.message.answer("✏️ Use text commands to edit:/set_name <name>/set_prof <prof>/set_price <price>/set_photo (send a photo)")
     elif data == 'menu_create':
         await menu_create_cb(call)
     elif data == 'menu_market':
@@ -310,6 +310,7 @@ async def process_wallet(msg: types.Message, state: FSMContext):
 
 # ---------- Edit Wizard ----------
 @dp.callback_query_handler(lambda c: c.data == 'menu_edit')
+async def menu_edit_wizard(call: types.CallbackQuery):
     await dp.current_state(user=call.from_user.id).set_state("editing_card")
     kb = types.InlineKeyboardMarkup(row_width=2)
     kb.add(types.InlineKeyboardButton("📝 Name", callback_data="wizard_name"),
@@ -321,6 +322,7 @@ async def process_wallet(msg: types.Message, state: FSMContext):
     await call.answer()
 
 @dp.callback_query_handler(lambda c: c.data.startswith('wizard_'))
+async def handle_wizard(call: types.CallbackQuery):
     action = call.data.split('_')[1]
     if action == 'cancel':
         await dp.current_state(user=call.from_user.id).finish()
@@ -339,6 +341,7 @@ async def process_wallet(msg: types.Message, state: FSMContext):
     await call.answer()
 
 @dp.message_handler(state="editing_card")
+async def process_wizard_input(msg: types.Message):
     data = await dp.current_state(user=msg.from_user.id).get_data()
     action = data.get('action')
     if not action: return
@@ -370,6 +373,7 @@ async def process_wallet(msg: types.Message, state: FSMContext):
     await msg.answer("✅ Updated. Use /start to return to menu.")
 
 @dp.message_handler(content_types=['photo'], state="editing_card")
+async def handle_wizard_photo(msg: types.Message):
     data = await dp.current_state(user=msg.from_user.id).get_data()
     if data.get('action') == 'photo':
         file_id = msg.photo[-1].file_id
@@ -551,6 +555,7 @@ async def market_cmd(msg: types.Message):
 
 # ---------- Edit Wizard (Robust) ----------
 @dp.callback_query_handler(lambda c: c.data == 'menu_edit')
+async def menu_edit_wizard(call: types.CallbackQuery):
     await dp.current_state(user=call.from_user.id).set_state("editing_card")
     kb = types.InlineKeyboardMarkup(row_width=2)
     kb.add(types.InlineKeyboardButton("📝 Name", callback_data="wizard_name"),
@@ -562,6 +567,7 @@ async def market_cmd(msg: types.Message):
     await call.answer()
 
 @dp.callback_query_handler(lambda c: c.data in ['wizard_name', 'wizard_prof', 'wizard_price', 'wizard_photo', 'wizard_cancel'])
+async def handle_wizard(call: types.CallbackQuery):
     await call.answer()  # immediate feedback
     action = call.data.split('_')[1]
     if action == 'cancel':
@@ -578,6 +584,7 @@ async def market_cmd(msg: types.Message):
         await call.message.answer("Send me a photo.")
 
 @dp.message_handler(state="editing_card")
+async def process_wizard_input(msg: types.Message):
     data = await dp.current_state(user=msg.from_user.id).get_data()
     action = data.get('action')
     if not action: return
@@ -609,6 +616,7 @@ async def market_cmd(msg: types.Message):
     await msg.answer("✅ Updated. Use /start to return to menu.")
 
 @dp.message_handler(content_types=['photo'], state="editing_card")
+async def handle_wizard_photo(msg: types.Message):
     data = await dp.current_state(user=msg.from_user.id).get_data()
     if data.get('action') == 'photo':
         file_id = msg.photo[-1].file_id
@@ -621,6 +629,7 @@ async def market_cmd(msg: types.Message):
 
 # פקודת /edit_card (למקרה שמשתמש מקליד)
 @dp.message_handler(commands=['edit_card'])
+async def edit_card_cmd(msg: types.Message):
     await menu_edit_wizard(types.CallbackQuery(message=msg, from_user=msg.from_user, data='menu_edit'))
 async def show_market_card(msg: types.Message, cards, index):
     c = cards[index]
