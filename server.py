@@ -1,15 +1,14 @@
-﻿import asyncio, os, logging, uuid, json, random, io
+﻿import asyncio, os, logging, uuid, json, random
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import HTMLResponse
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 import nifti_core as core
 import uvicorn
-from PIL import Image, ImageDraw, ImageFont
 
 logging.basicConfig(level=logging.INFO)
 
@@ -36,7 +35,6 @@ def t(key, user_id=None, **kwargs):
         except: pass
     return text
 
-# ---------- Database init ----------
 async def init_db():
     async with core.pool.acquire() as conn:
         await conn.execute('''CREATE TABLE IF NOT EXISTS users (
@@ -44,22 +42,16 @@ async def init_db():
             card_name TEXT, card_prof TEXT, wallet TEXT, balance FLOAT DEFAULT 0,
             price FLOAT DEFAULT 1, share_count INT DEFAULT 0, is_premium BOOLEAN DEFAULT FALSE,
             iwa_balance FLOAT DEFAULT 0, points FLOAT DEFAULT 0, role TEXT DEFAULT 'user',
-            photo_file_id TEXT, nft_image_url TEXT, shop_active BOOLEAN DEFAULT FALSE,
-            created_at TIMESTAMP DEFAULT NOW())''')
+            photo_file_id TEXT, created_at TIMESTAMP DEFAULT NOW())''')
         await conn.execute('''CREATE TABLE IF NOT EXISTS referrals (user_id BIGINT, ref_id BIGINT, PRIMARY KEY (user_id, ref_id))''')
         await conn.execute('''CREATE TABLE IF NOT EXISTS premium_users (id SERIAL PRIMARY KEY, user_id BIGINT, bot_name TEXT, amount FLOAT, tx_hash TEXT)''')
         await conn.execute('''CREATE TABLE IF NOT EXISTS casino_settings (id SERIAL PRIMARY KEY, house_edge FLOAT DEFAULT 0.15, is_active BOOLEAN DEFAULT TRUE)''')
         await conn.execute('''CREATE TABLE IF NOT EXISTS admin_logs (id SERIAL PRIMARY KEY, admin_id BIGINT, action TEXT, details TEXT, ts TIMESTAMP DEFAULT NOW())''')
-        await conn.execute('''CREATE TABLE IF NOT EXISTS shop_items (id SERIAL PRIMARY KEY, seller_id BIGINT, card_name TEXT, card_prof TEXT, price FLOAT, image_url TEXT)''')
-        await conn.execute('''CREATE TABLE IF NOT EXISTS exchange_settings (id SERIAL PRIMARY KEY, iwa_to_ton_rate FLOAT DEFAULT 0.001, burn_percent FLOAT DEFAULT 5)''')
         await conn.execute('''INSERT INTO casino_settings (house_edge, is_active) SELECT 0.15, TRUE WHERE NOT EXISTS (SELECT 1 FROM casino_settings)''')
-        await conn.execute('''INSERT INTO exchange_settings (iwa_to_ton_rate, burn_percent) SELECT 0.001, 5 WHERE NOT EXISTS (SELECT 1 FROM exchange_settings)''')
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS points FLOAT DEFAULT 0")
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS iwa_balance FLOAT DEFAULT 0")
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'user'")
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS photo_file_id TEXT")
-        await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS nft_image_url TEXT")
-        await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS shop_active BOOLEAN DEFAULT FALSE")
 
 async def get_lang(user_id):
     async with core.pool.acquire() as conn:
@@ -151,95 +143,385 @@ async def start(msg: types.Message):
         await conn.execute('INSERT INTO users (user_id, lang) VALUES ($1, $2) ON CONFLICT DO NOTHING', msg.from_user.id, lang)
     await main_menu(msg)
 
-# ---------- NFT Card Mint ----------
-@dp.message_handler(commands=['mint'])
-async def mint_cmd(msg: types.Message):
+@dp.callback_query_handler(lambda c: c.data == 'menu_create')
+async def menu_create(call: types.CallbackQuery, state: FSMContext):
+    await call.message.answer(t('name_prompt', call.from_user.id))
+    await CardForm.waiting_name.set()
+    await call.answer()
+
+@dp.callback_query_handler(lambda c: c.data == 'menu_mycard')
+async def menu_mycard(call: types.CallbackQuery):
+    await my_card(call.message)
+    await call.answer()
+
+@dp.callback_query_handler(lambda c: c.data == 'menu_market')
+async def menu_market(call: types.CallbackQuery):
+    await market(call.message)
+    await call.answer()
+
+@dp.callback_query_handler(lambda c: c.data == 'menu_earnings')
+async def menu_earnings(call: types.CallbackQuery):
+    await earnings(call.message)
+    await call.answer()
+
+@dp.callback_query_handler(lambda c: c.data == 'menu_leaderboard')
+async def menu_leaderboard(call: types.CallbackQuery):
+    await leaderboard(call.message)
+    await call.answer()
+
+@dp.callback_query_handler(lambda c: c.data == 'menu_profile')
+async def menu_profile(call: types.CallbackQuery):
+    async with core.pool.acquire() as conn:
+        u = await conn.fetchrow('SELECT * FROM users WHERE user_id=$1', call.from_user.id)
+    if not u or not u.get('card_name'):
+        await call.message.answer(t('no_card', call.from_user.id))
+        await call.answer()
+        return
+    level = get_level(u['share_count'])
+    await call.message.answer(t('profile_text', call.from_user.id,
+        name=u['card_name'], prof=u.get('card_prof',''), price=u.get('price',1),
+        balance=u['balance'] or 0, iwa=u.get('iwa_balance',0), points=u.get('points',0), level=level))
+    await call.answer()
+
+@dp.callback_query_handler(lambda c: c.data == 'menu_settings')
+async def menu_settings(call: types.CallbackQuery):
+    await call.message.answer('⚙️ Settings  coming soon.')
+    await call.answer()
+
+@dp.callback_query_handler(lambda c: c.data == 'menu_commands')
+async def menu_commands(call: types.CallbackQuery):
+    await call.message.answer(t('commands_list', call.from_user.id))
+    await call.answer()
+
+@dp.callback_query_handler(lambda c: c.data == 'menu_edit')
+async def menu_edit(call: types.CallbackQuery):
+    kb = types.InlineKeyboardMarkup(row_width=1)
+    kb.add(types.InlineKeyboardButton(t('change_name', call.from_user.id), callback_data='edit_name'),
+           types.InlineKeyboardButton(t('change_prof', call.from_user.id), callback_data='edit_prof'),
+           types.InlineKeyboardButton(t('change_photo', call.from_user.id), callback_data='edit_photo'))
+    await call.message.answer("Choose what to edit:", reply_markup=kb)
+    await call.answer()
+
+@dp.callback_query_handler(lambda c: c.data == 'edit_name')
+async def edit_name_start(call: types.CallbackQuery, state: FSMContext):
+    await call.message.answer(t('edit_name_prompt', call.from_user.id))
+    await EditForm.editing_name.set()
+    await call.answer()
+
+@dp.callback_query_handler(lambda c: c.data == 'edit_prof')
+async def edit_prof_start(call: types.CallbackQuery, state: FSMContext):
+    await call.message.answer(t('edit_prof_prompt', call.from_user.id))
+    await EditForm.editing_prof.set()
+    await call.answer()
+
+@dp.callback_query_handler(lambda c: c.data == 'edit_photo')
+async def edit_photo_start(call: types.CallbackQuery):
+    await call.message.answer("Send me a photo to set as your profile picture.")
+    await call.answer()
+
+@dp.message_handler(state=EditForm.editing_name)
+async def process_edit_name(msg: types.Message, state: FSMContext):
+    name = msg.text.strip()
+    if len(name) < 2:
+        await msg.answer(t('min_2_chars', msg.from_user.id))
+        return
+    async with core.pool.acquire() as conn:
+        await conn.execute('UPDATE users SET card_name=$1 WHERE user_id=$2', name, msg.from_user.id)
+    await msg.answer(t('name_updated', msg.from_user.id, name=name))
+    await state.finish()
+
+@dp.message_handler(state=EditForm.editing_prof)
+async def process_edit_prof(msg: types.Message, state: FSMContext):
+    prof = msg.text.strip()
+    async with core.pool.acquire() as conn:
+        await conn.execute('UPDATE users SET card_prof=$1 WHERE user_id=$2', prof, msg.from_user.id)
+    await msg.answer(t('prof_updated', msg.from_user.id, prof=prof))
+    await state.finish()
+
+@dp.message_handler(commands=['set_photo'])
+async def set_photo_cmd(msg: types.Message):
+    await msg.answer("Send me the photo now.")
+    await dp.current_state(user=msg.from_user.id).set_state("waiting_photo")
+    await dp.current_state(user=msg.from_user.id).set_data({"awaiting": "photo"})
+
+@dp.message_handler(content_types=['photo'])
+async def handle_photo(msg: types.Message):
+    state = dp.current_state(user=msg.from_user.id)
+    data = await state.get_data()
+    if data.get("awaiting") == "photo":
+        file_id = msg.photo[-1].file_id
+        async with core.pool.acquire() as conn:
+            await conn.execute('UPDATE users SET photo_file_id=$1 WHERE user_id=$2', file_id, msg.from_user.id)
+        await msg.answer(t('photo_updated', msg.from_user.id))
+        await state.finish()
+    else:
+        await msg.answer("I didn't expect a photo. Use /set_photo first.")
+
+async def my_card(msg: types.Message):
     async with core.pool.acquire() as conn:
         u = await conn.fetchrow('SELECT * FROM users WHERE user_id=$1', msg.from_user.id)
     if not u or not u.get('card_name'):
         await msg.answer(t('no_card', msg.from_user.id))
         return
-    # Generate NFT image
-    img = Image.new('RGB', (400, 200), color=(26, 26, 46))
-    d = ImageDraw.Draw(img)
-    font = ImageFont.load_default()
-    d.text((20,20), u['card_name'], fill=(233,69,96), font=font)
-    d.text((20,60), u.get('card_prof',''), fill=(160,160,176), font=font)
-    d.text((20,100), f"Price: {u.get('price',1)} TON", fill=(0,255,136), font=font)
-    d.text((20,140), f"Level: {get_level(u['share_count'])}", fill=(255,215,0), font=font)
-    buf = io.BytesIO()
-    img.save(buf, format='PNG')
-    buf.seek(0)
-    # Send as photo
-    await bot.send_photo(msg.chat.id, buf, caption=t('mint_success', msg.from_user.id))
-    # Save image URL (placeholder  in real app, upload to IPFS or S3)
-    async with core.pool.acquire() as conn:
-        await conn.execute("UPDATE users SET nft_image_url='minted' WHERE user_id=$1", msg.from_user.id)
+    level = get_level(u['share_count'])
+    caption = t('card_view', msg.from_user.id,
+                name=u['card_name'], prof=u.get('card_prof',''), price=u.get('price',1), level=level)
+    if u.get('photo_file_id'):
+        await bot.send_photo(msg.chat.id, u['photo_file_id'], caption=caption)
+    else:
+        await msg.answer(caption)
 
-# ---------- Shops ----------
-@dp.message_handler(commands=['openshop'])
-async def openshop_cmd(msg: types.Message):
-    async with core.pool.acquire() as conn:
-        await conn.execute("UPDATE users SET shop_active=TRUE WHERE user_id=$1", msg.from_user.id)
-    await msg.answer(t('shop_opened', msg.from_user.id))
+@dp.message_handler(state=CardForm.waiting_name)
+async def process_name(msg: types.Message, state: FSMContext):
+    name = msg.text.strip()
+    if len(name) < 2:
+        await msg.answer(t('min_2_chars', msg.from_user.id))
+        return
+    await state.update_data(name=name)
+    await msg.answer(t('prof_prompt', msg.from_user.id))
+    await CardForm.waiting_prof.set()
 
-@dp.message_handler(commands=['closeshop'])
-async def closeshop_cmd(msg: types.Message):
-    async with core.pool.acquire() as conn:
-        await conn.execute("UPDATE users SET shop_active=FALSE WHERE user_id=$1", msg.from_user.id)
-        await conn.execute("DELETE FROM shop_items WHERE seller_id=$1", msg.from_user.id)
-    await msg.answer(t('shop_closed', msg.from_user.id))
+@dp.message_handler(state=CardForm.waiting_prof)
+async def process_prof(msg: types.Message, state: FSMContext):
+    await state.update_data(prof=msg.text.strip())
+    await msg.answer(t('wallet_prompt', msg.from_user.id))
+    await CardForm.waiting_wallet.set()
 
-@dp.message_handler(commands=['sell'])
-async def sell_cmd(msg: types.Message):
+@dp.message_handler(state=CardForm.waiting_wallet)
+async def process_wallet(msg: types.Message, state: FSMContext):
+    data = await state.get_data()
+    async with core.pool.acquire() as conn:
+        await conn.execute('INSERT INTO users (user_id, lang) VALUES ($1, $2) ON CONFLICT DO NOTHING', msg.from_user.id, 'en')
+        await conn.execute('UPDATE users SET card_name=$1, card_prof=$2, wallet=$3, price=1.0 WHERE user_id=$4',
+                           data['name'], data['prof'], msg.text.strip(), msg.from_user.id)
+    await msg.answer(t('card_created', msg.from_user.id, name=data['name'], prof=data['prof']))
+    await state.finish()
+
+@dp.message_handler(commands=['status'])
+async def status(msg: types.Message):
+    async with core.pool.acquire() as conn:
+        users = await conn.fetchval('SELECT COUNT(*) FROM users')
+        cards = await conn.fetchval('SELECT COUNT(*) FROM users WHERE card_name IS NOT NULL')
+    await msg.answer(f'📊 Users: {users} | Cards: {cards}')
+
+async def earnings(msg: types.Message):
+    async with core.pool.acquire() as conn:
+        u = await conn.fetchrow('SELECT balance, price FROM users WHERE user_id=$1', msg.from_user.id)
+    if not u:
+        await msg.answer(t('send_start', msg.from_user.id))
+        return
+    price = u['price'] or 1
+    fee = core.platform_fee(float(price))
+    net = core.seller_amount(float(price))
+    await msg.answer(t('balance', msg.from_user.id, balance=u['balance'] or 0, price=price, fee=fee, net=net))
+
+async def market(msg: types.Message):
+    async with core.pool.acquire() as conn:
+        cards = await conn.fetch('SELECT user_id, card_name, price FROM users WHERE card_name IS NOT NULL ORDER BY price ASC LIMIT 10')
+    if not cards:
+        await msg.answer('No cards yet.')
+        return
+    kb = types.InlineKeyboardMarkup(row_width=1)
+    for c in cards:
+        kb.add(types.InlineKeyboardButton(f'{c["card_name"]} - {c["price"]} TON', callback_data=f'buy_{c["user_id"]}_{c["price"]}'))
+    await msg.answer('🛒 **Market**', reply_markup=kb)
+
+@dp.callback_query_handler(lambda c: c.data.startswith('buy_'))
+async def buy_card(call: types.CallbackQuery):
+    _, seller_id, price = call.data.split('_')
+    memo = f'NIFTI_PAY:{call.from_user.id}_{uuid.uuid4().hex[:8]}'
+    await call.message.answer(f'Send **{price} TON** to:\n`{TON_WALLET}`\n\nMemo: `{memo}`', parse_mode='Markdown')
+    async with core.pool.acquire() as conn:
+        ref = await conn.fetchval('SELECT ref_id FROM referrals WHERE user_id=$1', call.from_user.id)
+        if ref:
+            await conn.execute('UPDATE users SET balance = COALESCE(balance,0) + $1 WHERE user_id=$2', PURCHASE_BONUS_LEVEL1, ref)
+            try: await bot.send_message(ref, f'💰 {call.from_user.first_name} made a purchase! You earned {PURCHASE_BONUS_LEVEL1} TON.')
+            except: pass
+    await call.answer()
+
+async def leaderboard(msg: types.Message):
+    async with core.pool.acquire() as conn:
+        top = await conn.fetch('SELECT card_name, share_count FROM users WHERE card_name IS NOT NULL ORDER BY share_count DESC LIMIT 10')
+    if top:
+        lines = '\n'.join(f'{i+1}. {r["card_name"]}  {get_level(r["share_count"])} ({r["share_count"]} refs)' for i, r in enumerate(top))
+        await msg.answer(f'🏆 **Leaderboard**\n\n{lines}')
+    else:
+        await msg.answer('No cards yet.')
+
+# ---------- Unified invite with referral count ----------
+@dp.message_handler(commands=['invite'])
+async def invite_cmd(msg: types.Message):
+    async with core.pool.acquire() as conn:
+        count = await conn.fetchval('SELECT COUNT(*) FROM referrals WHERE ref_id=$1', msg.from_user.id)
+    link = f'https://t.me/NFTY_madness_bot?start={msg.from_user.id}'
+    qr_url = f'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={link}'
+    caption = f'🔗 Your referral link:\n{link}\n\n👥 Joined: {count}\n\nShare and earn {REFERRAL_LEVEL1_REWARD} TON + {IWA_REFERRAL_BONUS} IWA per friend!'
+    await msg.answer_photo(qr_url, caption=caption)
+
+@dp.message_handler(commands=['referrals'])
+async def referrals_cmd(msg: types.Message):
+    async with core.pool.acquire() as conn:
+        count = await conn.fetchval('SELECT COUNT(*) FROM referrals WHERE ref_id=$1', msg.from_user.id)
+    await msg.answer(f'👥 You have {count} referrals.')
+
+# ---------- Improved Spin ----------
+@dp.message_handler(commands=['spin'])
+async def handle_spin(msg: types.Message):
+    async with core.pool.acquire() as conn:
+        user_data = await conn.fetchrow('SELECT is_premium, points FROM users WHERE user_id=$1', msg.from_user.id)
+        if not user_data:
+            await msg.reply('Please /start first.')
+            return
+        is_prem = user_data['is_premium']
+        edge_row = await conn.fetchrow('SELECT house_edge FROM casino_settings LIMIT 1')
+        house_edge = edge_row['house_edge'] if edge_row else 0.15
+        WINNING_NUMBERS = {1, 22, 43, 64}
+        # Send spinning message
+        spin_msg = await msg.reply('🎰 Spinning...')
+        dice_msg = await bot.send_dice(msg.chat.id, emoji='🎰')
+        await asyncio.sleep(2)  # extra suspense
+        if is_prem:
+            real_win_prob = len(WINNING_NUMBERS) / 64 * (1 - house_edge)
+        else:
+            real_win_prob = len(WINNING_NUMBERS) / 64 * (1 - house_edge) * 0.5
+        result_value = dice_msg.dice.value
+        if random.random() < real_win_prob:
+            points_won = 1.0  # reduced reward
+            await conn.execute('UPDATE users SET points = COALESCE(points,0) + $1 WHERE user_id = $2', points_won, msg.from_user.id)
+            await spin_msg.edit_text(f"🎉 Jackpot! You won {points_won} points!")
+        else:
+            await spin_msg.edit_text("💸 No luck this time. Try again!")
+
+@dp.message_handler(commands=['set_edge'])
+async def set_edge_cmd(msg: types.Message):
+    if not await is_admin(msg.from_user.id):
+        return
     try:
-        args = msg.get_args().split()
-        price = float(args[0])
-        card_name = ' '.join(args[1:]) or (await (await core.pool.acquire()).fetchval('SELECT card_name FROM users WHERE user_id=$1', msg.from_user.id))
+        new_edge = float(msg.get_args())
+        if not 0 <= new_edge <= 1:
+            raise ValueError
         async with core.pool.acquire() as conn:
-            shop_active = await conn.fetchval('SELECT shop_active FROM users WHERE user_id=$1', msg.from_user.id)
-            if not shop_active:
-                await msg.answer("Open your shop first with /openshop")
-                return
-            await conn.execute('INSERT INTO shop_items (seller_id, card_name, card_prof, price) VALUES ($1, $2, $3, $4)',
-                               msg.from_user.id, card_name, '', price)
-        await msg.answer(t('sell_success', msg.from_user.id, price=price))
+            await conn.execute('UPDATE casino_settings SET house_edge = $1', new_edge)
+        await msg.reply(f"✅ House edge updated to {new_edge*100}%")
+        await log_action(msg.from_user.id, 'set_edge', str(new_edge))
     except:
-        await msg.answer("Usage: /sell <price> [card name]")
+        await msg.reply("❌ Usage: /set_edge 0.15")
 
-# ---------- Exchange ----------
-@dp.message_handler(commands=['exchange'])
-async def exchange_cmd(msg: types.Message):
-    try:
-        amount = float(msg.get_args())
-        if amount <= 0: raise ValueError
-        async with core.pool.acquire() as conn:
-            iwa = await conn.fetchval('SELECT iwa_balance FROM users WHERE user_id=$1', msg.from_user.id)
-            if iwa < amount:
-                await msg.answer("Insufficient IWA balance.")
-                return
-            rate, burn_pct = await conn.fetchrow('SELECT iwa_to_ton_rate, burn_percent FROM exchange_settings LIMIT 1')
-            burn = amount * (burn_pct/100)
-            net_iwa = amount - burn
-            ton_amount = net_iwa * rate
-            await conn.execute('UPDATE users SET iwa_balance = iwa_balance - $1 WHERE user_id=$2', amount, msg.from_user.id)
-            await conn.execute('UPDATE users SET balance = COALESCE(balance,0) + $1 WHERE user_id=$2', ton_amount, msg.from_user.id)
-            await msg.answer(t('exchange_success', msg.from_user.id, amount=net_iwa, ton=ton_amount))
-    except:
-        await msg.answer("Usage: /exchange <iwa_amount>")
+# ---------- Admin Commands ----------
+@dp.message_handler(commands=['admin'])
+async def admin_panel_cmd(msg: types.Message):
+    if not await is_admin(msg.from_user.id):
+        await msg.answer(t('admin_only', msg.from_user.id))
+        return
+    async with core.pool.acquire() as conn:
+        users = await conn.fetchval('SELECT COUNT(*) FROM users')
+        cards = await conn.fetchval('SELECT COUNT(*) FROM users WHERE card_name IS NOT NULL')
+        volume = await conn.fetchval('SELECT COALESCE(SUM(balance),0) FROM users')
+    await msg.answer(f'🛡️ **Admin Panel**\n👥 Users: {users}\n💳 Cards: {cards}\n💰 Volume: {volume} TON', parse_mode='Markdown')
+    await log_action(msg.from_user.id, 'admin_panel_viewed')
 
-@dp.message_handler(commands=['set_rate'])
-async def set_rate_cmd(msg: types.Message):
+@dp.message_handler(commands=['broadcast'])
+async def broadcast_cmd(msg: types.Message):
+    if not await is_admin(msg.from_user.id): return
+    text = msg.get_args()
+    if not text:
+        await msg.answer('Usage: /broadcast <message>')
+        return
+    async with core.pool.acquire() as conn:
+        all_users = await conn.fetch('SELECT user_id FROM users')
+    for u in all_users:
+        try: await bot.send_message(u['user_id'], text)
+        except: pass
+    await msg.answer(f'✅ Sent to {len(all_users)} users.')
+    await log_action(msg.from_user.id, 'broadcast', text)
+
+@dp.message_handler(commands=['stats'])
+async def stats_cmd(msg: types.Message):
+    if not await is_admin(msg.from_user.id): return
+    async with core.pool.acquire() as conn:
+        total_users = await conn.fetchval('SELECT COUNT(*) FROM users')
+        total_cards = await conn.fetchval('SELECT COUNT(*) FROM users WHERE card_name IS NOT NULL')
+        total_volume = await conn.fetchval('SELECT COALESCE(SUM(balance),0) FROM users')
+        referral_count = await conn.fetchval('SELECT COUNT(*) FROM referrals')
+    await msg.answer(f'📊 System Stats\n━━━━━━━━━━━━━━━━━\n👥 Total Users: {total_users}\n💳 Cards: {total_cards}\n💰 Volume: {total_volume} TON\n🔗 Referrals: {referral_count}')
+    await log_action(msg.from_user.id, 'stats_viewed')
+
+@dp.message_handler(commands=['airdrop'])
+async def airdrop_cmd(msg: types.Message):
     if not await is_admin(msg.from_user.id): return
     try:
-        rate, burn = msg.get_args().split()
+        amount = float(msg.get_args())
         async with core.pool.acquire() as conn:
-            await conn.execute('UPDATE exchange_settings SET iwa_to_ton_rate=$1, burn_percent=$2', float(rate), float(burn))
-        await msg.answer(f"Exchange rate: 1 IWA = {rate} TON, Burn: {burn}%")
+            users = await conn.fetch('SELECT user_id FROM users')
+            for u in users:
+                await conn.execute('UPDATE users SET balance = COALESCE(balance,0) + $1 WHERE user_id = $2', amount, u['user_id'])
+        await msg.answer(f'✅ {amount} TON sent to {len(users)} users!')
+        await log_action(msg.from_user.id, 'airdrop', f'{amount} TON to {len(users)} users')
     except:
-        await msg.answer("Usage: /set_rate <rate> <burn_percent>")
+        await msg.answer('❌ Usage: /airdrop 5.0')
 
-# ---------- Documentation (new) ----------
+@dp.message_handler(commands=['grant_admin'])
+async def grant_admin_cmd(msg: types.Message):
+    if msg.from_user.id != ADMIN_ID: return
+    try:
+        target_id = int(msg.get_args())
+        async with core.pool.acquire() as conn:
+            await conn.execute("UPDATE users SET role = 'admin' WHERE user_id=$1", target_id)
+        await msg.answer(f'✅ User {target_id} promoted to admin.')
+        await log_action(msg.from_user.id, 'grant_admin', str(target_id))
+    except:
+        await msg.answer('❌ Usage: /grant_admin <user_id>')
+
+@dp.message_handler(commands=['db_setup'])
+async def db_setup_cmd(msg: types.Message):
+    if msg.from_user.id != ADMIN_ID: return
+    try:
+        await init_db()
+        async with core.pool.acquire() as conn:
+            await conn.execute('''INSERT INTO users (user_id, username, lang, card_name, card_prof, wallet, is_premium, iwa_balance, points, role)
+                VALUES (224223270, 'OsifUngar', 'en', 'Osif Ungar', 'NIFTI Director', 'UQCr743gEr_nqV_0SBkSp3CtYS_15R3LDLBvLmKeEv7XdGvp', TRUE, 100000, 0, 'admin')
+                ON CONFLICT (user_id) DO UPDATE SET is_premium = TRUE, card_name = 'Osif Ungar', card_prof = 'NIFTI Director', iwa_balance = 100000, role = 'admin' ''')
+        await msg.reply("✅ DB tables created and admin card set!")
+    except Exception as e:
+        await msg.reply(f"❌ DB setup error: {e}")
+
+@dp.message_handler(commands=['healthcheck'])
+async def healthcheck_cmd(msg: types.Message):
+    if not await is_admin(msg.from_user.id): return
+    try:
+        async with core.pool.acquire() as conn:
+            users = await conn.fetchval('SELECT COUNT(*) FROM users')
+        webhook_info = await bot.get_webhook_info()
+        await msg.reply(f'🟢 DB OK (Users: {users})\n🟢 Webhook: {webhook_info.url}\nPending: {webhook_info.pending_update_count}')
+    except Exception as e:
+        await msg.reply(f'❌ Healthcheck failed: {e}')
+
+@dp.message_handler(commands=['check'])
+async def check_cmd(msg: types.Message):
+    if not await is_admin(msg.from_user.id): return
+    try:
+        async with core.pool.acquire() as conn:
+            users = await conn.fetchval('SELECT COUNT(*) FROM users')
+            cards = await conn.fetchval('SELECT COUNT(*) FROM users WHERE card_name IS NOT NULL')
+            refs = await conn.fetchval('SELECT COUNT(*) FROM referrals')
+            premium = await conn.fetchval('SELECT COUNT(*) FROM users WHERE is_premium = TRUE')
+        webhook_info = await bot.get_webhook_info()
+        status = f'''🟢 **System Check**
+━━━━━━━━━━━━━━━━━
+🟢 DB: OK (Users: {users}, Cards: {cards})
+🟢 Webhook: {webhook_info.url}
+🟢 Pending Updates: {webhook_info.pending_update_count}
+💰 Volume: {await conn.fetchval('SELECT COALESCE(SUM(balance),0) FROM users')} TON
+👥 Premium: {premium}
+🔗 Referrals: {refs}
+🎰 Casino: Active (House Edge: {await conn.fetchval('SELECT house_edge FROM casino_settings LIMIT 1')*100}%)
+
+✅ All systems operational'''
+        await msg.answer(status, parse_mode='Markdown')
+    except Exception as e:
+        await msg.answer(f'❌ System check failed: {e}')
+
+# ---------- Documentation ----------
 @dp.message_handler(commands=['docs'])
 async def docs_cmd(msg: types.Message):
     docs_text = "📚 **NIFTI Documentation**\n\n"
@@ -278,19 +560,38 @@ async def decisions_cmd(msg: types.Message):
 @dp.message_handler(commands=['news'])
 async def news_cmd(msg: types.Message):
     news_text = "📢 **Latest Updates**\n\n"
-    news_text += "• v4.1  NFT mint, Shops, Exchange\n"
-    news_text += "• v4.0  Stable Diamond: Dynamic menu, photo upload, edit card\n"
+    news_text += "• v4.2  Improved spin, unified invite, stable\n"
+    news_text += "• v4.0  Dynamic menu, photo upload, edit card\n"
     news_text += "• v3.8  Casino slot machine with house edge\n"
     news_text += "• v3.7  Referral system with TON + IWA rewards\n"
     await msg.answer(news_text)
 
-# ---------- All existing handlers (unchanged) ----------
-# ... (insert all previous handlers: Card creation FSM, Edit FSM, Photo, Market, Leaderboard, Admin, Casino, etc.)
-# For brevity, assume they are copied from the last stable version.
-# In practice, the full server.py must contain all handlers. We'll rely on the previous block.
-# (The full file is too large to paste here, but the PowerShell block above does the merge.)
+# ---------- TON Scanner ----------
+async def ton_scanner_loop():
+    import aiohttp
+    while True:
+        try:
+            async with aiohttp.ClientSession() as s:
+                url = f'https://toncenter.com/api/v2/getTransactions?address={TON_WALLET}&limit=5'
+                async with s.get(url) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        for tx in data.get('result', []):
+                            memo = tx.get('comment', '')
+                            if memo.startswith('NIFTI_PAY:'):
+                                user_id = int(memo.split(':')[1])
+                                value = int(tx['in_msg']['value']) / 1e9
+                                async with core.pool.acquire() as conn:
+                                    exists = await conn.fetchval('SELECT tx_hash FROM premium_users WHERE tx_hash=$1', tx['transaction_id']['hash'])
+                                    if not exists:
+                                        await conn.execute('UPDATE users SET is_premium = TRUE WHERE user_id = $1', user_id)
+                                        await conn.execute('INSERT INTO premium_users (user_id, bot_name, amount, tx_hash) VALUES ($1, $2, $3, $4)', user_id, 'nifti', value, tx['transaction_id']['hash'])
+                                        try: await bot.send_message(user_id, f'🎉 Payment of {value} TON received!')
+                                        except: pass
+        except Exception as e: logging.error(f'TON Scanner: {e}')
+        await asyncio.sleep(30)
 
-# ---------- FastAPI (unchanged) ----------
+# ---------- FastAPI ----------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await core.create_pool()
@@ -376,30 +677,6 @@ async def card_page(user_id: int):
         <button class="btn" onclick="window.open('https://t.me/share/url?url=https://t.me/NFTY_madness_bot?start={user_id}', '_blank')">🚀 Share & Earn 100 IWA</button>
     </div></body></html>'''
     return HTMLResponse(html)
-
-async def ton_scanner_loop():
-    import aiohttp
-    while True:
-        try:
-            async with aiohttp.ClientSession() as s:
-                url = f'https://toncenter.com/api/v2/getTransactions?address={TON_WALLET}&limit=5'
-                async with s.get(url) as resp:
-                    if resp.status == 200:
-                        data = await resp.json()
-                        for tx in data.get('result', []):
-                            memo = tx.get('comment', '')
-                            if memo.startswith('NIFTI_PAY:'):
-                                user_id = int(memo.split(':')[1])
-                                value = int(tx['in_msg']['value']) / 1e9
-                                async with core.pool.acquire() as conn:
-                                    exists = await conn.fetchval('SELECT tx_hash FROM premium_users WHERE tx_hash=$1', tx['transaction_id']['hash'])
-                                    if not exists:
-                                        await conn.execute('UPDATE users SET is_premium = TRUE WHERE user_id = $1', user_id)
-                                        await conn.execute('INSERT INTO premium_users (user_id, bot_name, amount, tx_hash) VALUES ($1, $2, $3, $4)', user_id, 'nifti', value, tx['transaction_id']['hash'])
-                                        try: await bot.send_message(user_id, f'🎉 Payment of {value} TON received!')
-                                        except: pass
-        except Exception as e: logging.error(f'TON Scanner: {e}')
-        await asyncio.sleep(30)
 
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 8000))
