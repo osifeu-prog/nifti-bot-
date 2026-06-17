@@ -1125,6 +1125,29 @@ async def cmd_set_photo(msg: types.Message):
             ON CONFLICT (user_id) DO UPDATE SET photo_file_id = $2
         ''', user_id, photo)
     await msg.reply('✅ Photo updated!')
+@dp.message_handler(commands=['db_backup'])
+async def cmd_db_backup(msg: types.Message):
+    user_id = msg.from_user.id
+    # Only admin (replace with your actual admin ID or check role)
+    if user_id != 224223270:
+        await msg.reply("⛔ Admin only.")
+        return
+    await msg.reply("📦 Generating database backup...")
+    async with core.pool.acquire() as conn:
+        rows = await conn.fetch("SELECT * FROM users")
+        cards = await conn.fetch("SELECT * FROM market_cards")
+    backup = {
+        "users": [dict(r) for r in rows],
+        "market_cards": [dict(c) for c in cards]
+    }
+    import json
+    text = json.dumps(backup, ensure_ascii=False, default=str)
+    # Send as a file (JSON) to avoid message length limits
+    from aiogram.types import InputFile
+    import io
+    buf = io.StringIO(text)
+    buf.name = "nifti_backup.json"
+    await msg.reply_document(InputFile(buf, filename="nifti_backup.json"))
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host='0.0.0.0', port=port)
