@@ -33,7 +33,14 @@
     "edit_name_prompt": "Enter new name:",
     "edit_prof_prompt": "Enter new profession:",
     "card_view": "💳 {name}\nProfession: {prof}\nPrice: {price} TON\nLevel: {level}",
-    "no_photo": "No photo set. Use /set_photo to add one."
+    "no_photo": "No photo set. Use /set_photo to add one.",
+    "mint_success": "🎨 NFT Card generated!",
+    "shop_opened": "🏪 Shop opened!",
+    "shop_closed": "🏪 Shop closed.",
+    "sell_success": "✅ Card listed for {price} TON in your shop.",
+    "buy_success": "✅ You bought {card_name} for {price} TON!",
+    "exchange_rate": "💱 Exchange rate: 1 IWA = {rate} TON. Burn: {burn}%",
+    "exchange_success": "✅ Exchanged {amount} IWA → {ton} TON."
   },
   "he": {
     "welcome": "✅ **ברוך הבא ל-NIFTI!**",
@@ -69,6 +76,13 @@
     "edit_name_prompt": "הכנס שם חדש:",
     "edit_prof_prompt": "הכנס מקצוע חדש:",
     "card_view": "💳 {name}\nמקצוע: {prof}\nמחיר: {price} TON\nרמה: {level}",
-    "no_photo": "אין תמונה. השתמש ב-/set_photo כדי להוסיף."
+    "no_photo": "אין תמונה. השתמש ב-/set_photo כדי להוסיף.",
+    "mint_success": "🎨 כרטיס NFT נוצר!",
+    "shop_opened": "🏪 חנות נפתחה!",
+    "shop_closed": "🏪 חנות נסגרה.",
+    "sell_success": "✅ הכרטיס הוצע למכירה ב-{price} TON בחנות שלך.",
+    "buy_success": "✅ רכשת את {card_name} עבור {price} TON!",
+    "exchange_rate": "💱 שער המרה: 1 IWA = {rate} TON. שריפה: {burn}%",
+    "exchange_success": "✅ הומרו {amount} IWA → {ton} TON."
   }
 }
