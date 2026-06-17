@@ -700,6 +700,52 @@ async def news_cmd(msg: types.Message):
     news_text += "• v3.6  Multi-language support (English + Hebrew)\n"
     await msg.answer(news_text)
 
+
+# ---------- Documentation ----------
+@dp.message_handler(commands=['docs'])
+async def docs_cmd(msg: types.Message):
+    docs_text = "📚 **NIFTI Documentation**\n\n"
+    docs_text += "• /vision  Project vision\n"
+    docs_text += "• /architecture  System architecture\n"
+    docs_text += "• /roadmap  Development roadmap\n"
+    docs_text += "• /api  API endpoints\n"
+    docs_text += "• /bugs  Known bugs\n"
+    docs_text += "• /decisions  Key decisions\n"
+    await msg.answer(docs_text, parse_mode='Markdown')
+
+@dp.message_handler(commands=['vision'])
+async def vision_cmd(msg: types.Message):
+    await msg.answer(open('docs/vision.md','r').read())
+
+@dp.message_handler(commands=['architecture'])
+async def architecture_cmd(msg: types.Message):
+    await msg.answer(open('docs/architecture.md','r').read())
+
+@dp.message_handler(commands=['roadmap'])
+async def roadmap_cmd(msg: types.Message):
+    await msg.answer(open('docs/roadmap.md','r').read())
+
+@dp.message_handler(commands=['api'])
+async def api_cmd(msg: types.Message):
+    await msg.answer(open('docs/api.md','r').read())
+
+@dp.message_handler(commands=['bugs'])
+async def bugs_cmd(msg: types.Message):
+    await msg.answer(open('docs/known_bugs.md','r').read())
+
+@dp.message_handler(commands=['decisions'])
+async def decisions_cmd(msg: types.Message):
+    await msg.answer(open('docs/decisions.md','r').read())
+
+@dp.message_handler(commands=['news'])
+async def news_cmd(msg: types.Message):
+    news_text = "📢 **Latest Updates**\n\n"
+    news_text += "• v4.0  Stable Diamond: Dynamic menu, photo upload, edit card, auto checks\n"
+    news_text += "• v3.9  Redis integration (disabled for stability)\n"
+    news_text += "• v3.8  Casino slot machine with house edge\n"
+    news_text += "• v3.7  Referral system with TON + IWA rewards\n"
+    news_text += "• v3.6  Multi-language support (English + Hebrew)\n"
+    await msg.answer(news_text)
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host='0.0.0.0', port=port)
