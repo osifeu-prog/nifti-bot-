@@ -1,19 +1,20 @@
-﻿# NIFTI Master Plan (v5.4.0  Stability Phase)
+﻿# NIFTI Master Plan (v5.4.1  Stable & Healthy)
 
 ## Current Status
-- All core features stable (Wallet, Market, Admin, Community, Casino).
-- Edit Wizard disabled temporarily  replaced with reliable text commands.
-- Docs regenerated, SSoT updated.
-- Heartbeat monitor added: automatic DB health check every 5 min.
+- Core features stable: Wallet, Market, Admin, Community, Casino, Analytics.
+- Edit Wizard works (v5.3.5 base, no duplicates).
+- Heartbeat monitor checks DB every 5 min, alerts admin if down.
+- Docs regenerated.
 
-## Next Immediate Steps
-1. **Modularize server.py**  split into handlers/, core/, ui/ to prevent regressions.
-2. **NFT Card Generation**  /mint command with Pillow.
+## Next Steps (Priority)
+1. **Modularize server.py**  split into handlers/, core/, ui/.
+2. **NFT Card Generation**  /mint with Pillow.
 3. **Onboarding Flow**  Welcome tutorial.
 4. **Order Book / Exchange**  Trading system.
 5. **9 Languages**  Full i18n.
 
 ## Decisions Log
-- Edit Wizard removed due to code duplication causing unresponsive buttons. Will be re-implemented after modularization.
-- PowerShell blocks for all deployments.
+- Restored v5.3.5 server.py as stable baseline.
+- Edit Wizard works; duplicate issue resolved by clean restore.
+- PowerShell blocks for deployment.
 - MASTER_PLAN.md is single source of truth.
