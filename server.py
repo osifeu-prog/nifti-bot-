@@ -377,7 +377,7 @@ async def referrals_cmd(msg: types.Message):
         count = await conn.fetchval('SELECT COUNT(*) FROM referrals WHERE ref_id=$1', msg.from_user.id)
     await msg.answer(f'👥 You have {count} referrals.')
 
-# ---------- Improved Spin (39% win, proper suspense) ----------
+# ---------- Improved Spin (39% win, proper suspense, prize guaranteed) ----------
 @dp.message_handler(commands=['spin'])
 async def handle_spin(msg: types.Message):
     async with core.pool.acquire() as conn:
@@ -398,9 +398,15 @@ async def handle_spin(msg: types.Message):
         if random.random() < real_win_prob:
             points_won = 2.0 if is_prem else 1.0
             await conn.execute('UPDATE users SET points = COALESCE(points,0) + $1 WHERE user_id = $2', points_won, msg.from_user.id)
-            await spin_msg.edit_text(f"🎉 Jackpot! You won {points_won} points!")
+            try:
+                await spin_msg.edit_text(f"🎉 Jackpot! You won {points_won} points!")
+            except Exception:
+                await msg.reply(f"🎉 Jackpot! You won {points_won} points!")
         else:
-            await spin_msg.edit_text("💸 No luck this time. Try again!")
+            try:
+                await spin_msg.edit_text("💸 No luck this time. Try again!")
+            except Exception:
+                await msg.reply("💸 No luck this time. Try again!")
 
 @dp.message_handler(commands=['set_edge'])
 async def set_edge_cmd(msg: types.Message):
@@ -506,6 +512,7 @@ async def healthcheck_cmd(msg: types.Message):
     except Exception as e:
         await msg.reply(f'❌ Healthcheck failed: {e}')
 
+# ---------- System Check (fixed DB pool) ----------
 @dp.message_handler(commands=['check'])
 async def check_cmd(msg: types.Message):
     if not await is_admin(msg.from_user.id): return
@@ -515,16 +522,18 @@ async def check_cmd(msg: types.Message):
             cards = await conn.fetchval('SELECT COUNT(*) FROM users WHERE card_name IS NOT NULL')
             refs = await conn.fetchval('SELECT COUNT(*) FROM referrals')
             premium = await conn.fetchval('SELECT COUNT(*) FROM users WHERE is_premium = TRUE')
+            volume = await conn.fetchval('SELECT COALESCE(SUM(balance),0) FROM users')
+            house_edge = await conn.fetchval('SELECT house_edge FROM casino_settings LIMIT 1')
         webhook_info = await bot.get_webhook_info()
         status = f'''🟢 **System Check**
 ━━━━━━━━━━━━━━━━━
 🟢 DB: OK (Users: {users}, Cards: {cards})
 🟢 Webhook: {webhook_info.url}
 🟢 Pending Updates: {webhook_info.pending_update_count}
-💰 Volume: {await conn.fetchval('SELECT COALESCE(SUM(balance),0) FROM users')} TON
+💰 Volume: {volume} TON
 👥 Premium: {premium}
 🔗 Referrals: {refs}
-🎰 Casino: Active (House Edge: {await conn.fetchval('SELECT house_edge FROM casino_settings LIMIT 1')*100}%)
+🎰 Casino: Active (House Edge: {house_edge*100}%)
 
 ✅ All systems operational'''
         await msg.answer(status, parse_mode='Markdown')
@@ -570,12 +579,21 @@ async def decisions_cmd(msg: types.Message):
 @dp.message_handler(commands=['news'])
 async def news_cmd(msg: types.Message):
     news_text = "📢 **Latest Updates**\n\n"
+    news_text += "• v4.3.1  Fixed check, spin prize, /plan, MASTER_PLAN\n"
     news_text += "• v4.3  Fixed direct commands, spin 39%, auto tests\n"
     news_text += "• v4.2  Improved spin, unified invite, stable\n"
     news_text += "• v4.0  Dynamic menu, photo upload, edit card\n"
     news_text += "• v3.8  Casino slot machine with house edge\n"
     news_text += "• v3.7  Referral system with TON + IWA rewards\n"
     await msg.answer(news_text)
+
+# ---------- Master Plan ----------
+@dp.message_handler(commands=['plan'])
+async def plan_cmd(msg: types.Message):
+    if os.path.exists('MASTER_PLAN.md'):
+        await msg.answer(open('MASTER_PLAN.md','r').read())
+    else:
+        await msg.answer("MASTER_PLAN.md not found. Please generate it from the latest deployment.")
 
 # ---------- TON Scanner ----------
 async def ton_scanner_loop():

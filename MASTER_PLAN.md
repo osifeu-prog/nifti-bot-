@@ -1,42 +1,39 @@
-﻿# NIFTI Master Plan (v4.3 -> v5.0)
+﻿# NIFTI Master Plan (v4.3.1 → v5.0)
 
 ## Vision
 Full digital business card ecosystem on Telegram: NFTs, shops, token exchange.
 9 languages, advanced wallet integration, TON blockchain connectivity.
 
 ## Immediate Next Steps
-1. **Fix /check DB error** (connection pool release)
-2. **Fix Spin prize bug** (ensure users receive points)
-3. **Create /plan command** (display this plan)
-4. **Wallet System**  full wallet management (balance, deposit, withdraw, TON integration)
-5. **NFT Card Minting**  generate card image, upload to IPFS, TON metadata
-6. **Franchise Shops**  allow users to open shops, list cards, earn commissions
-7. **IWA Exchange**  dynamic exchange rate, burn mechanism
-8. **9 Languages**  full i18n (English, Hebrew, Russian, Arabic, Spanish, French, German, Portuguese, Japanese)
-9. **Landing Page**  web page for card viewing, leaderboard, market
-10. **TON Connect**  wallet integration for seamless purchases
+1. **Fix /check DB error** ✅
+2. **Fix Spin prize bug** ✅
+3. **/plan command** ✅
+4. **Wallet System**  /wallet, /deposit, /withdraw, /transactions
+5. **NFT Card Minting**  /mint, IPFS, TON metadata
+6. **Franchise Shops**  /openshop, /sell, commissions
+7. **IWA Exchange**  /exchange, dynamic rate, burn
+8. **9 Languages**  full i18n (en, he, ru, ar, es, fr, de, pt, ja)
+9. **Landing Page**  card viewer, leaderboard, market
+10. **TON Connect**  wallet integration
 
 ## Wallet Spec
 - /wallet  show balance, deposit address
 - /deposit  generate TON address with memo
 - /withdraw  send TON to external address
 - /transactions  list recent transactions
-- TON Scanner detects incoming payments and updates balance
 
 ## NFT Card Spec
-- /mint  generate PNG card, upload to IPFS, return URL
+- /mint  generate PNG card, upload to IPFS
 - Card metadata: name, profession, level, price, photo
-- TON NFT metadata standard
 
 ## Exchange Spec
-- /exchange <iwa_amount>  convert IWA to TON
-- Admin-controlled rate + burn percent
-- Transaction history
+- /exchange <iwa> → convert to TON
+- Admin rate + burn, transaction history
 
 ## i18n Spec
 - 9 languages in lang.json
-- Dynamic language selection (/language)
-- All commands/buttons translated
+- /language  switch language
+- All UI translated
 
 ## Marketing Funnel
 - Landing page at https://bot-production-c2a5.up.railway.app
@@ -45,6 +42,6 @@ Full digital business card ecosystem on Telegram: NFTs, shops, token exchange.
 
 ## Decisions Log
 - MemoryStorage for FSM (no Redis until scaling)
-- PowerShell blocks for all deployment
-- All plans stored in MASTER_PLAN.md
-- Each new AI session reads MASTER_PLAN.md first
+- PowerShell blocks for deployment
+- MASTER_PLAN.md is the single source of truth
+- Every new AI session starts by reading MASTER_PLAN.md
