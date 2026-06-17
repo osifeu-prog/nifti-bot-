@@ -92,9 +92,6 @@ async def init_db():
                 await conn.execute('''CREATE TABLE IF NOT EXISTS analytics (
             id SERIAL PRIMARY KEY, user_id BIGINT, event_type VARCHAR(50),
             metadata JSONB, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
-        await conn.execute('''CREATE TABLE IF NOT EXISTS analytics (
-            id SERIAL PRIMARY KEY, user_id BIGINT, event_type VARCHAR(50),
-            metadata JSONB, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
 await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS points FLOAT DEFAULT 0")
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS iwa_balance FLOAT DEFAULT 0")
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'user'")
@@ -102,12 +99,6 @@ await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS points FLOAT DEFA
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS state TEXT DEFAULT 'IDLE'")
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS community_verified BOOLEAN DEFAULT FALSE")
 
-
-# ---------- Analytics ----------
-async def log_event(user_id, event_type, metadata=None):
-    async with core.pool.acquire() as conn:
-        await conn.execute('''INSERT INTO analytics (user_id, event_type, metadata) VALUES ($1, $2, $3)''',
-                           user_id, event_type, json.dumps(metadata) if metadata else None)
 async def get_lang(user_id):
     async with core.pool.acquire() as conn:
         u = await conn.fetchrow('SELECT lang FROM users WHERE user_id=$1', user_id)
@@ -266,7 +257,7 @@ async def dashboard_actions(call: types.CallbackQuery):
 
 # ---------- Card Creation ----------
 async def menu_create_cb(call: types.CallbackQuery):
-        await log_event(call.from_user.id, 'wizard_started')\n    await log_event(call.from_user.id, 'wizard_started')\nawait call.message.answer(t('name_prompt', call.from_user.id))
+        await log_event(call.from_user.id, 'wizard_started')\nawait call.message.answer(t('name_prompt', call.from_user.id))
     await CardForm.waiting_name.set()
     await call.answer()
 
@@ -293,7 +284,7 @@ async def process_wallet(msg: types.Message, state: FSMContext):
         await conn.execute('INSERT INTO users (user_id, lang) VALUES ($1, $2) ON CONFLICT DO NOTHING', msg.from_user.id, 'en')
         await conn.execute('UPDATE users SET card_name=$1, card_prof=$2, wallet=$3, price=1.0 WHERE user_id=$4',
                            data['name'], data['prof'], msg.text.strip(), msg.from_user.id)
-        await log_event(msg.from_user.id, 'card_created')\n    await log_event(msg.from_user.id, 'card_created')\nawait msg.answer(t('card_created', msg.from_user.id, name=data['name'], prof=data['prof']))
+        await log_event(msg.from_user.id, 'card_created')\nawait msg.answer(t('card_created', msg.from_user.id, name=data['name'], prof=data['prof']))
     await state.finish()
 
 # ---------- Edit Wizard ----------
