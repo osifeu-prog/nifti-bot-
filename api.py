@@ -24,6 +24,11 @@ async def get_card_json(user_id: int):
         raise HTTPException(status_code=404, detail="User not found")
     return dict(row)
 
+
+@app.get("/api/ping")
+async def ping():
+    return {"status": "ok", "message": "NIFTI Backend v5.5.0 Online"}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
