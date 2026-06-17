@@ -1,7 +1,7 @@
 ﻿import asyncio, os, logging, uuid, json, random
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
-from fastapi import HTTPException, FastAPI, Request
+from fastapi import HTTPException, HTTPException, FastAPI, Request
 from fastapi.responses import HTMLResponse
 from audit_core import SystemAudit
 from aiogram import Bot, Dispatcher, types
@@ -1134,6 +1134,19 @@ async def api_ping():
 async def api_card(user_id: int):
     async with core.pool.acquire() as conn:
         user = await conn.fetchrow("SELECT * FROM users WHERE user_id=$1", user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return dict(user)
+
+# ---------- JSON API Endpoints ----------
+@app.get("/api/ping")
+async def api_ping():
+    return {"status": "ok", "message": "NIFTI Backend v5.5.2 Online"}
+
+@app.get("/api/card/{user_id}")
+async def api_card(user_id: int):
+    async with pool.acquire() as conn:
+        user = await conn.fetchrow("SELECT * FROM users WHERE user_id=\", user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return dict(user)
