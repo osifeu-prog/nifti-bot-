@@ -86,12 +86,6 @@ async def apply_rate_limit(user_id):
             raise ValueError("Rate limit")
     user_last_action[user_id] = now
 
-
-# ---------- Analytics ----------
-async def log_event(user_id, event_type, metadata=None):
-    async with core.pool.acquire() as conn:
-        await conn.execute('''INSERT INTO analytics (user_id, event_type, metadata) VALUES ($1, $2, $3)''',
-                           user_id, event_type, json.dumps(metadata) if metadata else None)
 async def is_admin(user_id):
     async with core.pool.acquire() as conn:
         role = await conn.fetchval('SELECT role FROM users WHERE user_id=$1', user_id)
@@ -229,7 +223,6 @@ async def dashboard_actions(call: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'menu_create')
 async def menu_create(call: types.CallbackQuery, state: FSMContext):
         await log_event(call.from_user.id, 'wizard_started')
-    await log_event(call.from_user.id, 'wizard_started')
 await call.message.answer(t('name_prompt', call.from_user.id))
     await CardForm.waiting_name.set()
     await call.answer()
@@ -258,7 +251,6 @@ async def process_wallet(msg: types.Message, state: FSMContext):
         await conn.execute('UPDATE users SET card_name=$1, card_prof=$2, wallet=$3, price=1.0 WHERE user_id=$4',
                            data['name'], data['prof'], msg.text.strip(), msg.from_user.id)
         await log_event(msg.from_user.id, 'card_created')
-    await log_event(msg.from_user.id, 'card_created')
 await msg.answer(t('card_created', msg.from_user.id, name=data['name'], prof=data['prof']))
     await state.finish()
 
