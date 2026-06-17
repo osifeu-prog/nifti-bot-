@@ -210,6 +210,7 @@ async def glass_dashboard(msg: types.Message):
 
 @dp.message_handler(commands=['start'])
 async def start(msg: types.Message):
+    await SystemAudit.log_event('command_start', msg.from_user.id)
     ref = int(msg.get_args()) if msg.get_args() and msg.get_args().isdigit() else None
     if ref and ref != msg.from_user.id:
         await add_referral(msg.from_user.id, ref)
