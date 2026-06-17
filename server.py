@@ -1,10 +1,8 @@
 ﻿import asyncio, os, logging, uuid, json, random
-    uvicorn.run(app, host='0.0.0.0', port=port)
 from audit_core import SystemAudit
-import asyncio, os, logging, uuid, json, random
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
-from fastapi import HTTPException, FastAPI, Request
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -1127,18 +1125,6 @@ async def cmd_set_photo(msg: types.Message):
             ON CONFLICT (user_id) DO UPDATE SET photo_file_id = $2
         ''', user_id, photo)
     await msg.reply('✅ Photo updated!')
-# ---------- JSON API Endpoints ----------
-@app.get("/api/ping")
-async def api_ping():
-    return {"status": "ok", "message": "NIFTI Backend v5.5.3 Online"}
-
-@app.get("/api/card/{user_id}")
-async def api_card(user_id: int):
-    async with core.pool.acquire() as conn:
-        user = await conn.fetchrow("SELECT * FROM users WHERE user_id=$1", user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return dict(user)
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host='0.0.0.0', port=port)
