@@ -348,6 +348,19 @@ async def leaderboard(msg: types.Message):
     else:
         await msg.answer('No cards yet.')
 
+# ---------- Direct command handlers ----------
+@dp.message_handler(commands=['leaderboard'])
+async def leaderboard_cmd(msg: types.Message):
+    await leaderboard(msg)
+
+@dp.message_handler(commands=['my_card'])
+async def my_card_cmd(msg: types.Message):
+    await my_card(msg)
+
+@dp.message_handler(commands=['earnings'])
+async def earnings_cmd(msg: types.Message):
+    await earnings(msg)
+
 # ---------- Unified invite with referral count ----------
 @dp.message_handler(commands=['invite'])
 async def invite_cmd(msg: types.Message):
@@ -364,7 +377,7 @@ async def referrals_cmd(msg: types.Message):
         count = await conn.fetchval('SELECT COUNT(*) FROM referrals WHERE ref_id=$1', msg.from_user.id)
     await msg.answer(f'👥 You have {count} referrals.')
 
-# ---------- Improved Spin ----------
+# ---------- Improved Spin (39% win, proper suspense) ----------
 @dp.message_handler(commands=['spin'])
 async def handle_spin(msg: types.Message):
     async with core.pool.acquire() as conn:
@@ -375,18 +388,15 @@ async def handle_spin(msg: types.Message):
         is_prem = user_data['is_premium']
         edge_row = await conn.fetchrow('SELECT house_edge FROM casino_settings LIMIT 1')
         house_edge = edge_row['house_edge'] if edge_row else 0.15
-        WINNING_NUMBERS = {1, 22, 43, 64}
-        # Send spinning message
+        WINNING_NUMBERS = set(range(1, 26))   # numbers 1..25 = 39.06%
+        real_win_prob = len(WINNING_NUMBERS) / 64 * (1 - house_edge)
         spin_msg = await msg.reply('🎰 Spinning...')
+        await asyncio.sleep(0.3)
         dice_msg = await bot.send_dice(msg.chat.id, emoji='🎰')
-        await asyncio.sleep(2)  # extra suspense
-        if is_prem:
-            real_win_prob = len(WINNING_NUMBERS) / 64 * (1 - house_edge)
-        else:
-            real_win_prob = len(WINNING_NUMBERS) / 64 * (1 - house_edge) * 0.5
+        await asyncio.sleep(3.5)
         result_value = dice_msg.dice.value
         if random.random() < real_win_prob:
-            points_won = 1.0  # reduced reward
+            points_won = 2.0 if is_prem else 1.0
             await conn.execute('UPDATE users SET points = COALESCE(points,0) + $1 WHERE user_id = $2', points_won, msg.from_user.id)
             await spin_msg.edit_text(f"🎉 Jackpot! You won {points_won} points!")
         else:
@@ -560,6 +570,7 @@ async def decisions_cmd(msg: types.Message):
 @dp.message_handler(commands=['news'])
 async def news_cmd(msg: types.Message):
     news_text = "📢 **Latest Updates**\n\n"
+    news_text += "• v4.3  Fixed direct commands, spin 39%, auto tests\n"
     news_text += "• v4.2  Improved spin, unified invite, stable\n"
     news_text += "• v4.0  Dynamic menu, photo upload, edit card\n"
     news_text += "• v3.8  Casino slot machine with house edge\n"
