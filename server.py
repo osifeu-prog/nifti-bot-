@@ -1069,7 +1069,6 @@ async def card_page(user_id: int):
     </div></body></html>'''
     return HTMLResponse(html)
 
-
 # ---------- Card Edit Commands (auto-create card) ----------
 @dp.message_handler(commands=['set_name'])
 async def cmd_set_name(msg: types.Message):
@@ -1080,8 +1079,8 @@ async def cmd_set_name(msg: types.Message):
         return
     async with core.pool.acquire() as conn:
         await conn.execute('''
-            INSERT INTO users (user_id, card_name) VALUES (\, \)
-            ON CONFLICT (user_id) DO UPDATE SET card_name = \
+            INSERT INTO users (user_id, card_name) VALUES ($1, $2)
+            ON CONFLICT (user_id) DO UPDATE SET card_name = $2
         ''', user_id, name)
     await msg.reply(f'✅ Name set to: {name}')
 
@@ -1094,8 +1093,8 @@ async def cmd_set_prof(msg: types.Message):
         return
     async with core.pool.acquire() as conn:
         await conn.execute('''
-            INSERT INTO users (user_id, card_prof) VALUES (\, \)
-            ON CONFLICT (user_id) DO UPDATE SET card_prof = \
+            INSERT INTO users (user_id, card_prof) VALUES ($1, $2)
+            ON CONFLICT (user_id) DO UPDATE SET card_prof = $2
         ''', user_id, prof)
     await msg.reply(f'✅ Profession set to: {prof}')
 
@@ -1109,8 +1108,8 @@ async def cmd_set_price(msg: types.Message):
         return
     async with core.pool.acquire() as conn:
         await conn.execute('''
-            INSERT INTO users (user_id, price) VALUES (\, \)
-            ON CONFLICT (user_id) DO UPDATE SET price = \
+            INSERT INTO users (user_id, price) VALUES ($1, $2)
+            ON CONFLICT (user_id) DO UPDATE SET price = $2
         ''', user_id, price)
     await msg.reply(f'✅ Price set to: {price} TON')
 
@@ -1120,11 +1119,10 @@ async def cmd_set_photo(msg: types.Message):
     photo = msg.photo[-1].file_id
     async with core.pool.acquire() as conn:
         await conn.execute('''
-            INSERT INTO users (user_id, photo_file_id) VALUES (\, \)
-            ON CONFLICT (user_id) DO UPDATE SET photo_file_id = \
+            INSERT INTO users (user_id, photo_file_id) VALUES ($1, $2)
+            ON CONFLICT (user_id) DO UPDATE SET photo_file_id = $2
         ''', user_id, photo)
     await msg.reply('✅ Photo updated!')
-
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host='0.0.0.0', port=port)
