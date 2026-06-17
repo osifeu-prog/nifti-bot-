@@ -121,6 +121,17 @@ class CardForm(StatesGroup):
     waiting_wallet = State()
 
 # ---------- Community Check ----------
+@dp.callback_query_handler(lambda c: c.data == 'verify_join')
+async def verify_join_handler(call: types.CallbackQuery):
+    is_member = await check_community_member(call.from_user.id)
+    if is_member:
+        async with core.pool.acquire() as conn:
+            await conn.execute("UPDATE users SET community_verified=TRUE WHERE user_id=$1", call.from_user.id)
+        await call.message.answer("✅ You are verified! Refresh /start to see your badge.")
+    else:
+        await call.message.answer("❌ You are not a member of SLH Community yet. Please join first, then try again.")
+    await call.answer()
+
 async def check_community_member(user_id):
     try:
         member = await bot.get_chat_member(COMMUNITY_CHAT_ID, user_id)
