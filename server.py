@@ -210,7 +210,6 @@ async def glass_dashboard(msg: types.Message):
 
 @dp.message_handler(commands=['start'])
 async def start(msg: types.Message):
-    SystemAudit.log_event('command_start', msg.from_user.id)
     ref = int(msg.get_args()) if msg.get_args() and msg.get_args().isdigit() else None
     if ref and ref != msg.from_user.id:
         await add_referral(msg.from_user.id, ref)
@@ -1073,64 +1072,3 @@ async def card_page(user_id: int):
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host='0.0.0.0', port=port)
-
-# ---------- Card Edit Commands (auto-create card) ----------
-@dp.message_handler(commands=['set_name'])
-@log_execution('set_name')
-async def cmd_set_name(msg: types.Message):
-    user_id = msg.from_user.id
-    name = msg.get_args()
-    if not name:
-        await msg.reply('Usage: /set_name <your name>')
-        return
-    async with core.pool.acquire() as conn:
-        # יצירת כרטיס אוטומטית אם לא קיים
-        await conn.execute('''
-            INSERT INTO users (user_id, card_name) VALUES (\, \)
-            ON CONFLICT (user_id) DO UPDATE SET card_name = \
-        ''', user_id, name)
-    await msg.reply(f'✅ Name set to: {name}')
-
-@dp.message_handler(commands=['set_prof'])
-@log_execution('set_prof')
-async def cmd_set_prof(msg: types.Message):
-    user_id = msg.from_user.id
-    prof = msg.get_args()
-    if not prof:
-        await msg.reply('Usage: /set_prof <profession>')
-        return
-    async with core.pool.acquire() as conn:
-        await conn.execute('''
-            INSERT INTO users (user_id, card_prof) VALUES (\, \)
-            ON CONFLICT (user_id) DO UPDATE SET card_prof = \
-        ''', user_id, prof)
-    await msg.reply(f'✅ Profession set to: {prof}')
-
-@dp.message_handler(commands=['set_price'])
-@log_execution('set_price')
-async def cmd_set_price(msg: types.Message):
-    user_id = msg.from_user.id
-    try:
-        price = float(msg.get_args())
-    except:
-        await msg.reply('Usage: /set_price <number>')
-        return
-    async with core.pool.acquire() as conn:
-        await conn.execute('''
-            INSERT INTO users (user_id, price) VALUES (\, \)
-            ON CONFLICT (user_id) DO UPDATE SET price = \
-        ''', user_id, price)
-    await msg.reply(f'✅ Price set to: {price} TON')
-
-@dp.message_handler(commands=['set_photo'], content_types=types.ContentType.PHOTO)
-@log_execution('set_photo')
-async def cmd_set_photo(msg: types.Message):
-    user_id = msg.from_user.id
-    photo = msg.photo[-1].file_id
-    async with core.pool.acquire() as conn:
-        await conn.execute('''
-            INSERT INTO users (user_id, photo_file_id) VALUES (\, \)
-            ON CONFLICT (user_id) DO UPDATE SET photo_file_id = \
-        ''', user_id, photo)
-    await msg.reply('✅ Photo updated!')
-
