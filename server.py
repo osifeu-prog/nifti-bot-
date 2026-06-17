@@ -16,7 +16,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID = int(os.getenv("ADMIN_USER_ID", "0"))
 TON_WALLET = os.getenv("TON_WALLET")
 WEBHOOK_URL = "https://bot-production-c2a5.up.railway.app/webhook"
-COMMUNITY_CHAT_ID = "@SLH_Community"
+COMMUNITY_CHAT_ID = "@SLH_Community"  # replace with your group username
 
 bot = Bot(token=BOT_TOKEN)
 Bot.set_current(bot)
@@ -37,40 +37,6 @@ def t(key, user_id=None, **kwargs):
     return text
 
 # ---------- Database ----------
-
-# ---------- Analytics ----------
-async def log_event(user_id, event_type, metadata=None):
-    async with core.pool.acquire() as conn:
-        await conn.execute('''INSERT INTO analytics (user_id, event_type, metadata) VALUES ($1, $2, $3)''',
-                           user_id, event_type, json.dumps(metadata) if metadata else None)
-
-@dp.message_handler(commands=['stats'])
-async def stats_cmd(msg: types.Message):
-    if not await is_admin(msg.from_user.id): return
-    async with core.pool.acquire() as conn:
-        total_users = await conn.fetchval('SELECT COUNT(*) FROM users')
-        total_cards = await conn.fetchval('SELECT COUNT(*) FROM users WHERE card_name IS NOT NULL')
-        total_volume = await conn.fetchval('SELECT COALESCE(SUM(balance),0) FROM users')
-        referral_count = await conn.fetchval('SELECT COUNT(*) FROM referrals')
-        # Analytics metrics
-        created_cards = await conn.fetchval("SELECT COUNT(*) FROM analytics WHERE event_type = 'card_created'")
-        started_cards = await conn.fetchval("SELECT COUNT(*) FROM analytics WHERE event_type = 'wizard_started'")
-        community_joins = await conn.fetchval("SELECT COUNT(*) FROM analytics WHERE event_type = 'community_join'")
-        conversion = (created_cards / started_cards * 100) if started_cards > 0 else 0
-    report = (
-        f'📊 **NIFTI SYSTEM STATS**\n'
-        f'━━━━━━━━━━━━━━━━━━\n'
-        f'👥 Total Users: {total_users}\n'
-        f'💳 Cards: {total_cards}\n'
-        f'💰 Volume: {total_volume} TON\n'
-        f'🔗 Referrals: {referral_count}\n'
-        f'✨ Cards Created (log): {created_cards}\n'
-        f'🚀 Conversion Rate: {conversion:.1f}%\n'
-        f'🤝 Community Joins: {community_joins}\n'
-    )
-    await msg.answer(report, parse_mode='Markdown')
-    await log_action(msg.from_user.id, 'stats_viewed')
-
 async def init_db():
     async with core.pool.acquire() as conn:
         await conn.execute('''CREATE TABLE IF NOT EXISTS users (
@@ -88,20 +54,18 @@ async def init_db():
             id SERIAL PRIMARY KEY, seller_id BIGINT, card_name TEXT, card_prof TEXT,
             price FLOAT, photo_file_id TEXT, level TEXT DEFAULT 'Newbie',
             created_at TIMESTAMP DEFAULT NOW())''')
-        await conn.execute('''INSERT INTO casino_settings (house_edge, is_active) SELECT 0.15, TRUE WHERE NOT EXISTS (SELECT 1 FROM casino_settings)''')
-                await conn.execute('''CREATE TABLE IF NOT EXISTS analytics (
-            id SERIAL PRIMARY KEY, user_id BIGINT, event_type VARCHAR(50),
-            metadata JSONB, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+        await conn.execute('''INSERT INTO casino_settings (house_edge, is_active) SELECT 0.15, TRUE WHERE NOT EXISTS (SELECT 1 FROM casino_settings)'''
         await conn.execute('''CREATE TABLE IF NOT EXISTS analytics (
             id SERIAL PRIMARY KEY, user_id BIGINT, event_type VARCHAR(50),
-            metadata JSONB, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
-await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS points FLOAT DEFAULT 0")
+            metadata JSONB, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)'''))
+        await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS points FLOAT DEFAULT 0")
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS iwa_balance FLOAT DEFAULT 0")
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'user'")
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS photo_file_id TEXT")
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS state TEXT DEFAULT 'IDLE'")
         await conn.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS community_verified BOOLEAN DEFAULT FALSE")
 
+# ---------- Helpers ----------
 
 # ---------- Analytics ----------
 async def log_event(user_id, event_type, metadata=None):
@@ -139,6 +103,7 @@ async def get_user_state(user_id):
     async with core.pool.acquire() as conn:
         return await conn.fetchval('SELECT state FROM users WHERE user_id=$1', user_id) or 'IDLE'
 
+# ---------- Referral Engine ----------
 REFERRAL_LEVEL1_REWARD = 0.04
 PURCHASE_BONUS_LEVEL1 = 0.094
 WITHDRAWAL_FEE = 0.05
@@ -166,26 +131,15 @@ class CardForm(StatesGroup):
     waiting_prof = State()
     waiting_wallet = State()
 
-# ---------- Community Check ----------
-@dp.callback_query_handler(lambda c: c.data == 'verify_join')
-async def verify_join_handler(call: types.CallbackQuery):
-    is_member = await check_community_member(call.from_user.id)
-    if is_member:
-        async with core.pool.acquire() as conn:
-            await conn.execute("UPDATE users SET community_verified=TRUE WHERE user_id=$1", call.from_user.id)
-        await call.message.answer("✅ You are verified! Refresh /start to see your badge.")
-    else:
-        await call.message.answer("❌ You are not a member of SLH Community yet. Please join first, then try again.")
-    await call.answer()
-
+# ---------- Community Verification ----------
 async def check_community_member(user_id):
     try:
         member = await bot.get_chat_member(COMMUNITY_CHAT_ID, user_id)
         return member.status in ('member', 'administrator', 'creator')
-    except:
+    except Exception:
         return False
 
-# ---------- Glass Dashboard ----------
+# ---------- Glass Dashboard Menu ----------
 async def glass_dashboard(msg: types.Message):
     async with core.pool.acquire() as conn:
         u = await conn.fetchrow('SELECT card_name, share_count, balance, iwa_balance, points, is_premium, community_verified, photo_file_id FROM users WHERE user_id=$1', msg.from_user.id)
@@ -194,11 +148,13 @@ async def glass_dashboard(msg: types.Message):
         return
     has_card = u['card_name'] is not None
     verified = u['community_verified']
+    premium = u['is_premium']
     level = get_level(u['share_count']) if has_card else '⚪ Newbie'
     balance = u['balance'] or 0
     iwa = u['iwa_balance'] or 0
     points = u['points'] or 0
 
+    # Glass text block
     text = (
         "╔════════════════════════════╗\n"
         f"   ✨ NIFTII: {u['card_name'] or 'Newcomer'}\n"
@@ -240,33 +196,34 @@ async def start(msg: types.Message):
     await set_user_state(msg.from_user.id, 'IDLE')
     await glass_dashboard(msg)
 
-# Dashboard callbacks  all point to real functions
+# ---------- Callbacks for Dashboard ----------
 @dp.callback_query_handler(lambda c: c.data in ['menu_mycard', 'menu_edit', 'menu_create', 'menu_market', 'menu_wallet', 'menu_leaderboard', 'menu_community', 'menu_commands', 'verify_join'])
 async def dashboard_actions(call: types.CallbackQuery):
-    data = call.data
-    if data == 'menu_mycard':
+    if call.data == 'menu_mycard':
         await my_card_cmd(call.message)
-    elif data == 'menu_edit':
+    elif call.data == 'menu_edit':
         await menu_edit_wizard(call)
-    elif data == 'menu_create':
-        await menu_create_cb(call)
-    elif data == 'menu_market':
+    elif call.data == 'menu_create':
+        await menu_create(call)
+    elif call.data == 'menu_market':
         await market_cmd(call.message)
-    elif data == 'menu_wallet':
+    elif call.data == 'menu_wallet':
         await wallet_cmd(call.message)
-    elif data == 'menu_leaderboard':
+    elif call.data == 'menu_leaderboard':
         await leaderboard_cmd(call.message)
-    elif data == 'menu_community':
+    elif call.data == 'menu_community':
         await community_info(call.message)
-    elif data == 'menu_commands':
+    elif call.data == 'menu_commands':
         await commands_list(call.message)
-    elif data == 'verify_join':
+    elif call.data == 'verify_join':
         await verify_and_join(call)
     await call.answer()
 
-# ---------- Card Creation ----------
-async def menu_create_cb(call: types.CallbackQuery):
-        await log_event(call.from_user.id, 'wizard_started')\n    await log_event(call.from_user.id, 'wizard_started')\nawait call.message.answer(t('name_prompt', call.from_user.id))
+# ---------- Card Creation (unchanged) ----------
+@dp.callback_query_handler(lambda c: c.data == 'menu_create')
+async def menu_create(call: types.CallbackQuery, state: FSMContext):
+        await log_event(call.from_user.id, 'wizard_started')
+await call.message.answer(t('name_prompt', call.from_user.id))
     await CardForm.waiting_name.set()
     await call.answer()
 
@@ -293,10 +250,12 @@ async def process_wallet(msg: types.Message, state: FSMContext):
         await conn.execute('INSERT INTO users (user_id, lang) VALUES ($1, $2) ON CONFLICT DO NOTHING', msg.from_user.id, 'en')
         await conn.execute('UPDATE users SET card_name=$1, card_prof=$2, wallet=$3, price=1.0 WHERE user_id=$4',
                            data['name'], data['prof'], msg.text.strip(), msg.from_user.id)
-        await log_event(msg.from_user.id, 'card_created')\n    await log_event(msg.from_user.id, 'card_created')\nawait msg.answer(t('card_created', msg.from_user.id, name=data['name'], prof=data['prof']))
+        await log_event(msg.from_user.id, 'card_created')
+await msg.answer(t('card_created', msg.from_user.id, name=data['name'], prof=data['prof']))
     await state.finish()
 
-# ---------- Edit Wizard ----------
+# ---------- Edit Wizard (unchanged) ----------
+@dp.callback_query_handler(lambda c: c.data == 'menu_edit')
 async def menu_edit_wizard(call: types.CallbackQuery):
     await dp.current_state(user=call.from_user.id).set_state("editing_card")
     kb = types.InlineKeyboardMarkup(row_width=2)
@@ -317,10 +276,9 @@ async def handle_wizard(call: types.CallbackQuery):
         await call.answer()
         return
     await dp.current_state(user=call.from_user.id).set_data({"action": action})
-    if action == 'name':
-        await call.message.answer(t('edit_name_prompt', call.from_user.id))
-    elif action == 'prof':
-        await call.message.answer(t('edit_prof_prompt', call.from_user.id))
+    prompts = {'name': 'edit_name_prompt', 'prof': 'edit_prof_prompt'}
+    if action in prompts:
+        await call.message.answer(t(prompts[action], call.from_user.id))
     elif action == 'price':
         await call.message.answer("Enter new price:")
     elif action == 'photo':
@@ -331,7 +289,8 @@ async def handle_wizard(call: types.CallbackQuery):
 async def process_wizard_input(msg: types.Message):
     data = await dp.current_state(user=msg.from_user.id).get_data()
     action = data.get('action')
-    if not action: return
+    if not action:
+        return
     async with core.pool.acquire() as conn:
         if action == 'name':
             name = msg.text.strip()
@@ -368,94 +327,31 @@ async def handle_wizard_photo(msg: types.Message):
             await conn.execute('UPDATE users SET photo_file_id=$1 WHERE user_id=$2', file_id, msg.from_user.id)
         await msg.answer(t('photo_updated', msg.from_user.id))
         await dp.current_state(user=msg.from_user.id).finish()
-
-# ---------- Commands List ----------
-async def commands_list(msg: types.Message):
-    text = t('commands_list', msg.from_user.id)
-    await msg.answer(text)
-
-@dp.message_handler(commands=['commands'])
-async def commands_cmd(msg: types.Message):
-    await commands_list(msg)
-
-# ---------- My Card ----------
-@dp.message_handler(commands=['my_card'])
-async def my_card_cmd(msg: types.Message):
-    async with core.pool.acquire() as conn:
-        u = await conn.fetchrow('SELECT * FROM users WHERE user_id=$1', msg.from_user.id)
-    if not u or not u.get('card_name'):
-        await msg.answer(t('no_card', msg.from_user.id))
-        return
-    level = get_level(u['share_count'])
-    caption = t('card_view', msg.from_user.id,
-                name=u['card_name'], prof=u.get('card_prof',''), price=u.get('price',1), level=level)
-    if u.get('photo_file_id'):
-        await bot.send_photo(msg.chat.id, u['photo_file_id'], caption=caption)
     else:
-        await msg.answer(caption)
+        await msg.answer("I didn't expect a photo.")
 
-# ---------- Leaderboard ----------
-@dp.message_handler(commands=['leaderboard'])
-async def leaderboard_cmd(msg: types.Message):
-    async with core.pool.acquire() as conn:
-        top = await conn.fetch('SELECT card_name, share_count FROM users WHERE card_name IS NOT NULL ORDER BY share_count DESC LIMIT 10')
-    if top:
-        lines = '\n'.join(f'{i+1}. {r["card_name"]}  {get_level(r["share_count"])} ({r["share_count"]} refs)' for i, r in enumerate(top))
-        await msg.answer(f'🏆 **Leaderboard**\n\n{lines}')
+# ---------- Community ----------
+async def community_info(msg: types.Message):
+    text = "👥 **SLH Community**\n\nJoin our experts group to get support, collaborations, and exclusive rewards.\n\n[👉 Join Group](https://t.me/SLH_Community)"
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton("🚀 Join Now", url="https://t.me/SLH_Community"))
+    await msg.answer(text, reply_markup=kb)
+
+async def verify_and_join(call: types.CallbackQuery):
+    is_member = await check_community_member(call.from_user.id)
+    if is_member:
+        async with core.pool.acquire() as conn:
+            await conn.execute("UPDATE users SET community_verified=TRUE WHERE user_id=$1", call.from_user.id)
+        await call.message.answer("✅ You are verified! Refresh /start to see your badge.")
     else:
-        await msg.answer('No cards yet.')
+        await call.message.answer("❌ You are not a member of SLH Community yet. Please join first, then try again.")
+    await call.answer()
 
-# ---------- Earnings ----------
-@dp.message_handler(commands=['earnings'])
-async def earnings_cmd(msg: types.Message):
-    async with core.pool.acquire() as conn:
-        u = await conn.fetchrow('SELECT balance, price FROM users WHERE user_id=$1', msg.from_user.id)
-    if not u:
-        await msg.answer(t('send_start', msg.from_user.id))
-        return
-    price = u['price'] or 1
-    fee = core.platform_fee(float(price))
-    net = core.seller_amount(float(price))
-    await msg.answer(t('balance', msg.from_user.id, balance=u['balance'] or 0, price=price, fee=fee, net=net))
+@dp.message_handler(commands=['verify'])
+async def verify_cmd(msg: types.Message):
+    await verify_and_join(msg)
 
-# ---------- Invite ----------
-@dp.message_handler(commands=['invite'])
-async def invite_cmd(msg: types.Message):
-    async with core.pool.acquire() as conn:
-        count = await conn.fetchval('SELECT COUNT(*) FROM referrals WHERE ref_id=$1', msg.from_user.id)
-    link = f'https://t.me/NFTY_madness_bot?start={msg.from_user.id}'
-    qr_url = f'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={link}'
-    caption = f'🔗 Your referral link:\n{link}\n\n👥 Joined: {count}\n\nShare and earn {REFERRAL_LEVEL1_REWARD} TON + {IWA_REFERRAL_BONUS} IWA per friend!'
-    await msg.answer_photo(qr_url, caption=caption)
-
-# ---------- Spin ----------
-@dp.message_handler(commands=['spin'])
-async def spin_cmd(msg: types.Message):
-    async with core.pool.acquire() as conn:
-        user_data = await conn.fetchrow('SELECT is_premium, points FROM users WHERE user_id=$1', msg.from_user.id)
-        if not user_data:
-            await msg.reply('Please /start first.')
-            return
-        is_prem = user_data['is_premium']
-        edge_row = await conn.fetchrow('SELECT house_edge FROM casino_settings LIMIT 1')
-        house_edge = edge_row['house_edge'] if edge_row else 0.15
-        WINNING_NUMBERS = set(range(1, 26))
-        real_win_prob = len(WINNING_NUMBERS) / 64 * (1 - house_edge)
-        spin_msg = await msg.reply('🎰 Spinning...')
-        await asyncio.sleep(0.3)
-        dice_msg = await bot.send_dice(msg.chat.id, emoji='🎰')
-        await asyncio.sleep(3.5)
-        result_value = dice_msg.dice.value
-        if random.random() < real_win_prob:
-            points_won = 2.0 if is_prem else 1.0
-            await conn.execute('UPDATE users SET points = COALESCE(points,0) + $1 WHERE user_id = $2', points_won, msg.from_user.id)
-            try: await spin_msg.edit_text(f"🎉 Jackpot! You won {points_won} points!")
-            except: await msg.reply(f"🎉 Jackpot! You won {points_won} points!")
-        else:
-            try: await spin_msg.edit_text("💸 No luck this time. Try again!")
-            except: await msg.reply("💸 No luck this time. Try again!")
-
-# ---------- Wallet ----------
+# ---------- Wallet (unchanged) ----------
 @dp.message_handler(commands=['wallet'])
 async def wallet_cmd(msg: types.Message):
     async with core.pool.acquire() as conn:
@@ -592,27 +488,6 @@ async def check_and_lock(user_id, required_state, new_state):
         raise RuntimeError(f"Action blocked (current state: {current})")
     await set_user_state(user_id, new_state)
 
-# ---------- Community ----------
-async def community_info(msg: types.Message):
-    text = "👥 **SLH Community**\n\nJoin our experts group to get support, collaborations, and exclusive rewards.\n\n[👉 Join Group](https://t.me/SLH_Community)"
-    kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton("🚀 Join Now", url="https://t.me/SLH_Community"))
-    await msg.answer(text, reply_markup=kb)
-
-async def verify_and_join(call: types.CallbackQuery):
-    is_member = await check_community_member(call.from_user.id)
-    if is_member:
-        async with core.pool.acquire() as conn:
-            await conn.execute("UPDATE users SET community_verified=TRUE WHERE user_id=$1", call.from_user.id)
-        await call.message.answer("✅ You are verified! Refresh /start to see your badge.")
-    else:
-        await call.message.answer("❌ You are not a member of SLH Community yet. Please join first, then try again.")
-    await call.answer()
-
-@dp.message_handler(commands=['verify'])
-async def verify_cmd(msg: types.Message):
-    await verify_and_join(msg)
-
 # ---------- Admin ----------
 @dp.message_handler(commands=['admin'])
 async def admin_cmd(msg: types.Message):
@@ -690,7 +565,7 @@ async def dev_actions(call: types.CallbackQuery):
         await plan_cmd(call.message)
     await call.answer()
 
-# ---------- System Commands ----------
+# ---------- System Functions (Defined) ----------
 @dp.message_handler(commands=['db_setup'])
 async def db_setup_cmd(msg: types.Message):
     if msg.from_user.id != ADMIN_ID: return
@@ -774,7 +649,7 @@ async def decisions_cmd(msg: types.Message):
     await msg.answer(open('docs/decisions.md','r').read() if os.path.exists('docs/decisions.md') else "No decisions file.")
 @dp.message_handler(commands=['news'])
 async def news_cmd(msg: types.Message):
-    await msg.answer("📢 **Latest Updates**\n• v5.2.0  Stable Glass Dashboard, Community, Wallet, Market, Auto Tests")
+    await msg.answer("📢 **Latest Updates**\n• v5.1.0  Community Verification, Glass Dashboard, Full Stability")
 @dp.message_handler(commands=['plan'])
 async def plan_cmd(msg: types.Message):
     if os.path.exists('MASTER_PLAN.md'):
