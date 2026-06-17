@@ -943,18 +943,6 @@ async def plan_cmd(msg: types.Message):
         await msg.answer("MASTER_PLAN.md not found.")
 
 # ---------- TON Scanner ----------
-
-async def heartbeat_monitor():
-    while True:
-        try:
-            async with core.pool.acquire() as conn:
-                await conn.fetchval('SELECT 1')
-            logging.debug('Heartbeat OK')
-        except Exception as e:
-            logging.error(f'Heartbeat FAILED: {e}')
-            try: await bot.send_message(ADMIN_ID, f'⚠️ DB Heartbeat failed: {e}')
-            except: pass
-        await asyncio.sleep(300)
 async def ton_scanner_loop():
     import aiohttp
     while True:
@@ -990,9 +978,8 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logging.error(f'❌ init_db failed: {e}')
     await bot.set_webhook(WEBHOOK_URL)
-    # Heartbeat monitor (checks DB every 5 min)
-    asyncio.create_task(heartbeat_monitor())
-    asyncio.create_task(ton_scanner_loop())
+        asyncio.create_task(heartbeat_monitor())
+asyncio.create_task(ton_scanner_loop())
     logging.info('🚀 Server started  Webhook + TON Scanner')
     yield
     logging.info('Server shutting down')

@@ -1,9 +1,8 @@
-﻿# NIFTI Master Plan (v5.4.1  Stable & Healthy)
+﻿# NIFTI Master Plan (v5.4.2  Clean Stable)
 
 ## Current Status
-- Core features stable: Wallet, Market, Admin, Community, Casino, Analytics.
-- Edit Wizard works (v5.3.5 base, no duplicates).
-- Heartbeat monitor checks DB every 5 min, alerts admin if down.
+- Core features stable: Wallet, Market, Admin, Community, Casino, Analytics, Edit Wizard.
+- Heartbeat monitor active: checks DB every 5 min, alerts admin on failure.
 - Docs regenerated.
 
 ## Next Steps (Priority)
@@ -14,7 +13,6 @@
 5. **9 Languages**  Full i18n.
 
 ## Decisions Log
-- Restored v5.3.5 server.py as stable baseline.
-- Edit Wizard works; duplicate issue resolved by clean restore.
-- PowerShell blocks for deployment.
+- Restored v5.3.5 as stable baseline, added heartbeat with correct indentation.
+- All PowerShell blocks tested for idempotency.
 - MASTER_PLAN.md is single source of truth.
