@@ -1,0 +1,8 @@
+﻿{
+  "version": "1.0.0",
+  "entities": {
+    "user": { "id": "telegram_id", "wallet_address": "string", "state": "IDLE | EDITING_CARD | BUYING_CARD", "balance_ton": "decimal", "iwa_balance": "decimal", "points": "decimal", "role": "user | admin | superadmin", "lang": "string" },
+    "card": { "card_id": "uuid", "owner_id": "telegram_id", "metadata": { "name": "string", "profession": "string", "photo_url": "string" }, "price_ton": "decimal", "level": "BRONZE | SILVER | GOLD" },
+    "transaction": { "tx_id": "uuid", "user_id": "telegram_id", "amount_ton": "decimal", "type": "DEPOSIT | WITHDRAW | PURCHASE" }
+  }
+}
