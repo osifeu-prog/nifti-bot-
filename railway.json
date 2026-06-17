@@ -1,0 +1,12 @@
+﻿{
+  "services": {
+    "bot": {
+      "healthcheck": {
+        "path": "/api/ping",
+        "interval": 60,
+        "initialDelay": 30,
+        "timeout": 10
+      }
+    }
+  }
+}
