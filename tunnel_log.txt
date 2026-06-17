@@ -42,3 +42,17 @@
 2026-06-15T23:57:12Z INF precheck complete hard_fail=false run_id=01e4a40c-4e43-4ea3-acaa-d1b1e058aacc suggested_protocol=quic
 2026-06-15T23:57:12Z INF Registered tunnel connection connIndex=0 connection=4845998b-b817-4a8d-844b-e9c26514aebd event=0 ip=2606:4700:a8::4 location=fra15 protocol=quic
 2026-06-16T04:22:19Z ERR Failed to refresh DNS local resolver error="lookup region1.v2.argotunnel.com: i/o timeout"
+2026-06-16T20:41:08Z ERR  error="Unable to reach the origin service. The service may be down or it may not be responding to traffic from cloudflared: dial tcp [::1]:8000: connectex: No connection could be made because the target machine actively refused it." connIndex=0 event=1 ingressRule=0 originService=http://localhost:8000
+2026-06-16T20:41:08Z ERR Request failed error="Unable to reach the origin service. The service may be down or it may not be responding to traffic from cloudflared: dial tcp [::1]:8000: connectex: No connection could be made because the target machine actively refused it." connIndex=0 dest=https://bar-premier-hash-substance.trycloudflare.com/ event=0 ip=2606:4700:a8::4 type=http
+2026-06-17T01:06:01Z ERR  error="Unable to reach the origin service. The service may be down or it may not be responding to traffic from cloudflared: dial tcp [::1]:8000: connectex: No connection could be made because the target machine actively refused it." connIndex=0 event=1 ingressRule=0 originService=http://localhost:8000
+2026-06-17T01:06:01Z ERR Request failed error="Unable to reach the origin service. The service may be down or it may not be responding to traffic from cloudflared: dial tcp [::1]:8000: connectex: No connection could be made because the target machine actively refused it." connIndex=0 dest=https://bar-premier-hash-substance.trycloudflare.com/ event=0 ip=2606:4700:a8::4 type=http
+2026-06-17T09:22:38Z ERR Failed to refresh DNS local resolver error="lookup region1.v2.argotunnel.com: i/o timeout"
+2026-06-17T10:41:39Z INF Initiating graceful shutdown due to signal terminated ...
+2026-06-17T10:41:40Z ERR failed to run the datagram handler error="context canceled" connIndex=0 event=0 ip=2606:4700:a8::4
+2026-06-17T10:41:40Z ERR failed to serve tunnel connection error="accept stream listener encountered a failure while serving" connIndex=0 event=0 ip=2606:4700:a8::4
+2026-06-17T10:41:40Z ERR Serve tunnel error error="accept stream listener encountered a failure while serving" connIndex=0 event=0 ip=2606:4700:a8::4
+2026-06-17T10:41:40Z INF Retrying connection in up to 1s connIndex=0 event=0 ip=2606:4700:a8::4
+2026-06-17T10:41:40Z ERR Connection terminated connIndex=0
+2026-06-17T10:41:40Z ERR no more connections active and exiting
+2026-06-17T10:41:40Z INF Tunnel server stopped
+2026-06-17T10:41:40Z INF Metrics server stopped

@@ -1,6 +1,8 @@
-﻿# Roadmap
-## Phase 1 (current)
-- [x] Multi-language, FSM, Referrals
-- [ ] Cancel FSM
-## Phase 2
-- TON payments, Admin dashboard, Mini-site
+﻿# NIFTI Roadmap
+1. Stabilize and document
+2. Onboarding improvements
+3. NFT card generation
+4. Shops & franchise
+5. IWA exchange
+6. Web app
+7. Analytics dashboard
