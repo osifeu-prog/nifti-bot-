@@ -309,6 +309,7 @@ async def process_wallet(msg: types.Message, state: FSMContext):
     await state.finish()
 
 # ---------- Edit Wizard ----------
+@dp.callback_query_handler(lambda c: c.data == 'menu_edit')
 async def menu_edit_wizard(call: types.CallbackQuery):
     await dp.current_state(user=call.from_user.id).set_state("editing_card")
     kb = types.InlineKeyboardMarkup(row_width=2)
@@ -553,6 +554,7 @@ async def market_cmd(msg: types.Message):
 
 
 # ---------- Edit Wizard (Robust) ----------
+@dp.callback_query_handler(lambda c: c.data == 'menu_edit')
 async def menu_edit_wizard(call: types.CallbackQuery):
     await dp.current_state(user=call.from_user.id).set_state("editing_card")
     kb = types.InlineKeyboardMarkup(row_width=2)
@@ -564,6 +566,7 @@ async def menu_edit_wizard(call: types.CallbackQuery):
     await call.message.answer("What would you like to edit?", reply_markup=kb)
     await call.answer()
 
+@dp.callback_query_handler(lambda c: c.data in ['wizard_name', 'wizard_prof', 'wizard_price', 'wizard_photo', 'wizard_cancel'])
 async def handle_wizard(call: types.CallbackQuery):
     await call.answer()  # immediate feedback
     action = call.data.split('_')[1]
@@ -625,6 +628,7 @@ async def handle_wizard_photo(msg: types.Message):
         await msg.answer("I didn't expect a photo.")
 
 # פקודת /edit_card (למקרה שמשתמש מקליד)
+@dp.message_handler(commands=['edit_card'])
 async def edit_card_cmd(msg: types.Message):
     await menu_edit_wizard(types.CallbackQuery(message=msg, from_user=msg.from_user, data='menu_edit'))
 async def show_market_card(msg: types.Message, cards, index):
