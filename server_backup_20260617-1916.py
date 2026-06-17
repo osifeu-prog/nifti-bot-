@@ -468,9 +468,6 @@ async def spin_cmd(msg: types.Message):
             except: await msg.reply("💸 No luck this time. Try again!")
 
 # ---------- Wallet ----------
-@dp.message_handler(commands=['edit_card'])
-async def edit_card_cmd(msg: types.Message):
-    await msg.answer("Send /set_name <name>, /set_prof <prof>, /set_price <price>, or /set_photo to edit.")
 @dp.message_handler(commands=['wallet'])
 async def wallet_cmd(msg: types.Message):
     async with core.pool.acquire() as conn:
@@ -977,8 +974,7 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logging.error(f'❌ init_db failed: {e}')
     await bot.set_webhook(WEBHOOK_URL)
-        asyncio.create_task(heartbeat_monitor())
-asyncio.create_task(ton_scanner_loop())
+    asyncio.create_task(ton_scanner_loop())
     logging.info('🚀 Server started  Webhook + TON Scanner')
     yield
     logging.info('Server shutting down')

@@ -1,28 +1,19 @@
-﻿# NIFTI Master Plan (v5.3.0)
+﻿# NIFTI Master Plan (v5.4.0  Stability Phase)
 
-## Vision
-Full digital business card ecosystem on Telegram: NFTs, shops, token exchange.
-9 languages, advanced wallet integration, TON blockchain connectivity.
-**All data governed by NIFTI_SCHEMA.json and SYSTEM_COMMAND.md.**
+## Current Status
+- All core features stable (Wallet, Market, Admin, Community, Casino).
+- Edit Wizard disabled temporarily  replaced with reliable text commands.
+- Docs regenerated, SSoT updated.
+- Heartbeat monitor added: automatic DB health check every 5 min.
 
-## Current Phase: Analytics & Stability (v5.3.0)
-- Analytics table and log_event function
-- Enhanced /stats with conversion metrics
-- Edit Wizard fix (new message instead of edit)
-- Error protection in webhook handler
+## Next Immediate Steps
+1. **Modularize server.py**  split into handlers/, core/, ui/ to prevent regressions.
+2. **NFT Card Generation**  /mint command with Pillow.
+3. **Onboarding Flow**  Welcome tutorial.
+4. **Order Book / Exchange**  Trading system.
+5. **9 Languages**  Full i18n.
 
-## Implemented Features
-1. State Machine  prevents concurrent actions
-2. Market Showcase  carousel style display
-3. SSoT documents  NIFTI_SCHEMA.json, SYSTEM_COMMAND.md
-4. Wallet System  /wallet, /deposit, /withdraw, /transactions
-5. Community Verification  /verify, badge
-6. Analytics  conversion tracking
-
-## Upcoming
-- NFT Card Minting
-- Shops & Franchise
-- IWA Exchange
-- 9 Languages
-- Landing Page
-- TON Connect
+## Decisions Log
+- Edit Wizard removed due to code duplication causing unresponsive buttons. Will be re-implemented after modularization.
+- PowerShell blocks for all deployments.
+- MASTER_PLAN.md is single source of truth.
