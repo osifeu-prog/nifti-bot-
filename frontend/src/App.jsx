@@ -8,9 +8,8 @@ function App() {
 
   useEffect(() => {
     const userId = WebApp.initDataUnsafe?.user?.id;
-    
     if (userId) {
-      axios.get(https://bot-production-c2a5.up.railway.app/api/card/\)
+      axios.get(`https://bot-production-c2a5.up.railway.app/api/card/${userId}`)
         .then(res => {
           setUserData(res.data);
           setLoading(false);
@@ -31,7 +30,7 @@ function App() {
       <div style={{ background: '#222', color: '#fff', padding: '15px', borderRadius: '12px', marginTop: '20px' }}>
         <p>Wallet: {userData?.wallet || "Not linked"}</p>
       </div>
-      <button 
+      <button
         onClick={() => WebApp.close()}
         style={{ marginTop: '20px', padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#3390ec', color: 'white' }}
       >
@@ -40,5 +39,4 @@ function App() {
     </div>
   );
 }
-
 export default App;
