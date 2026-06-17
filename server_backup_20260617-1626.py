@@ -874,35 +874,6 @@ async def analytics_cmd(msg: types.Message):
         conversion = (created_cards / started_cards * 100) if started_cards > 0 else 0
     await msg.answer(f'📈 **Analytics**\nWizard Started: {started_cards}\nCards Created: {created_cards}\nConversion: {conversion:.1f}%\nCommunity Joins: {community_joins}')
 
-
-# ---------- Seed Market ----------
-@dp.message_handler(commands=['seed_market'])
-async def seed_market_cmd(msg: types.Message):
-    if msg.from_user.id != ADMIN_ID:
-        await msg.answer("⛔ Admin only.")
-        return
-    try:
-        async with core.pool.acquire() as conn:
-            # Clear existing demo cards
-            await conn.execute("DELETE FROM market_cards WHERE seller_id = 224223270")
-            cards = [
-                ('Alex Designer', 'Graphic Designer', 2.5, 'Silver'),
-                ('Maria Dev', 'Blockchain Developer', 7.0, 'Gold'),
-                ('Tom Trader', 'Crypto Analyst', 3.2, 'Bronze'),
-                ('Sara Artist', 'NFT Creator', 5.5, 'Gold'),
-                ('Mike Founder', 'Startup CEO', 10.0, 'Diamond'),
-                ('Eva Writer', 'Content Strategist', 1.8, 'Bronze'),
-                ('Dan Builder', 'Software Architect', 8.0, 'Gold'),
-                ('Lia Mentor', 'Business Coach', 4.5, 'Silver'),
-                ('Ron Hacker', 'Security Expert', 6.0, 'Gold'),
-                ('Amy Speaker', 'Keynote Speaker', 3.0, 'Silver')
-            ]
-            for c in cards:
-                await conn.execute('INSERT INTO market_cards (seller_id, card_name, card_prof, price, level) VALUES ($1, $2, $3, $4, $5)',
-                                   224223270, c[0], c[1], c[2], c[3])
-        await msg.answer("✅ 10 demo cards inserted into Market!")
-    except Exception as e:
-        await msg.answer(f"❌ Error: {e}")
 @dp.message_handler(commands=['docs'])
 async def docs_cmd(msg: types.Message):
     docs_text = "📚 **NIFTI Documentation**\n\n"
