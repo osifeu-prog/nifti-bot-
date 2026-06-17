@@ -1,15 +1,12 @@
 ﻿import asyncio, os, logging, uuid, json, random
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
-from fastapi import FastAPI, Request
+from fastapi import HTTPException, FastAPI, Request
 from fastapi.responses import HTMLResponse
 from audit_core import SystemAudit
 from aiogram import Bot, Dispatcher, types
-from audit_core import SystemAudit
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from audit_core import SystemAudit
 from aiogram.dispatcher import FSMContext
-from audit_core import SystemAudit
 from aiogram.dispatcher.filters.state import State, StatesGroup
 import nifti_core as core
 import uvicorn
@@ -214,7 +211,7 @@ async def glass_dashboard(msg: types.Message):
 
 @dp.message_handler(commands=['start'])
 async def start(msg: types.Message):
-    await SystemAudit.log_event('command_start', msg.from_user.id)
+    SystemAudit.log_event('command_start', msg.from_user.id)
     ref = int(msg.get_args()) if msg.get_args() and msg.get_args().isdigit() else None
     if ref and ref != msg.from_user.id:
         await add_referral(msg.from_user.id, ref)
@@ -1128,6 +1125,18 @@ async def cmd_set_photo(msg: types.Message):
             ON CONFLICT (user_id) DO UPDATE SET photo_file_id = $2
         ''', user_id, photo)
     await msg.reply('✅ Photo updated!')
+# ---------- JSON API Endpoints ----------
+@app.get("/api/ping")
+async def api_ping():
+    return {"status": "ok", "message": "NIFTI Backend v5.5.2 Online"}
+
+@app.get("/api/card/{user_id}")
+async def api_card(user_id: int):
+    async with core.pool.acquire() as conn:
+        user = await conn.fetchrow("SELECT * FROM users WHERE user_id=$1", user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return dict(user)
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host='0.0.0.0', port=port)
