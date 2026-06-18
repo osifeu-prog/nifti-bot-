@@ -15,3 +15,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 ENV AIOHTTP_NO_VERIFY_SSL=1
 CMD ["python", "server.py"]
 # force rebuild
+# force rebuild v2
