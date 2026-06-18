@@ -2419,6 +2419,16 @@ async def get_payment_qr(user_id: int):
     return {"qr_url": qr_url, "ton_link": ton_link, "amount_ton": row['price'], "wallet": wallet}
 
 
+
+@app.get("/api/debug/user/{user_id}")
+async def debug_user(user_id: int):
+    async with core.pool.acquire() as conn:
+        row = await conn.fetchrow("SELECT * FROM users WHERE user_id = ", user_id)
+    if not row:
+        return {"error": "User not found"}
+    return dict(row)
+
+
 if __name__ == '__main__':
 
     port = int(os.getenv("PORT", 8000))
