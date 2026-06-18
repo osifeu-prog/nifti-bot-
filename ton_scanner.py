@@ -29,7 +29,6 @@ async def process_tx(tx, pool):
     if not tx_hash:
         return
 
-    # Verify BOC
     boc = await verify_boc(tx_hash)
     if not boc.get("ok"):
         logging.warning(f"BOC verification failed for {tx_hash}: {boc.get('error')}")
