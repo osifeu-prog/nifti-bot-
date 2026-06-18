@@ -1,13 +1,15 @@
-﻿## ✅ Completed (v1.3)
+﻿## ✅ Completed (v1.4)
 - [x] BOC verification
 - [x] SIF Token integration
 - [x] Marketplace + Buy button
 - [x] Admin Dashboard
 - [x] Mini App static serving
 
-## 🔒 Backlog (LOCKED)
+## 🎯 Next Session (LOCKED)
+- Add TON payment QR / deep link [RECOVERED]
+
+## 🧊 Backlog (LOCKED)
 - Landing page [LOCKED]
 - Full i18n [LOCKED]
 - NFT card generation [LOCKED]
 - Order book / Exchange [LOCKED]
-- Add TON payment QR / deep link [RECOVERED]
