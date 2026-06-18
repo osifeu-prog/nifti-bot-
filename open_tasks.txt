@@ -3,14 +3,14 @@
 - [x] Database backup created
 - [x] Release notes documented
 - [x] Git anchor point committed
+- [x] Mini App served from FastAPI
 
-## 🟡 Next Session
-- Serve Mini App from FastAPI (static files)
-- Implement BOC verification
+## 🟡 In Progress
+- BOC verification (TON Center API)
 - SIF Token integration
-- Admin Dashboard
 
 ## 🟢 Backlog
+- Admin Dashboard
 - Landing page
 - Full i18n (9+ languages)
 - NFT card generation
