@@ -9,12 +9,18 @@ function App() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const tgUser = WebApp.initDataUnsafe?.user;
-    let userId = tgUser?.id;
-
+    // 1. Try Telegram WebApp user
+    let userId = WebApp.initDataUnsafe?.user?.id;
+    
+    // 2. Try URL query param (?user_id=...)
     if (!userId) {
       const params = new URLSearchParams(window.location.search);
       userId = params.get('user_id');
+    }
+
+    // 3. Fallback to server‑injected global variable
+    if (!userId && window.NIFTI_USER_ID) {
+      userId = window.NIFTI_USER_ID;
     }
 
     if (!userId) {
@@ -23,11 +29,10 @@ function App() {
       return;
     }
 
-    // Fetch card data
+    // Fetch card data + QR
     axios.get(`https://bot-production-c2a5.up.railway.app/api/card/${userId}`)
       .then(res => {
         setUserData(res.data);
-        // After getting card, fetch QR code
         return axios.get(`https://bot-production-c2a5.up.railway.app/api/qr/${userId}`);
       })
       .then(qrRes => {

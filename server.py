@@ -2020,8 +2020,13 @@ async def api_card_json(user_id: int):
 app.mount("/mini-app/assets", StaticFiles(directory="frontend/dist/assets"), name="mini-app-assets")
 
 @app.get("/mini-app")
-async def mini_app_root():
-    return HTMLResponse(open("frontend/dist/index.html", encoding="utf-8").read())
+async def mini_app_root(request: Request):
+    user_id = request.query_params.get("user_id", "")
+    html = open("frontend/dist/index.html", encoding="utf-8").read()
+    if user_id:
+        # Inject the user_id before the closing </head> tag
+        html = html.replace("</head>", f"<script>window.NIFTI_USER_ID = '{user_id}';</script></head>")
+    return HTMLResponse(html)
 
 @app.get("/mini-app/{full_path:path}")
 async def mini_app_fallback(full_path: str):
