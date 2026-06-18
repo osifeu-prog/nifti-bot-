@@ -1,4 +1,4 @@
-﻿import asyncio, json, os, asyncpg, logging, re, time
+import asyncio, json, os, asyncpg, logging, re, time
 from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
@@ -11,7 +11,7 @@ LANG = {}
 async def create_pool():
     global pool
     pool = await asyncpg.create_pool(DB_URL, min_size=1, max_size=5)
-    logging.info('✅ DB pool created')
+    logging.info(' DB pool created')
 
 async def check_db_health():
     try:
@@ -102,7 +102,7 @@ async def verify_boc(tx_hash: str) -> bool:
                 data = await resp.json()
                 return data.get("ok", False)
     return False
-﻿import aiohttp
+import aiohttp
 import os
 
 TONCENTER_API = "https://toncenter.com/api/v2"
@@ -122,4 +122,6 @@ async def verify_boc(tx_hash: str) -> dict:
                     return {"ok": True, "amount": value, "sender": sender, "comment": comment}
                 return {"ok": False, "error": "Transaction not found or invalid"}
             return {"ok": False, "error": f"API error {resp.status}"}
+
+
 
