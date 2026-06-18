@@ -2004,7 +2004,7 @@ app = FastAPI(lifespan=lifespan)
 @app.get("/api/card/{user_id}")
 async def api_card_json(user_id: int):
     async with core.pool.acquire() as conn:
-        row = await conn.fetchrow("SELECT card_name, card_prof, wallet FROM users WHERE user_id = ", user_id)
+        row = await conn.fetchrow("SELECT card_name, card_prof, wallet FROM users WHERE user_id = $1", user_id)
     if not row:
         return {"card_name": "Guest", "card_prof": "", "wallet": ""}
     return {"card_name": row["card_name"], "card_prof": row["card_prof"], "wallet": row["wallet"]}
