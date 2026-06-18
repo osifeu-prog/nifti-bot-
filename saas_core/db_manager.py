@@ -14,7 +14,6 @@ class DBManager:
         if not dsn:
             raise ValueError("DATABASE_URL is not set in .env file!")
         
-        # הדפסה לבדיקה בלבד (אל תשאיר סיסמאות בלוגים בייצור!)
         print(f"Connecting to DB using URL from .env")
         self.pool = await asyncpg.create_pool(dsn=dsn)
         print("SAAS DB Pool initialized")
@@ -22,3 +21,6 @@ class DBManager:
     async def get_user_wallet(self, user_id: int):
         async with self.pool.acquire() as conn:
             return await conn.fetchrow("SELECT wallet, iwa_balance FROM users WHERE user_id = $1", user_id)
+
+# יצירת המופע שכל הקבצים ייבאו
+db = DBManager()

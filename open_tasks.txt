@@ -2,7 +2,7 @@
 - [x] BOC verification
 - [x] SIF Token integration
 - [x] Marketplace + Buy button
-- [x] Bot command list updated
+- [x] Session protocol documented
 
 ## 🔒 Next Session (LOCKED)
 - Admin Dashboard [LOCKED]
