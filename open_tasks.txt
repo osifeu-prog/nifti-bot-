@@ -3,9 +3,9 @@
 - [x] SIF Token integration
 - [x] Marketplace + Buy button
 - [x] Session protocol documented
+- [x] Admin Dashboard
 
 ## 🔒 Next Session (LOCKED)
-- Admin Dashboard [LOCKED]
 - Mini App static serving
 
 ## 🔒 Backlog (LOCKED)
