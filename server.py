@@ -2411,3 +2411,4 @@ app.mount("/assets", StaticFiles(directory="frontend/dist/assets"), name="assets
 async def serve_frontend(rest_of_path: str):
     return FileResponse("frontend/dist/index.html")
 
+
