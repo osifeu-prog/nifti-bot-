@@ -2001,6 +2001,13 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+@app.middleware("http")
+async def add_utf8_header(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Content-Type"] = "application/json; charset=utf-8"
+    return response
+
 @app.get("/api/card/{user_id}")
 async def api_card_json(user_id: int):
     async with core.pool.acquire() as conn:
@@ -2154,6 +2161,8 @@ async def card_page(user_id: int):
         <div class="price">{price} TON</div>
 
         <button class="btn" onclick="window.open('https://app.tonkeeper.com/transfer/{TON_WALLET}?amount={amount_nano}&text=NIFTI_PAY:{user_id}', '_blank')">?? Pay with TON</button>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ton://transfer/{TON_WALLET}?amount={amount_nano}&text=NIFTI_PAY:{user_id}" alt="QR Code" style="margin-top:15px;border-radius:10px;">
+
 
         <button class="btn" onclick="window.open('https://t.me/share/url?url=https://t.me/NFTY_madness_bot?start={user_id}', '_blank')">?? Share & Earn 100 IWA</button>
 

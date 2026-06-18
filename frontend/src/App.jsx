@@ -4,6 +4,7 @@ import axios from 'axios';
 
 function App() {
   const [userData, setUserData] = useState(null);
+  const [qrData, setQrData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -22,14 +23,20 @@ function App() {
       return;
     }
 
+    // Fetch card data
     axios.get(`https://bot-production-c2a5.up.railway.app/api/card/${userId}`)
       .then(res => {
         setUserData(res.data);
+        // After getting card, fetch QR code
+        return axios.get(`https://bot-production-c2a5.up.railway.app/api/qr/${userId}`);
+      })
+      .then(qrRes => {
+        setQrData(qrRes.data);
         setLoading(false);
       })
       .catch(err => {
         console.error(err);
-        setError("Failed to load card.");
+        setError("Failed to load card or QR.");
         setLoading(false);
       });
   }, []);
@@ -44,6 +51,13 @@ function App() {
       <div style={{ background: '#222', color: '#fff', padding: 15, borderRadius: 12, marginTop: 20 }}>
         <p>Wallet: {userData?.wallet || "Not linked"}</p>
       </div>
+      {qrData && qrData.qr_url && (
+        <div style={{ marginTop: 20 }}>
+          <p style={{ color: '#00ff88' }}>Pay {qrData.amount_ton} TON</p>
+          <img src={qrData.qr_url} alt="Payment QR" style={{ width: 180, height: 180, borderRadius: 12, border: '2px solid #00ff88' }} />
+          <p style={{ fontSize: 12, color: '#888', marginTop: 5 }}>Scan with Tonkeeper</p>
+        </div>
+      )}
       <button
         onClick={() => WebApp.close()}
         style={{ marginTop: 20, padding: '10px 20px', borderRadius: 8, border: 'none', background: '#3390ec', color: 'white' }}
