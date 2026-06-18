@@ -29,3 +29,9 @@
 - Mini App now correctly serves JavaScript with pplication/javascript MIME type.
 ### Known issues
 - Browser caching may still serve stale content; resolved by using fresh profiles / hard refresh.
+## [v1.5.2] - 2026-06-19
+### Fixed
+- Cache busting for Mini App  added ?v= timestamp to JS src, plus Cache-Control headers.
+- MIME type collision (utf8 middleware removed).
+### Added
+- Source of Truth: PROJECT_MASTER.md, docs/vision.md, docs/roadmap.md, docs/known_bugs.md, docs/decisions.md
