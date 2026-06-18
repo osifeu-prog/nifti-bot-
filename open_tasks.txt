@@ -1,12 +1,10 @@
-﻿## ✅ Completed (v1.4)
+﻿## ✅ Completed (v1.5)
 - [x] BOC verification
 - [x] SIF Token integration
 - [x] Marketplace + Buy button
 - [x] Admin Dashboard
 - [x] Mini App static serving
-
-## 🎯 Next Session (LOCKED)
-- Add TON payment QR / deep link [RECOVERED]
+- [x] Add TON payment QR / deep link
 
 ## 🧊 Backlog (LOCKED)
 - Landing page [LOCKED]
