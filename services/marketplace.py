@@ -1,4 +1,4 @@
-"""
+﻿"""
 NIFTI Marketplace Service
 Direct asyncpg access to existing DB tables.
 """
@@ -74,3 +74,4 @@ async def get_user_balance(user_id: int):
 async def add_balance(user_id: int, amount: float):
     async with core.pool.acquire() as conn:
         await conn.execute("UPDATE users SET balance = COALESCE(balance, 0) + $1 WHERE user_id = $2", amount, user_id)
+

@@ -1,13 +1,1 @@
-﻿# NIFTI Open Tasks / Technical Debt
-
-## 🔴 High Priority
-- None - core systems stable
-
-## 🟡 Medium Priority
-- Verify BOC payment verification (TON Center API)
-
-## 🟢 Low Priority
-- Create templates/index.html (landing page)
-- Full i18n (9+ languages)
-- NFT card generation via Pillow
-- Order book / Exchange system
+- [2026-06-18 13:40] [API] Verify BOC verification
