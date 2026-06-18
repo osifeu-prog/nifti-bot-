@@ -1,5 +1,9 @@
 ﻿import asyncpg
 import os
+from dotenv import load_dotenv
+
+# טעינת המשתנים מהקובץ .env
+load_dotenv(override=True)
 
 class DBManager:
     def __init__(self):
@@ -8,8 +12,10 @@ class DBManager:
     async def connect(self):
         dsn = os.getenv("DATABASE_URL")
         if not dsn:
-            raise ValueError("DATABASE_URL is not set!")
-        print(f"Connecting to DB: {dsn[:15]}...") # הדפסה חלקית לבדיקה
+            raise ValueError("DATABASE_URL is not set in .env file!")
+        
+        # הדפסה לבדיקה בלבד (אל תשאיר סיסמאות בלוגים בייצור!)
+        print(f"Connecting to DB using URL from .env")
         self.pool = await asyncpg.create_pool(dsn=dsn)
         print("SAAS DB Pool initialized")
 

@@ -7,7 +7,6 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 
 from fastapi import FastAPI, Request
-from fastapi.staticfiles import StaticFiles
 
 from fastapi.responses import HTMLResponse
 
@@ -2001,7 +2000,6 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-app.mount("/assets", StaticFiles(directory="frontend/dist/assets"), name="assets")
 
 
 
