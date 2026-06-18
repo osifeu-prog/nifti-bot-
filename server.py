@@ -1153,3 +1153,59 @@ if __name__ == '__main__':
     uvicorn.run(app, host='0.0.0.0', port=port)
 
 # v5.5.4 - API endpoints active
+# ---------- Marketplace Handlers ----------
+from services.marketplace import add_product, list_products, buy_product, get_store, get_user_balance
+
+@dp.message_handler(commands=['sell'])
+async def cmd_sell(message: types.Message):
+    await message.answer("What are you selling? Send: /addproduct <name> | <description> | <price>")
+
+@dp.message_handler(commands=['addproduct'])
+async def cmd_add_product(message: types.Message):
+    try:
+        _, rest = message.text.split(' ', 1)
+        name, desc, price = rest.split(' | ')
+        price = float(price)
+        product_id = await add_product(message.from_user.id, name, desc, price)
+        await message.answer(f"✅ Product added! ID: {product_id}")
+    except Exception as e:
+        await message.answer(f"❌ Error: {e}\nFormat: /addproduct Name | Description | Price")
+
+@dp.message_handler(commands=['buy'])
+async def cmd_buy(message: types.Message):
+    try:
+        _, product_id = message.text.split()
+        product_id = int(product_id)
+        result = await buy_product(message.from_user.id, product_id)
+        if result['ok']:
+            await message.answer(f"🎉 Purchased {result['product']} for {result['price']} TON (fee: {result['fee']})")
+        else:
+            await message.answer(f"❌ {result['error']}")
+    except Exception as e:
+        await message.answer(f"❌ Error: {e}\nUsage: /buy <product_id>")
+
+@dp.message_handler(commands=['store'])
+async def cmd_store(message: types.Message):
+    store_data = await get_store(message.from_user.id)
+    if not store_data:
+        await message.answer("You don't have a store yet. Use /sell to create one.")
+        return
+    products = store_data['products']
+    if not products:
+        await message.answer("Your store is empty.")
+    else:
+        text = "🏪 *Your Store*\n"
+        for p in products:
+            text += f"  • {p['name']} — {p['price']} TON (ID: {p['id']})\n"
+        await message.answer(text, parse_mode='Markdown')
+
+@dp.message_handler(commands=['market'])
+async def cmd_market(message: types.Message):
+    products = await list_products()
+    if not products:
+        await message.answer("No products available.")
+        return
+    text = "🛒 *Marketplace*\n"
+    for p in products:
+        text += f"  • {p['name']} — {p['price']} TON (ID: {p['id']})\n"
+    await message.answer(text, parse_mode='Markdown')
