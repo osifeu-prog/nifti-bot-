@@ -50,8 +50,9 @@ async def buy_product(buyer_user_id: int, product_id: int, referrer_user_id: int
                 "INSERT INTO purchases (buyer_user_id, product_id, referrer_user_id, amount_ton, commission_paid, status) VALUES ($1,$2,$3,$4,FALSE,'completed')",
                 buyer_user_id, product_id, referrer_user_id, product["price"]
             )
+            # Fixed xp update  no ambiguous column
             await conn.execute(
-                "UPDATE xp SET xp = COALESCE(xp, 0) + 10 WHERE user_id = \$1; INSERT INTO xp (user_id, xp) SELECT \$1, 10 WHERE NOT EXISTS (SELECT 1 FROM xp WHERE user_id = \$1)",
+                "INSERT INTO xp (user_id, xp) VALUES ($1, 10) ON CONFLICT (user_id) DO UPDATE SET xp = xp.xp + 10",
                 buyer_user_id
             )
             return {"ok": True, "product": product["name"], "price": product["price"], "fee": fee}
@@ -74,5 +75,3 @@ async def get_user_balance(user_id: int):
 async def add_balance(user_id: int, amount: float):
     async with core.pool.acquire() as conn:
         await conn.execute("UPDATE users SET balance = COALESCE(balance, 0) + $1 WHERE user_id = $2", amount, user_id)
-
-
