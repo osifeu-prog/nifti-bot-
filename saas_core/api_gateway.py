@@ -1,4 +1,5 @@
-﻿from fastapi import FastAPI, HTTPException
+﻿from fastapi import FastAPI
+from saas_core.admin.admin_routes import router as admin_router, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from saas_core.db_manager import DBManager
