@@ -801,7 +801,7 @@ async def my_card_cmd(msg: types.Message):
 
     if not u or not u.get('card_name'):
 
-        await msg.answer(t('no_card', msg.from_user.id))
+        await msg.answer(f'Debug ID: {msg.from_user.id}')
 
         return
 
