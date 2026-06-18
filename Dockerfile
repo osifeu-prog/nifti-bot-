@@ -14,3 +14,4 @@ COPY --from=build-frontend /app/frontend/dist /app/frontend/dist
 RUN pip install --no-cache-dir -r requirements.txt
 ENV AIOHTTP_NO_VERIFY_SSL=1
 CMD ["python", "server.py"]
+# force rebuild
