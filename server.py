@@ -2009,11 +2009,6 @@ async def add_js_mime(request: Request, call_next):
     return response
 
 
-@app.middleware("http")
-async def add_utf8_header(request: Request, call_next):
-    response = await call_next(request)
-    response.headers["Content-Type"] = "application/json; charset=utf-8"
-    return response
 
 @app.get("/api/card/{user_id}")
 async def api_card_json(user_id: int):
