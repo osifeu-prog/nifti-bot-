@@ -2423,11 +2423,6 @@ async def get_payment_qr(user_id: int):
 
 
 
-@app.get("/api/dump/users")
-async def dump_users():
-    async with core.pool.acquire() as conn:
-        rows = await conn.fetch("SELECT * FROM users")
-    return [dict(r) for r in rows]
 
 
 if __name__ == '__main__':
