@@ -37,7 +37,8 @@ async def send_broadcast(text):
     await bot.close()
     return sent, failed
 
-@app.route('/')\n@app.route('/admin')
+@app.route('/')
+@app.route('/admin')
 def index():
     users = asyncio.run(get_users())
     payments = asyncio.run(get_payments())
@@ -55,4 +56,5 @@ def broadcast():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8002, debug=True)
+
 

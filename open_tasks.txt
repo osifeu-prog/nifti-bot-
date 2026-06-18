@@ -4,7 +4,6 @@
 - None - core systems stable
 
 ## 🟡 Medium Priority
-- Install Flask for admin_panel.py (or remove dependency)
 - Verify BOC payment verification (TON Center API)
 
 ## 🟢 Low Priority
