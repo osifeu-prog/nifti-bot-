@@ -3,16 +3,22 @@ scanner_path = r"D:\NIFTI\ton_scanner.py"
 with open(scanner_path, "r", encoding="utf-8") as f:
     content = f.read()
 
-# 1. Add import
+# Add import if not present
 if "from nifti_core import verify_boc" not in content:
     content = content.replace(
         "import asyncio, aiohttp, os, asyncpg, logging",
         "import asyncio, aiohttp, os, asyncpg, logging\nfrom nifti_core import verify_boc"
     )
 
-# 2. Replace process_tx to use BOC verification
-old_func = "async def process_tx(tx, pool):"
-new_func = '''async def process_tx(tx, pool):
+# Replace process_tx
+start_marker = "async def process_tx(tx, pool):"
+end_marker = "async def main():"
+
+start_idx = content.find(start_marker)
+end_idx = content.find(end_marker)
+
+if start_idx != -1 and end_idx != -1:
+    new_func = '''async def process_tx(tx, pool):
     tx_hash = tx.get("transaction_id", {}).get("hash", "")
     if not tx_hash:
         return
@@ -49,15 +55,6 @@ new_func = '''async def process_tx(tx, pool):
         await send_telegram(user_id, f"🎉 Payment of {value} TON received! Your Premium status is now active.")
         await send_telegram(224223270, f"💰 Payment received: {value} TON from user {user_id}")
 '''
-
-# Replace old process_tx with new one (find and replace by boundaries)
-start_marker = "async def process_tx(tx, pool):"
-end_marker = "async def main():"
-
-start_idx = content.find(start_marker)
-end_idx = content.find(end_marker)
-
-if start_idx != -1 and end_idx != -1:
     content = content[:start_idx] + new_func + "\n\n" + content[end_idx:]
     with open(scanner_path, "w", encoding="utf-8") as f:
         f.write(content)
