@@ -31,4 +31,3 @@ async def get_wallet(user_id: int):
         'balance': user_data.get('balance'),
         'wallet_address': user_data.get('wallet')
     }
-

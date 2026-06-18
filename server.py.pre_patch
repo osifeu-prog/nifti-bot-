@@ -2001,15 +2001,6 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-@app.get("/api/card/{user_id}")
-async def api_card_json(user_id: int):
-    async with core.pool.acquire() as conn:
-        row = await conn.fetchrow("SELECT card_name, card_prof, wallet FROM users WHERE user_id = ", user_id)
-    if not row:
-        return {"card_name": "Guest", "card_prof": "", "wallet": ""}
-    return {"card_name": row["card_name"], "card_prof": row["card_prof"], "wallet": row["wallet"]}
-
-
 # Mini App static serving
 app.mount("/mini-app/assets", StaticFiles(directory="frontend/dist/assets"), name="mini-app-assets")
 
@@ -2387,8 +2378,6 @@ async def cmd_set_sif_rate(msg: types.Message):
     except:
         await msg.answer("Usage: /set_sif_rate <rate>")
 
-
-
 if __name__ == '__main__':
 
     port = int(os.getenv("PORT", 8000))
@@ -2401,6 +2390,13 @@ if __name__ == '__main__':
 
 
 
+@app.get("/api/card/{user_id}")
+async def api_card_json(user_id: int):
+    async with core.pool.acquire() as conn:
+        row = await conn.fetchrow("SELECT card_name, card_prof, wallet FROM users WHERE user_id = $1", user_id)
+    if not row:
+        return {"card_name": "Guest", "card_prof": "", "wallet": ""}
+    return {"card_name": row["card_name"], "card_prof": row["card_prof"], "wallet": row["wallet"]}
 
 # ---------- Marketplace Handlers ----------
 
