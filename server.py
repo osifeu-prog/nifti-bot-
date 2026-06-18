@@ -6,8 +6,7 @@ from contextlib import asynccontextmanager
 
 from datetime import datetime, timedelta
 
-from fastapi import FastAPI
-from saas_core.api_gateway import app as saas_app, Request
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 
 from fastapi.responses import HTMLResponse
@@ -2380,6 +2379,19 @@ async def cmd_set_sif_rate(msg: types.Message):
         await msg.answer("Usage: /set_sif_rate <rate>")
 
 
+
+if __name__ == '__main__':
+
+    port = int(os.getenv("PORT", 8000))
+
+    uvicorn.run(app, host='0.0.0.0', port=port)
+
+
+
+# v5.5.4 - API endpoints active
+
+
+
 @app.get("/api/card/{user_id}")
 async def api_card_json(user_id: int):
     async with core.pool.acquire() as conn:
@@ -2388,9 +2400,17 @@ async def api_card_json(user_id: int):
         return {"card_name": "Guest", "card_prof": "", "wallet": ""}
     return {"card_name": row["card_name"], "card_prof": row["card_prof"], "wallet": row["wallet"]}
 
+# ---------- Marketplace Handlers ----------
 
-if __name__ == '__main__':
+from services.marketplace import add_product, list_products, buy_product, get_store, get_user_balance
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
 
-    port = int(os.getenv("PORT", 8000))
+app.mount("/assets", StaticFiles(directory="frontend/dist/assets"), name="assets")
 
-    uvicorn.run(app, host='0.0.0.0', port=port)
+@app.get("/{rest_of_path:path}")
+async def serve_frontend(rest_of_path: str):
+    return FileResponse("frontend/dist/index.html")
+
+
