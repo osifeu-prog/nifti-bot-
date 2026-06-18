@@ -2030,7 +2030,7 @@ async def mini_app_root(request: Request):
 
 @app.get("/mini-app/{full_path:path}")
 async def mini_app_fallback(full_path: str):
-    return HTMLResponse(open("frontend/dist/index.html", encoding="utf-8").read())
+    return HTMLResponse(open("frontend/dist/index.html", encoding="utf-8").read(), headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
 
 
 
