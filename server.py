@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 
 from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
 
 from fastapi.responses import HTMLResponse
 
@@ -2000,6 +2001,17 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+# Mini App static serving
+app.mount("/mini-app/assets", StaticFiles(directory="frontend/dist/assets"), name="mini-app-assets")
+
+@app.get("/mini-app")
+async def mini_app_root():
+    return HTMLResponse(open("frontend/dist/index.html", encoding="utf-8").read())
+
+@app.get("/mini-app/{full_path:path}")
+async def mini_app_fallback(full_path: str):
+    return HTMLResponse(open("frontend/dist/index.html", encoding="utf-8").read())
+
 
 
 
@@ -2389,3 +2401,13 @@ async def api_card_json(user_id: int):
 # ---------- Marketplace Handlers ----------
 
 from services.marketplace import add_product, list_products, buy_product, get_store, get_user_balance
+f r o m   f a s t a p i . s t a t i c f i l e s   i m p o r t   S t a t i c F i l e s 
+ f r o m   f a s t a p i . r e s p o n s e s   i m p o r t   F i l e R e s p o n s e 
+ i m p o r t   o s  
+ 
+app.mount("/assets", StaticFiles(directory="frontend/dist/assets"), name="assets")
+
+@app.get("/{rest_of_path:path}")
+async def serve_frontend(rest_of_path: str):
+    return FileResponse("frontend/dist/index.html")
+
