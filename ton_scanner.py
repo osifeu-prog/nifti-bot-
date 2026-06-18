@@ -1,4 +1,4 @@
-﻿import asyncio, aiohttp, os, asyncpg, logging
+import asyncio, aiohttp, os, asyncpg, logging
 from datetime import datetime
 
 logging.basicConfig(level=logging.INFO)
@@ -39,15 +39,15 @@ async def process_tx(tx, pool):
                 "INSERT INTO premium_users (user_id, bot_name, amount, tx_hash) VALUES ($1, 'nifti', $2, $3)",
                 user_id, value, tx_hash
             )
-            logging.info(f"✅ Premium activated for user {user_id} ({value} TON)")
+            logging.info(f"? Premium activated for user {user_id} ({value} TON)")
             # Notify user
-            await send_telegram(user_id, f"🎉 Payment of {value} TON received! Your Premium status is now active.")
+            await send_telegram(user_id, f"?? Payment of {value} TON received! Your Premium status is now active.")
             # Notify admin (you)
-            await send_telegram(224223270, f"💰 Payment received: {value} TON from user {user_id}")
+            await send_telegram(224223270, f"?? Payment received: {value} TON from user {user_id}")
 
 async def main():
     pool = await asyncpg.create_pool(DB_URL, min_size=1, max_size=2)
-    logging.info("🔍 TON Scanner started (with notifications)")
+    logging.info("?? TON Scanner started (with notifications)")
     while True:
         try:
             txs = await get_transactions()
@@ -55,7 +55,7 @@ async def main():
                 await process_tx(tx, pool)
         except Exception as e:
             logging.error(f"Scanner error: {e}")
-        await asyncio.sleep(300)
+        await asyncio.sleep(600)
 
 if __name__ == "__main__":
     asyncio.run(main())
