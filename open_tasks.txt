@@ -1,12 +1,8 @@
-﻿## ✅ Completed (v1.0)
-- [x] Marketplace live with first transaction
-- [x] Database backup created
-- [x] Release notes documented
-- [x] Git anchor point committed
-- [x] Mini App served from FastAPI
+﻿## ✅ Completed (v1.1)
+- [x] BOC verification (TON Center API)
+- [x] ton_scanner now verifies each transaction via TON Center
 
 ## 🟡 In Progress
-- BOC verification (TON Center API)
 - SIF Token integration
 
 ## 🟢 Backlog

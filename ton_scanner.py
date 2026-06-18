@@ -1,4 +1,5 @@
 import asyncio, aiohttp, os, asyncpg, logging
+from nifti_core import verify_boc
 from datetime import datetime
 
 logging.basicConfig(level=logging.INFO)
@@ -24,26 +25,42 @@ async def send_telegram(user_id: int, text: str):
         await session.post(url, json=payload)
 
 async def process_tx(tx, pool):
-    memo = tx.get("comment", "")
+    tx_hash = tx.get("transaction_id", {}).get("hash", "")
+    if not tx_hash:
+        return
+
+    # Verify BOC
+    boc = await verify_boc(tx_hash)
+    if not boc.get("ok"):
+        logging.warning(f"BOC verification failed for {tx_hash}: {boc.get('error')}")
+        return
+
+    memo = boc.get("comment", "")
+    value = boc["amount"]
+    user_id = None
+
     if memo.startswith("NIFTI_PAY:"):
-        user_id = int(memo.split(":")[1])
-        value = int(tx["in_msg"]["value"]) / 1e9
-        tx_hash = tx["transaction_id"]["hash"]
-        async with pool.acquire() as conn:
-            # Check if already processed
-            exists = await conn.fetchval("SELECT tx_hash FROM premium_users WHERE tx_hash=$1", tx_hash)
-            if exists:
-                return
-            await conn.execute("UPDATE users SET is_premium = TRUE WHERE user_id = $1", user_id)
-            await conn.execute(
-                "INSERT INTO premium_users (user_id, bot_name, amount, tx_hash) VALUES ($1, 'nifti', $2, $3)",
-                user_id, value, tx_hash
-            )
-            logging.info(f"? Premium activated for user {user_id} ({value} TON)")
-            # Notify user
-            await send_telegram(user_id, f"?? Payment of {value} TON received! Your Premium status is now active.")
-            # Notify admin (you)
-            await send_telegram(224223270, f"?? Payment received: {value} TON from user {user_id}")
+        try:
+            user_id = int(memo.split(":")[1])
+        except:
+            pass
+
+    if not user_id:
+        return
+
+    async with pool.acquire() as conn:
+        exists = await conn.fetchval("SELECT tx_hash FROM premium_users WHERE tx_hash=$1", tx_hash)
+        if exists:
+            return
+        await conn.execute("UPDATE users SET is_premium = TRUE WHERE user_id = $1", user_id)
+        await conn.execute(
+            "INSERT INTO premium_users (user_id, bot_name, amount, tx_hash) VALUES ($1, 'nifti', $2, $3)",
+            user_id, value, tx_hash
+        )
+        logging.info(f"✅ Premium activated for user {user_id} ({value} TON)")
+        await send_telegram(user_id, f"🎉 Payment of {value} TON received! Your Premium status is now active.")
+        await send_telegram(224223270, f"💰 Payment received: {value} TON from user {user_id}")
+
 
 async def main():
     pool = await asyncpg.create_pool(DB_URL, min_size=1, max_size=2)
