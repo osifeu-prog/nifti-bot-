@@ -8,12 +8,23 @@ function App() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const userId = WebApp.initDataUnsafe?.user?.id;
+    // Try to get user from Telegram WebApp
+    const tgUser = WebApp.initDataUnsafe?.user;
+    let userId = tgUser?.id;
+
+    // Fallback: if not in Telegram, use a query parameter
     if (!userId) {
-      setError("User ID not found. Ensure you open this app from Telegram.");
+      const params = new URLSearchParams(window.location.search);
+      userId = params.get('user_id');
+    }
+
+    // Hardcoded fallback for testing
+    if (!userId) {
+      setError("Please open this app from Telegram, or add ?user_id=224223270 to test.");
       setLoading(false);
       return;
     }
+
     axios.get(`https://bot-production-c2a5.up.railway.app/api/card/${userId}`)
       .then(res => {
         setUserData(res.data);
@@ -31,8 +42,8 @@ function App() {
 
   return (
     <div style={{ padding: '20px', textAlign: 'center', fontFamily: 'sans-serif' }}>
-      <h1>{userData?.name || "NIFTI User"}</h1>
-      <p>Profession: {userData?.prof || "Not set"}</p>
+      <h1>{userData?.card_name || userData?.name || "NIFTI User"}</h1>
+      <p>Profession: {userData?.card_prof || "Not set"}</p>
       <div style={{ background: '#222', color: '#fff', padding: '15px', borderRadius: '12px', marginTop: '20px' }}>
         <p>Wallet: {userData?.wallet || "Not linked"}</p>
       </div>
