@@ -9,27 +9,19 @@ function App() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // 1. Try Telegram WebApp user
     let userId = WebApp.initDataUnsafe?.user?.id;
-    
-    // 2. Try URL query param (?user_id=...)
     if (!userId) {
       const params = new URLSearchParams(window.location.search);
       userId = params.get('user_id');
     }
-
-    // 3. Fallback to server‑injected global variable
     if (!userId && window.NIFTI_USER_ID) {
       userId = window.NIFTI_USER_ID;
     }
-
     if (!userId) {
       setError("Please open this app from Telegram, or add ?user_id=...");
       setLoading(false);
       return;
     }
-
-    // Fetch card data + QR
     axios.get(`https://bot-production-c2a5.up.railway.app/api/card/${userId}`)
       .then(res => {
         setUserData(res.data);
@@ -63,6 +55,12 @@ function App() {
           <p style={{ fontSize: 12, color: '#888', marginTop: 5 }}>Scan with Tonkeeper</p>
         </div>
       )}
+      <button
+        onClick={() => window.open('https://t.me/SLH_Community', '_blank')}
+        style={{ marginTop: 20, padding: '10px 20px', borderRadius: 8, border: 'none', background: '#00d2ff', color: 'white' }}
+      >
+        ?? Join Community
+      </button>
       <button
         onClick={() => WebApp.close()}
         style={{ marginTop: 20, padding: '10px 20px', borderRadius: 8, border: 'none', background: '#3390ec', color: 'white' }}
