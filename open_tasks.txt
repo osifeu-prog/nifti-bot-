@@ -1,8 +1,17 @@
-﻿## ? In Progress (LOCKED)
+﻿## ✅ Completed (v1.2)
 - [x] BOC verification
-- [x] SIF Token integration
-- [x] Admin Dashboard (LOCKED)
-- [x] Landing page (LOCKED)
-- [x] Full i18n (9+ languages) (LOCKED)
-- [x] NFT card generation (LOCKED)
-- [x] Order book / Exchange (LOCKED)
+- [x] SIF Token integration (buy/sell/transfer, rate)
+- [x] Server crash fixed (StaticFiles removed)
+- [x] SIF commands working (/sif, /buy_sif, /sell_sif)
+- [x] Bot command list updated
+- [x] sif_balance column added to Railway DB
+
+## 🟡 Next Session (LOCKED)
+- Admin Dashboard (fees, commissions, SIF stats) [LOCKED]
+- Mini App static serving (proper implementation)
+
+## 🟢 Backlog (LOCKED)
+- Landing page [LOCKED]
+- Full i18n (9+ languages) [LOCKED]
+- NFT card generation [LOCKED]
+- Order book / Exchange [LOCKED]
