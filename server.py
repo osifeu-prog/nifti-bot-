@@ -22,6 +22,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 import nifti_core as core
 
 import uvicorn
+import time
 
 
 
@@ -2028,7 +2029,10 @@ async def mini_app_root(request: Request):
     if user_id:
         # Inject user_id BEFORE the first <script> tag (before React loads)
         html = html.replace("<script", f"<script>window.NIFTI_USER_ID = '{user_id}';</script><script", 1)
-    return HTMLResponse(html)
+    # Cache busting: add timestamp to JS file
+    ts = int(time.time())
+    html = html.replace('.js"', f'.js?v={ts}"')
+    return HTMLResponse(html, headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
 
 @app.get("/mini-app/{full_path:path}")
 async def mini_app_fallback(full_path: str):
