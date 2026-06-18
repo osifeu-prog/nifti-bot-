@@ -1105,11 +1105,11 @@ async def market_cmd(msg: types.Message):
         await msg.answer("No products available.")
         return
     for p in products[:10]:
-        text = f'**{p["name"]}**
-{p["description"]}
-Price: {p["price"]} TON'
+        text = f"**{p['name']}**
+{p['description']}
+Price: {p['price']} TON"
         kb = types.InlineKeyboardMarkup().add(
-            types.InlineKeyboardButton("Buy", callback_data=f"buy_{p["id"]}")
+            types.InlineKeyboardButton("Buy", callback_data=f"buy_{p['id']}")
         )
         await msg.answer(text, parse_mode="Markdown", reply_markup=kb)
 
