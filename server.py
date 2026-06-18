@@ -1095,22 +1095,21 @@ async def set_wallet_cmd(msg: types.Message):
 @dp.message_handler(commands=['market'])
 
 async def market_cmd(msg: types.Message):
-
-    async with core.pool.acquire() as conn:
-
-        cards = await conn.fetch('SELECT * FROM market_cards ORDER BY id LIMIT 10')
-
-    if not cards:
-
-        await msg.answer('No cards in the market yet.')
-
+    from services.marketplace import list_products
+    try:
+        products = await list_products()
+    except Exception as e:
+        await msg.answer(f"Error loading products: {e}")
         return
-
-    await show_market_card(msg, cards, 0)
-
-
-
-
+    if not products:
+        await msg.answer("No products available.")
+        return
+    for p in products[:10]:
+        text = f"**{p['name']}**\n{p['description']}\nPrice: {p['price']} TON"
+        kb = types.InlineKeyboardMarkup().add(
+            types.InlineKeyboardButton("Buy", callback_data=f"buy_{p['id']}")
+        )
+        await msg.answer(text, parse_mode="Markdown", reply_markup=kb)
 
 # ---------- Edit Wizard (Robust) ----------
 
@@ -2307,6 +2306,16 @@ if __name__ == '__main__':
 
 
 # v5.5.4 - API endpoints active
+
+
+
+@app.get("/api/card/{user_id}")
+async def api_card_json(user_id: int):
+    async with core.pool.acquire() as conn:
+        row = await conn.fetchrow("SELECT card_name, card_prof, wallet FROM users WHERE user_id = $1", user_id)
+    if not row:
+        return {"card_name": "Guest", "card_prof": "", "wallet": ""}
+    return {"card_name": row["card_name"], "card_prof": row["card_prof"], "wallet": row["wallet"]}
 
 # ---------- Marketplace Handlers ----------
 
