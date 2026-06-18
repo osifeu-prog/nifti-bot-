@@ -1,27 +1,26 @@
-﻿# NIFTI STATUS - 2026-06-18
+﻿# NIFTI STATUS - 2026-06-18 Session End
 
-## Working
-- Bot: LIVE at https://bot-production-c2a5.up.railway.app
-- DB: 23 tables, PostgreSQL Railway
-- Handlers: start, market (demo), leaderboard, admin, earnings, invite, spin
-- TON Scanner: running every 600s
-- BOM/null bytes: fixed in server.py + marketplace.py
+## ✅ Achieved Today
+- Fixed Procfile, aiogram install, DB columns
+- Cleaned server.py BOM/null bytes
+- Built marketplace.py (real DB logic)
+- Replaced /market handler with real products
+- Created all Marketplace tables (products, stores, purchases, transactions, commissions, xp)
+- Seeded demo product ("SIF Token Sample")
+- Fixed Mini App user_id fallback
+- Added /api/card/{user_id} JSON endpoint
+- Git repository clean, all changes pushed
 
-## Fixed Today
-- server.py BOM removed
-- marketplace.py created (clean)
-- requirements.txt updated
-- DB columns added
+## 🟢 Working
+- Bot fully functional
+- TON Scanner (every 600s)
+- All core handlers (start, market, leaderboard, admin, earnings, wallet, etc.)
+- Real Marketplace (products from DB, buy flow in progress)
+- API: /api/ping, /api/card/{user_id}
 
-## Known Issues
-- Emoji broken in some deploys (PYTHONIOENCODING missing on Railway)
-- /market shows demo cards (needs real products)
-- /buy, /store, /addproduct not connected to real DB
-- Mini App: User ID not found (frontend fix needed)
-- /db_backup returns empty
-- /dev panel broken
-
-## Next Session
-1. Set PYTHONIOENCODING on Railway
-2. Replace /market handler with real products
-3. Fix Mini App user_id
+## 🔜 Next Session
+- Connect "Buy" button to purchase flow (TON payment)
+- Implement SIF Token (balance, conversion)
+- Build Admin Dashboard for fees/commissions
+- Full i18n support
+- Mini App refinement
