@@ -1,0 +1,2001 @@
+{
+  "wallets": [],
+  "cards": [
+    {
+      "user_id": 224223270,
+      "display_name": "אוסיף אונגר",
+      "profession": "אומן על חלל",
+      "ton_wallet": "UQCr743gEr_nqV_0SBkSp3CtYS_15R3LDLBvLmKeEv7XdGvp",
+      "custom_links": "[]",
+      "created_at": "2026-06-13 20:13:03.022396",
+      "updated_at": "2026-06-13 20:13:03.022396"
+    }
+  ],
+  "contests": [],
+  "premium_products": [
+    {
+      "id": 1,
+      "name": "כרטיס ביקור מוזהב",
+      "description": "עיצוב פרימיום + QR + תו אבטחה",
+      "price_ton": "3.00",
+      "active": true
+    },
+    {
+      "id": 2,
+      "name": "בדיקת מערכת",
+      "description": "מוצר לבדיקת תשלום (0.1 TON)",
+      "price_ton": "0.10",
+      "active": true
+    }
+  ],
+  "purchases": [
+    {
+      "id": 6,
+      "buyer_user_id": 224223270,
+      "product_id": 1,
+      "referrer_user_id": null,
+      "amount_ton": "3.00",
+      "commission_paid": false,
+      "tx_hash": "demo_tx",
+      "invoice_id": "84927174-1548-4a77-a80b-cd5012e51325",
+      "status": "paid",
+      "created_at": "2026-06-14 08:31:15.025289"
+    },
+    {
+      "id": 7,
+      "buyer_user_id": 224223270,
+      "product_id": 1,
+      "referrer_user_id": null,
+      "amount_ton": "3.00",
+      "commission_paid": false,
+      "tx_hash": "demo_tx",
+      "invoice_id": "12261eec-8bd5-4559-8cbc-98f8766d9f04",
+      "status": "paid",
+      "created_at": "2026-06-14 08:37:07.691926"
+    },
+    {
+      "id": 3,
+      "buyer_user_id": 224223270,
+      "product_id": 2,
+      "referrer_user_id": null,
+      "amount_ton": "0.10",
+      "commission_paid": true,
+      "tx_hash": "manual_verify",
+      "invoice_id": "e5702e50-d3d0-43a2-b233-9125dbbcb23c",
+      "status": "paid",
+      "created_at": "2026-06-14 07:50:29.739375"
+    },
+    {
+      "id": 1,
+      "buyer_user_id": 224223270,
+      "product_id": 1,
+      "referrer_user_id": null,
+      "amount_ton": "3.00",
+      "commission_paid": true,
+      "tx_hash": "manual_verify",
+      "invoice_id": "f940a771-d4d6-4277-86aa-5e6553c278b0",
+      "status": "paid",
+      "created_at": "2026-06-14 07:19:16.815926"
+    },
+    {
+      "id": 2,
+      "buyer_user_id": 224223270,
+      "product_id": 1,
+      "referrer_user_id": null,
+      "amount_ton": "3.00",
+      "commission_paid": true,
+      "tx_hash": "manual_verify",
+      "invoice_id": "ebdad903-c893-4ba5-aaf5-6572d8e9bebc",
+      "status": "paid",
+      "created_at": "2026-06-14 07:22:38.726654"
+    },
+    {
+      "id": 4,
+      "buyer_user_id": 224223270,
+      "product_id": 2,
+      "referrer_user_id": null,
+      "amount_ton": "0.10",
+      "commission_paid": true,
+      "tx_hash": "manual_verify",
+      "invoice_id": "0cbd1358-f2fd-4bed-89c2-dfc9835fbff8",
+      "status": "paid",
+      "created_at": "2026-06-14 07:55:34.368033"
+    },
+    {
+      "id": 5,
+      "buyer_user_id": 224223270,
+      "product_id": 2,
+      "referrer_user_id": null,
+      "amount_ton": "0.10",
+      "commission_paid": true,
+      "tx_hash": "manual_verify",
+      "invoice_id": "a5500e83-3a50-4c0b-8cfa-6db9974ea34a",
+      "status": "paid",
+      "created_at": "2026-06-14 08:19:11.515009"
+    },
+    {
+      "id": 8,
+      "buyer_user_id": 224223270,
+      "product_id": 2,
+      "referrer_user_id": null,
+      "amount_ton": "0.10",
+      "commission_paid": true,
+      "tx_hash": "manual_verify",
+      "invoice_id": "76ca6a3e-9d94-4ec5-95c3-92810b264992",
+      "status": "paid",
+      "created_at": "2026-06-14 09:14:08.553808"
+    }
+  ],
+  "commissions": [
+    {
+      "id": 1,
+      "from_user_id": 224223270,
+      "to_user_id": 224223270,
+      "amount_ton": "3.00",
+      "level": 1,
+      "status": "paid",
+      "purchase_id": 6,
+      "created_at": "2026-06-14 08:31:15.034038"
+    },
+    {
+      "id": 2,
+      "from_user_id": 224223270,
+      "to_user_id": 224223270,
+      "amount_ton": "3.00",
+      "level": 1,
+      "status": "paid",
+      "purchase_id": 7,
+      "created_at": "2026-06-14 08:37:07.694743"
+    },
+    {
+      "id": 3,
+      "from_user_id": 224223270,
+      "to_user_id": 224223270,
+      "amount_ton": "0.10",
+      "level": 1,
+      "status": "paid",
+      "purchase_id": 3,
+      "created_at": "2026-06-14 09:05:33.265148"
+    },
+    {
+      "id": 4,
+      "from_user_id": 224223270,
+      "to_user_id": 224223270,
+      "amount_ton": "3.00",
+      "level": 1,
+      "status": "paid",
+      "purchase_id": 1,
+      "created_at": "2026-06-14 11:27:23.339801"
+    },
+    {
+      "id": 5,
+      "from_user_id": 224223270,
+      "to_user_id": 224223270,
+      "amount_ton": "3.00",
+      "level": 1,
+      "status": "paid",
+      "purchase_id": 2,
+      "created_at": "2026-06-14 11:27:39.541864"
+    },
+    {
+      "id": 6,
+      "from_user_id": 224223270,
+      "to_user_id": 224223270,
+      "amount_ton": "0.10",
+      "level": 1,
+      "status": "paid",
+      "purchase_id": 4,
+      "created_at": "2026-06-14 11:27:48.422214"
+    },
+    {
+      "id": 7,
+      "from_user_id": 224223270,
+      "to_user_id": 224223270,
+      "amount_ton": "0.10",
+      "level": 1,
+      "status": "paid",
+      "purchase_id": 5,
+      "created_at": "2026-06-14 11:28:01.034278"
+    },
+    {
+      "id": 8,
+      "from_user_id": 224223270,
+      "to_user_id": 224223270,
+      "amount_ton": "0.10",
+      "level": 1,
+      "status": "paid",
+      "purchase_id": 8,
+      "created_at": "2026-06-14 11:28:09.526604"
+    }
+  ],
+  "referral_points": [],
+  "settings": [
+    {
+      "key": "free_cards_max",
+      "value": "200"
+    },
+    {
+      "key": "free_cards_claimed",
+      "value": "2"
+    }
+  ],
+  "promo_claims": [
+    {
+      "user_id": 224223370,
+      "wallet": "none",
+      "claimed_at": "2026-06-14 16:37:50.035412+00:00"
+    },
+    {
+      "user_id": 224223270,
+      "wallet": null,
+      "claimed_at": "2026-06-14 21:16:36.359938+00:00"
+    }
+  ],
+  "coupons": [
+    {
+      "id": 1,
+      "code": "PYKR4IDC",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.770117"
+    },
+    {
+      "id": 2,
+      "code": "H4NFMCHM",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.803284"
+    },
+    {
+      "id": 3,
+      "code": "MEBZK1T0",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.803994"
+    },
+    {
+      "id": 4,
+      "code": "V8QNO89Q",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.804695"
+    },
+    {
+      "id": 5,
+      "code": "04KNKKXR",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.806121"
+    },
+    {
+      "id": 6,
+      "code": "CVWD7Z50",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.807691"
+    },
+    {
+      "id": 7,
+      "code": "P7Q6ZFUT",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.808414"
+    },
+    {
+      "id": 8,
+      "code": "20D84K00",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.809146"
+    },
+    {
+      "id": 9,
+      "code": "WHSUXV5L",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.810240"
+    },
+    {
+      "id": 10,
+      "code": "8SHYKQ6Q",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.810925"
+    },
+    {
+      "id": 11,
+      "code": "V1A5RWHF",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.811615"
+    },
+    {
+      "id": 12,
+      "code": "ADFJNVE8",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.812266"
+    },
+    {
+      "id": 13,
+      "code": "BK9R38Y2",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.812783"
+    },
+    {
+      "id": 14,
+      "code": "SVOMFXIM",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.813316"
+    },
+    {
+      "id": 15,
+      "code": "83XA61ZD",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.814067"
+    },
+    {
+      "id": 16,
+      "code": "60T25NJ4",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.815574"
+    },
+    {
+      "id": 17,
+      "code": "5NBXP1M0",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.816010"
+    },
+    {
+      "id": 18,
+      "code": "60ZP8ZHC",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.816444"
+    },
+    {
+      "id": 19,
+      "code": "KQP7T9A7",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.816813"
+    },
+    {
+      "id": 20,
+      "code": "4VRVO9O9",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.817253"
+    },
+    {
+      "id": 21,
+      "code": "GTB953CT",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.817672"
+    },
+    {
+      "id": 22,
+      "code": "0C7ESFXY",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.818026"
+    },
+    {
+      "id": 23,
+      "code": "KXZZ9EBF",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.818499"
+    },
+    {
+      "id": 24,
+      "code": "OCMA8Q02",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.818895"
+    },
+    {
+      "id": 25,
+      "code": "GL60EXM6",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.819332"
+    },
+    {
+      "id": 26,
+      "code": "532IQBVP",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.819728"
+    },
+    {
+      "id": 27,
+      "code": "Z7SIKBS2",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.820097"
+    },
+    {
+      "id": 28,
+      "code": "I6NVODM1",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.820400"
+    },
+    {
+      "id": 29,
+      "code": "Q1BCBFLY",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.820915"
+    },
+    {
+      "id": 30,
+      "code": "XQ759HTH",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.821288"
+    },
+    {
+      "id": 31,
+      "code": "7M6ZO74A",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.821767"
+    },
+    {
+      "id": 32,
+      "code": "6V6WS1OH",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.822062"
+    },
+    {
+      "id": 33,
+      "code": "YILGOAAZ",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.822493"
+    },
+    {
+      "id": 34,
+      "code": "P8F8R9X3",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.822889"
+    },
+    {
+      "id": 35,
+      "code": "XI3XITOT",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.823186"
+    },
+    {
+      "id": 36,
+      "code": "645IDYUH",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.823579"
+    },
+    {
+      "id": 37,
+      "code": "2Q06YBCE",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.823862"
+    },
+    {
+      "id": 38,
+      "code": "JJ88E57K",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.824236"
+    },
+    {
+      "id": 39,
+      "code": "7ZERBW4W",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.824617"
+    },
+    {
+      "id": 40,
+      "code": "IKQG2I2J",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.824894"
+    },
+    {
+      "id": 41,
+      "code": "OPALAUEE",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.825249"
+    },
+    {
+      "id": 42,
+      "code": "1TQJGG67",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.825614"
+    },
+    {
+      "id": 43,
+      "code": "HNHSY27Q",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.825884"
+    },
+    {
+      "id": 44,
+      "code": "6GF41563",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.826407"
+    },
+    {
+      "id": 45,
+      "code": "QXBIS776",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.826768"
+    },
+    {
+      "id": 46,
+      "code": "FSLTIXS7",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.827045"
+    },
+    {
+      "id": 47,
+      "code": "C24T9OT8",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.827390"
+    },
+    {
+      "id": 48,
+      "code": "Z1NREV9I",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.827749"
+    },
+    {
+      "id": 49,
+      "code": "7Y4PUPVJ",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.828129"
+    },
+    {
+      "id": 50,
+      "code": "BBFUKP6U",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.828421"
+    },
+    {
+      "id": 51,
+      "code": "UAIRKSJZ",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.828725"
+    },
+    {
+      "id": 52,
+      "code": "FZ0TT4Y1",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.828941"
+    },
+    {
+      "id": 53,
+      "code": "YH1ARQLX",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.829222"
+    },
+    {
+      "id": 54,
+      "code": "W5UVA9IK",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.829544"
+    },
+    {
+      "id": 55,
+      "code": "CVM8BFUE",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.829859"
+    },
+    {
+      "id": 56,
+      "code": "6NL5HZZZ",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.830347"
+    },
+    {
+      "id": 57,
+      "code": "CGJXUU96",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.830875"
+    },
+    {
+      "id": 58,
+      "code": "Q7WS68WK",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.831258"
+    },
+    {
+      "id": 59,
+      "code": "CDDZU6QV",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.831668"
+    },
+    {
+      "id": 60,
+      "code": "CMKV0OHG",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.831885"
+    },
+    {
+      "id": 61,
+      "code": "9OPCVI40",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.832313"
+    },
+    {
+      "id": 62,
+      "code": "LA287SMB",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.832674"
+    },
+    {
+      "id": 63,
+      "code": "6671N9L5",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.833053"
+    },
+    {
+      "id": 64,
+      "code": "XDBVBEK9",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.833331"
+    },
+    {
+      "id": 65,
+      "code": "2VY7FY67",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.833636"
+    },
+    {
+      "id": 66,
+      "code": "GA1O0KD4",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.833920"
+    },
+    {
+      "id": 67,
+      "code": "O70G5VA0",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.834158"
+    },
+    {
+      "id": 68,
+      "code": "2QQON6C2",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.834463"
+    },
+    {
+      "id": 69,
+      "code": "KY77HWP4",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.834695"
+    },
+    {
+      "id": 70,
+      "code": "VVV7GBPV",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.834978"
+    },
+    {
+      "id": 71,
+      "code": "CL1GE13S",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.835450"
+    },
+    {
+      "id": 72,
+      "code": "9E6AQ9WL",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.835688"
+    },
+    {
+      "id": 73,
+      "code": "LQZ8TAZA",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.835911"
+    },
+    {
+      "id": 74,
+      "code": "3AWEPXY4",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.836310"
+    },
+    {
+      "id": 75,
+      "code": "R0A2E7OH",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.836552"
+    },
+    {
+      "id": 76,
+      "code": "7ACKM5VL",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.836786"
+    },
+    {
+      "id": 77,
+      "code": "BSAGO8JI",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.837224"
+    },
+    {
+      "id": 78,
+      "code": "SQXFYCFS",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.837437"
+    },
+    {
+      "id": 79,
+      "code": "LL7CH903",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.837667"
+    },
+    {
+      "id": 80,
+      "code": "ZP5WDVB0",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.838108"
+    },
+    {
+      "id": 81,
+      "code": "BVI3QNP8",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.838322"
+    },
+    {
+      "id": 82,
+      "code": "SFU2DOFJ",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.838533"
+    },
+    {
+      "id": 83,
+      "code": "U7Q7J1OT",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.838767"
+    },
+    {
+      "id": 84,
+      "code": "FZAFAN1B",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.839036"
+    },
+    {
+      "id": 85,
+      "code": "SAWFHURG",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.839247"
+    },
+    {
+      "id": 86,
+      "code": "2TB3HJZ2",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.839464"
+    },
+    {
+      "id": 87,
+      "code": "9C9N4QYR",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.839696"
+    },
+    {
+      "id": 88,
+      "code": "ZPB1SKMK",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.840033"
+    },
+    {
+      "id": 89,
+      "code": "915NF9F5",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.840238"
+    },
+    {
+      "id": 90,
+      "code": "GGAHWKQS",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.840492"
+    },
+    {
+      "id": 91,
+      "code": "LGZCUIBY",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.840723"
+    },
+    {
+      "id": 92,
+      "code": "W8LNP6OS",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.841097"
+    },
+    {
+      "id": 93,
+      "code": "GAHD0M44",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.841303"
+    },
+    {
+      "id": 94,
+      "code": "JZUV47RA",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.841529"
+    },
+    {
+      "id": 95,
+      "code": "MVD18EH7",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.841759"
+    },
+    {
+      "id": 96,
+      "code": "DRCH6VK9",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.842165"
+    },
+    {
+      "id": 97,
+      "code": "X7CIN05Y",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.842379"
+    },
+    {
+      "id": 98,
+      "code": "FUWIIN3L",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.842604"
+    },
+    {
+      "id": 99,
+      "code": "UYIV1LZR",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.842835"
+    },
+    {
+      "id": 100,
+      "code": "VYYBW3DK",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:35:12.843116"
+    },
+    {
+      "id": 101,
+      "code": "MA6ZQPA6",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:06.876951"
+    },
+    {
+      "id": 102,
+      "code": "YL18BQPO",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.031866"
+    },
+    {
+      "id": 103,
+      "code": "9659A25T",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.032884"
+    },
+    {
+      "id": 104,
+      "code": "9JLG0GBI",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.033529"
+    },
+    {
+      "id": 105,
+      "code": "0PFVUPUT",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.034013"
+    },
+    {
+      "id": 106,
+      "code": "LPQ501SI",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.034369"
+    },
+    {
+      "id": 107,
+      "code": "ZXY3ORCI",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.034784"
+    },
+    {
+      "id": 108,
+      "code": "QX7TZVLH",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.035223"
+    },
+    {
+      "id": 109,
+      "code": "O9FF6UQT",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.035655"
+    },
+    {
+      "id": 110,
+      "code": "G0OMAYN8",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.036069"
+    },
+    {
+      "id": 111,
+      "code": "XHYUDIS8",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.036640"
+    },
+    {
+      "id": 112,
+      "code": "90A5MVYW",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.037033"
+    },
+    {
+      "id": 113,
+      "code": "69CKY1ER",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.037583"
+    },
+    {
+      "id": 114,
+      "code": "LEMCKKIQ",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.037962"
+    },
+    {
+      "id": 115,
+      "code": "XOT1JUO3",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.038314"
+    },
+    {
+      "id": 116,
+      "code": "RIPCHSPG",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.038691"
+    },
+    {
+      "id": 117,
+      "code": "UFFE2XRK",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.039292"
+    },
+    {
+      "id": 118,
+      "code": "67FMO37M",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.039658"
+    },
+    {
+      "id": 119,
+      "code": "F8WSN0R0",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.040073"
+    },
+    {
+      "id": 120,
+      "code": "VVW9NUP9",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.040428"
+    },
+    {
+      "id": 121,
+      "code": "4GLK9B8F",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.040830"
+    },
+    {
+      "id": 122,
+      "code": "KHFGG75J",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.041920"
+    },
+    {
+      "id": 123,
+      "code": "WGGTIB1B",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.042329"
+    },
+    {
+      "id": 124,
+      "code": "IKNR3SCH",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.042604"
+    },
+    {
+      "id": 125,
+      "code": "JNBY37I5",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.042927"
+    },
+    {
+      "id": 126,
+      "code": "GUT4EFVF",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.043295"
+    },
+    {
+      "id": 127,
+      "code": "VREFA64E",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.043670"
+    },
+    {
+      "id": 128,
+      "code": "BY239TYH",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.044117"
+    },
+    {
+      "id": 129,
+      "code": "898RN4AZ",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.044428"
+    },
+    {
+      "id": 130,
+      "code": "1H8YBULB",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.044790"
+    },
+    {
+      "id": 131,
+      "code": "XF238ZR2",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.045206"
+    },
+    {
+      "id": 132,
+      "code": "Z03SOBMX",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.045501"
+    },
+    {
+      "id": 133,
+      "code": "UP4MDLQW",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.045794"
+    },
+    {
+      "id": 134,
+      "code": "Q3WNY8OY",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.046155"
+    },
+    {
+      "id": 135,
+      "code": "BIRYP678",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.046496"
+    },
+    {
+      "id": 136,
+      "code": "M2QWFGHC",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.046894"
+    },
+    {
+      "id": 137,
+      "code": "XYIXBT7C",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.047261"
+    },
+    {
+      "id": 138,
+      "code": "5X8RG0MI",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.047625"
+    },
+    {
+      "id": 139,
+      "code": "BNV4J6E6",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.048019"
+    },
+    {
+      "id": 140,
+      "code": "IKKJM6CS",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.048284"
+    },
+    {
+      "id": 141,
+      "code": "SC8A4MR1",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.048589"
+    },
+    {
+      "id": 142,
+      "code": "GE9Z1KBZ",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.048885"
+    },
+    {
+      "id": 143,
+      "code": "JPLEY8VJ",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.049166"
+    },
+    {
+      "id": 144,
+      "code": "RCHCV614",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.049472"
+    },
+    {
+      "id": 145,
+      "code": "62OUZP72",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.049802"
+    },
+    {
+      "id": 146,
+      "code": "OHXU7G5N",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.050092"
+    },
+    {
+      "id": 147,
+      "code": "AVBZD4CA",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.050394"
+    },
+    {
+      "id": 148,
+      "code": "DVGE5ZGE",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.050682"
+    },
+    {
+      "id": 149,
+      "code": "OXZ9MZ0D",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.050962"
+    },
+    {
+      "id": 150,
+      "code": "8HZLO30F",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.051253"
+    },
+    {
+      "id": 151,
+      "code": "OCTB6FRN",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.051584"
+    },
+    {
+      "id": 152,
+      "code": "LCKQGWNF",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.051870"
+    },
+    {
+      "id": 153,
+      "code": "6D3MDQRQ",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.052166"
+    },
+    {
+      "id": 154,
+      "code": "OFBDCFCG",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.052540"
+    },
+    {
+      "id": 155,
+      "code": "TRKTSGT9",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.052776"
+    },
+    {
+      "id": 156,
+      "code": "E2JMEC6A",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.053055"
+    },
+    {
+      "id": 157,
+      "code": "DE7H0ZLX",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.053351"
+    },
+    {
+      "id": 158,
+      "code": "FR8M92SG",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.053560"
+    },
+    {
+      "id": 159,
+      "code": "RS1XGWHH",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.053846"
+    },
+    {
+      "id": 160,
+      "code": "4TIY5T5Y",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.054149"
+    },
+    {
+      "id": 161,
+      "code": "LEHN08VK",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.054548"
+    },
+    {
+      "id": 162,
+      "code": "1U7XT051",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.054767"
+    },
+    {
+      "id": 163,
+      "code": "3BEXKNV4",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.054988"
+    },
+    {
+      "id": 164,
+      "code": "5AOU7WLX",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.055231"
+    },
+    {
+      "id": 165,
+      "code": "8BOPJBO5",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.055591"
+    },
+    {
+      "id": 166,
+      "code": "WWHXWA8O",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.055834"
+    },
+    {
+      "id": 167,
+      "code": "NMMLFCYP",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.056069"
+    },
+    {
+      "id": 168,
+      "code": "4F4NSJJM",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.056298"
+    },
+    {
+      "id": 169,
+      "code": "DNU6AXVD",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.056583"
+    },
+    {
+      "id": 170,
+      "code": "031YGBDI",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.056809"
+    },
+    {
+      "id": 171,
+      "code": "DPDPLB3B",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.057030"
+    },
+    {
+      "id": 172,
+      "code": "OB55E1ZA",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.057250"
+    },
+    {
+      "id": 173,
+      "code": "ZM6BK6YH",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.057518"
+    },
+    {
+      "id": 174,
+      "code": "VJ0UH6YJ",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.057748"
+    },
+    {
+      "id": 175,
+      "code": "JO0T2I4S",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.057979"
+    },
+    {
+      "id": 176,
+      "code": "9B346FEY",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.058192"
+    },
+    {
+      "id": 177,
+      "code": "UCD6ZZLL",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.058431"
+    },
+    {
+      "id": 178,
+      "code": "E1V6DXEI",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.058659"
+    },
+    {
+      "id": 179,
+      "code": "MEARW5OK",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.058897"
+    },
+    {
+      "id": 180,
+      "code": "VKZBIMIK",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.059131"
+    },
+    {
+      "id": 181,
+      "code": "V8NW68HN",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.059446"
+    },
+    {
+      "id": 182,
+      "code": "8OIKA1E6",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.059653"
+    },
+    {
+      "id": 183,
+      "code": "5KS6M20R",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.059854"
+    },
+    {
+      "id": 184,
+      "code": "ASUBO9ZK",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.060082"
+    },
+    {
+      "id": 185,
+      "code": "FYSL5AX7",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.060487"
+    },
+    {
+      "id": 186,
+      "code": "W64LOPTT",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.060733"
+    },
+    {
+      "id": 187,
+      "code": "N0W7CWTQ",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.060940"
+    },
+    {
+      "id": 188,
+      "code": "R43K0CO4",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.061163"
+    },
+    {
+      "id": 189,
+      "code": "NSFBZCPX",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.061573"
+    },
+    {
+      "id": 190,
+      "code": "10DW7K7G",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.061792"
+    },
+    {
+      "id": 191,
+      "code": "RLBSDNLP",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.061997"
+    },
+    {
+      "id": 192,
+      "code": "6CR2DKBW",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.062219"
+    },
+    {
+      "id": 193,
+      "code": "VH7WS6U5",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.062607"
+    },
+    {
+      "id": 194,
+      "code": "3DVVXIP2",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.062823"
+    },
+    {
+      "id": 195,
+      "code": "8TCO1PV9",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.063047"
+    },
+    {
+      "id": 196,
+      "code": "UQGC0NXV",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.063253"
+    },
+    {
+      "id": 197,
+      "code": "Z6J09I43",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.063555"
+    },
+    {
+      "id": 198,
+      "code": "IJV5FVX3",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.063769"
+    },
+    {
+      "id": 199,
+      "code": "PRWCTAVJ",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.063988"
+    },
+    {
+      "id": 200,
+      "code": "OAA1DUVA",
+      "max_uses": 1,
+      "used_count": 0,
+      "active": true,
+      "created_at": "2026-06-14 11:55:07.064192"
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "user_id": 224223270,
+      "event": "start",
+      "metadata": "{}",
+      "created_at": "2026-06-14 11:37:44.241426"
+    },
+    {
+      "id": 2,
+      "user_id": 224223270,
+      "event": "start",
+      "metadata": "{}",
+      "created_at": "2026-06-14 11:54:31.705518"
+    },
+    {
+      "id": 3,
+      "user_id": 7998856873,
+      "event": "start",
+      "metadata": "{}",
+      "created_at": "2026-06-14 13:39:36.459967"
+    },
+    {
+      "id": 4,
+      "user_id": 7998856873,
+      "event": "signup",
+      "metadata": "{\"ref_code\": \"7998856873AXEU\"}",
+      "created_at": "2026-06-14 13:39:36.490877"
+    },
+    {
+      "id": 5,
+      "user_id": 224223270,
+      "event": "start",
+      "metadata": "{}",
+      "created_at": "2026-06-14 13:39:39.956775"
+    },
+    {
+      "id": 6,
+      "user_id": 224223270,
+      "event": "start",
+      "metadata": "{}",
+      "created_at": "2026-06-14 13:39:42.895085"
+    },
+    {
+      "id": 7,
+      "user_id": 7998856873,
+      "event": "start",
+      "metadata": "{}",
+      "created_at": "2026-06-14 13:45:14.579881"
+    },
+    {
+      "id": 8,
+      "user_id": 224223270,
+      "event": "start",
+      "metadata": "{}",
+      "created_at": "2026-06-14 13:45:21.879333"
+    },
+    {
+      "id": 9,
+      "user_id": 224223270,
+      "event": "feedback",
+      "metadata": "{\"text\": \"בדיקה\"}",
+      "created_at": "2026-06-14 13:46:46.370828"
+    },
+    {
+      "id": 10,
+      "user_id": 7998856873,
+      "event": "start",
+      "metadata": "{}",
+      "created_at": "2026-06-14 14:16:01.643642"
+    },
+    {
+      "id": 11,
+      "user_id": 224223270,
+      "event": "start",
+      "metadata": "{}",
+      "created_at": "2026-06-14 14:16:06.817450"
+    }
+  ],
+  "alembic_version": [
+    {
+      "version_num": "5e79ce62aed4"
+    }
+  ],
+  "user_settings": [
+    {
+      "user_id": 224223270,
+      "language": "en",
+      "selling_price": "5.00"
+    }
+  ],
+  "xp": [],
+  "payments": [],
+  "referrals": [],
+  "transactions": [],
+  "premium_users": [],
+  "casino_settings": [
+    {
+      "id": 1,
+      "house_edge": 0.15,
+      "is_active": true
+    }
+  ],
+  "admin_logs": [],
+  "invoices": [],
+  "products": [
+    {
+      "id": 1,
+      "name": "SIF Token Sample",
+      "description": "A demonstration product",
+      "price": 5.0,
+      "active": true
+    },
+    {
+      "id": 2,
+      "name": "SIF Token Sample",
+      "description": "A demonstration product",
+      "price": 5.0,
+      "active": true
+    },
+    {
+      "id": 3,
+      "name": "SIF Token Sample",
+      "description": "A demonstration product",
+      "price": 5.0,
+      "active": true
+    }
+  ],
+  "shares": [],
+  "analytics": [],
+  "stores": [
+    {
+      "id": 1,
+      "user_id": 224223270,
+      "store_name": "SIF Token Sample",
+      "description": null,
+      "created_at": "2026-06-18 10:00:32.068106+00:00"
+    }
+  ],
+  "payment_methods": [],
+  "users": [
+    {
+      "user_id": 224223270,
+      "username": "osifeu_prog",
+      "balance": 0.0,
+      "ref_id": null,
+      "created_at": "2026-06-15 11:39:24.950268",
+      "lang": "he",
+      "card_name": "/admin",
+      "card_prof": "/admin",
+      "wallet": "/admin",
+      "price": 1.0,
+      "share_count": 0,
+      "level": "free",
+      "minisite": null,
+      "is_premium": false,
+      "iwa_balance": 0.0,
+      "points": 0.0,
+      "role": "user",
+      "photo_file_id": null,
+      "state": "IDLE",
+      "community_verified": false
+    }
+  ],
+  "market_cards": []
+}
