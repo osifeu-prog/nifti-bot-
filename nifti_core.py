@@ -89,3 +89,16 @@ def all_menu_labels(lang=None):
     for lang_code in LANG:
         labels.update(all_menu_labels(lang_code))
     return labels
+import aiohttp
+
+TONCENTER_API = "https://toncenter.com/api/v2"
+
+async def verify_boc(tx_hash: str) -> bool:
+    """Check if a transaction exists and is valid on TON."""
+    url = f"{TONCENTER_API}/getTransactions?hash={tx_hash}"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            if resp.status == 200:
+                data = await resp.json()
+                return data.get("ok", False)
+    return False

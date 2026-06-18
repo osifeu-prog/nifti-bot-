@@ -8,19 +8,16 @@ function App() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Try to get user from Telegram WebApp
     const tgUser = WebApp.initDataUnsafe?.user;
     let userId = tgUser?.id;
 
-    // Fallback: if not in Telegram, use a query parameter
     if (!userId) {
       const params = new URLSearchParams(window.location.search);
       userId = params.get('user_id');
     }
 
-    // Hardcoded fallback for testing
     if (!userId) {
-      setError("Please open this app from Telegram, or add ?user_id=224223270 to test.");
+      setError("Please open this app from Telegram, or add ?user_id=...");
       setLoading(false);
       return;
     }
@@ -31,25 +28,25 @@ function App() {
         setLoading(false);
       })
       .catch(err => {
-        console.error("Error fetching card:", err);
-        setError("Failed to load card. Check console for details.");
+        console.error(err);
+        setError("Failed to load card.");
         setLoading(false);
       });
   }, []);
 
   if (loading) return <div>Loading NIFTI Card...</div>;
-  if (error) return <div style={{ color: 'red', padding: '20px' }}>Error: {error}</div>;
+  if (error) return <div style={{ color: 'red' }}>Error: {error}</div>;
 
   return (
-    <div style={{ padding: '20px', textAlign: 'center', fontFamily: 'sans-serif' }}>
+    <div style={{ padding: 20, textAlign: 'center' }}>
       <h1>{userData?.card_name || userData?.name || "NIFTI User"}</h1>
       <p>Profession: {userData?.card_prof || "Not set"}</p>
-      <div style={{ background: '#222', color: '#fff', padding: '15px', borderRadius: '12px', marginTop: '20px' }}>
+      <div style={{ background: '#222', color: '#fff', padding: 15, borderRadius: 12, marginTop: 20 }}>
         <p>Wallet: {userData?.wallet || "Not linked"}</p>
       </div>
       <button
         onClick={() => WebApp.close()}
-        style={{ marginTop: '20px', padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#3390ec', color: 'white' }}
+        style={{ marginTop: 20, padding: '10px 20px', borderRadius: 8, border: 'none', background: '#3390ec', color: 'white' }}
       >
         Close App
       </button>

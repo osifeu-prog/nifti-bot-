@@ -13,8 +13,10 @@ class DBManager:
 
     async def get_user_wallet(self, user_id):
         async with self.pool.acquire() as conn:
-            # בוא נשלוף הכל כדי לראות מה המבנה האמיתי
-            return await conn.fetchrow('SELECT * FROM users WHERE id = $1', user_id)
+            return await conn.fetchrow(
+                'SELECT user_id, username, balance, wallet, is_premium FROM users WHERE user_id = $1',
+                user_id
+            )
 
     async def close(self):
         await self.pool.close()
