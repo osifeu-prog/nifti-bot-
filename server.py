@@ -2001,6 +2001,13 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+@app.middleware("http")
+async def add_js_mime(request: Request, call_next):
+    response = await call_next(request)
+    if request.url.path.endswith(".js"):
+        response.headers["Content-Type"] = "application/javascript; charset=utf-8"
+    return response
+
 
 @app.middleware("http")
 async def add_utf8_header(request: Request, call_next):
