@@ -23,3 +23,9 @@
 ### Upcoming
 - TON payment QR / deep link generation.
 - Landing page, Full i18n, NFT card generation, Order book.
+## [v1.5.1] - 2026-06-19
+### Fixed
+- Removed dd_utf8_header middleware that forced Content-Type: application/json on all responses, breaking JS delivery.
+- Mini App now correctly serves JavaScript with pplication/javascript MIME type.
+### Known issues
+- Browser caching may still serve stale content; resolved by using fresh profiles / hard refresh.
