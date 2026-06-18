@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 
 from fastapi import FastAPI, Request
-# from fastapi.staticfiles import StaticFiles
+from fastapi.staticfiles import StaticFiles
 
 from fastapi.responses import HTMLResponse
 
@@ -2001,7 +2001,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-# # removed  # disabled  dist not in Railway
+app.mount("/assets", StaticFiles(directory="frontend/dist/assets"), name="assets")
 
 
 
@@ -2337,4 +2337,3 @@ async def api_card_json(user_id: int):
 # ---------- Marketplace Handlers ----------
 
 from services.marketplace import add_product, list_products, buy_product, get_store, get_user_balance
-
