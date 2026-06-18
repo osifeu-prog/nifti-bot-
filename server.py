@@ -2024,8 +2024,8 @@ async def mini_app_root(request: Request):
     user_id = request.query_params.get("user_id", "")
     html = open("frontend/dist/index.html", encoding="utf-8").read()
     if user_id:
-        # Inject the user_id before the closing </head> tag
-        html = html.replace("</head>", f"<script>window.NIFTI_USER_ID = '{user_id}';</script></head>")
+        # Inject the user_id BEFORE the first <script> tag (before React loads)
+        html = html.replace("<script", f"<script>window.NIFTI_USER_ID = '{user_id}';</script><script", 1)
     return HTMLResponse(html)
 
 @app.get("/mini-app/{full_path:path}")
