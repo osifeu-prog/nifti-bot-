@@ -1,0 +1,1078 @@
+"""Payment configuration shared across all SLH bots."""
+import os
+import json
+from dataclasses import dataclass, field
+from typing import Optional
+
+ADMIN_USER_ID = int(os.getenv("ADMIN_USER_ID", "224223270"))
+
+TON_WALLET = "UQCr743gEr_nqV_0SBkSp3CtYS_15R3LDLBvLmKeEv7XdGvp"
+
+# Payment instructions - TON only
+PAYMENT_INSTRUCTIONS = (
+    "\u05e9\u05dc\u05d7 \u05ea\u05e9\u05dc\u05d5\u05dd \u05d1-TON \u05dc\u05db\u05ea\u05d5\u05d1\u05ea:\n"
+    f"`{TON_WALLET}`\n\n"
+    "\u05dc\u05d0\u05d7\u05e8 \u05d4\u05ea\u05e9\u05dc\u05d5\u05dd, \u05e9\u05dc\u05d7 \u05db\u05d0\u05df \u05e6\u05d9\u05dc\u05d5\u05dd \u05de\u05e1\u05da \u05e9\u05dc \u05d0\u05d9\u05e9\u05d5\u05e8 \u05d4\u05e2\u05d1\u05e8\u05d4.\n"
+    "\u05d0\u05e9\u05dc\u05d7 \u05dc\u05da \u05d0\u05d9\u05e9\u05d5\u05e8/\u05d3\u05d7\u05d9\u05d9\u05d4 \u05d1\u05d4\u05ea\u05d0\u05dd."
+)
+
+
+@dataclass
+class BotPricing:
+    """Pricing configuration for a single bot."""
+    bot_name: str
+    price_ils: float
+    price_ton: float = 0.0
+    description_he: str = ""
+    premium_group_chat_id: Optional[int] = None
+    premium_group_link: Optional[str] = None
+    features: list = field(default_factory=list)
+
+
+# Per-bot pricing with group links
+BOT_PRICING = {
+    "botshop": BotPricing(
+        bot_name="GATE BotShop",
+        price_ils=99, price_ton=5.0,
+        description_he="\u05de\u05e1\u05d7\u05e8 AI + \u05e0\u05d9\u05ea\u05d5\u05d7\u05d9 \u05e9\u05d5\u05e7 + \u05e1\u05d9\u05de\u05d5\u05dc\u05e6\u05d9\u05d4",
+        premium_group_link="https://t.me/+Hl1TEpkVLws2MTQ8",
+        features=["\u05e0\u05d9\u05ea\u05d5\u05d7\u05d9 \u05e9\u05d5\u05e7 \u05d7\u05db\u05de\u05d9\u05dd", "\u05e1\u05d9\u05de\u05d5\u05dc\u05e6\u05d9\u05d9\u05ea \u05de\u05e1\u05d7\u05e8", "\u05e7\u05d1\u05d5\u05e6\u05ea VIP"],
+    ),
+    "wallet": BotPricing(
+        bot_name="SLH Wallet",
+        price_ils=79, price_ton=4.0,
+        description_he="\u05e0\u05d9\u05d4\u05d5\u05dc \u05d0\u05e8\u05e0\u05e7 TON/BNB",
+        premium_group_link="https://t.me/+trsYaT1UVI8yY2Y0",
+        features=["\u05d0\u05e8\u05e0\u05e7 TON/BNB", "\u05d4\u05e2\u05d1\u05e8\u05d5\u05ea", "\u05de\u05e2\u05e7\u05d1 \u05d9\u05ea\u05e8\u05d5\u05ea"],
+    ),
+    "factory": BotPricing(
+        bot_name="BOT Factory",
+        price_ils=149, price_ton=7.5,
+        description_he="\u05d4\u05e9\u05e7\u05e2\u05d5\u05ea + \u05e1\u05d8\u05d9\u05d9\u05e7\u05d9\u05e0\u05d2",
+        premium_group_link="https://t.me/+yWzrEaA41rRhNjVk",
+        features=["\u05d4\u05e9\u05e7\u05e2\u05d5\u05ea \u05d7\u05db\u05de\u05d5\u05ea", "\u05e1\u05d8\u05d9\u05d9\u05e7\u05d9\u05e0\u05d2 \u05d0\u05de\u05d9\u05ea\u05d9", "\u05e4\u05d0\u05e0\u05dc \u05d0\u05d3\u05de\u05d9\u05df"],
+    ),
+    "academia": BotPricing(
+        bot_name="SLH Academia",
+        price_ils=41, price_ton=2.0,
+        description_he="\u05d7\u05d9\u05e0\u05d5\u05da + Airdrop + XP",
+        premium_group_link="https://t.me/+JSGStjREEs43MzZk",
+        features=["Airdrop \u05d9\u05d5\u05de\u05d9", "\u05de\u05e9\u05d9\u05de\u05d5\u05ea XP", "\u05dc\u05d5\u05d7 \u05de\u05d5\u05d1\u05d9\u05dc\u05d9\u05dd"],
+    ),
+    "guardian": BotPricing(
+        bot_name="SLH Guardian",
+        price_ils=59, price_ton=3.0,
+        description_he="\u05d0\u05d1\u05d8\u05d7\u05d4 + \u05e0\u05d9\u05d8\u05d5\u05e8 \u05de\u05e2\u05e8\u05db\u05ea",
+        premium_group_link="https://t.me/+_l9XZ77Bbb5kZTM0",
+        features=["\u05e0\u05d9\u05d8\u05d5\u05e8 DB/Redis", "\u05d3\u05d5\u05d7\u05d5\u05ea \u05d0\u05d3\u05de\u05d9\u05df", "\u05d4\u05ea\u05e8\u05d0\u05d5\u05ea \u05d0\u05de\u05ea"],
+    ),
+    "community": BotPricing(
+        bot_name="SLH Community",
+        price_ils=41, price_ton=2.0,
+        description_he="\u05e7\u05d4\u05d9\u05dc\u05d4 + \u05e4\u05e8\u05d5\u05de\u05d5",
+        premium_group_link="https://t.me/+e8GeOmh0CD82ZmI0",
+        features=["\u05e7\u05d4\u05d9\u05dc\u05ea \u05e4\u05e8\u05d9\u05de\u05d9\u05d5\u05dd", "\u05e2\u05d3\u05db\u05d5\u05e0\u05d9\u05dd \u05d1\u05dc\u05e2\u05d3\u05d9\u05d9\u05dd", "\u05ea\u05d5\u05db\u05df VIP"],
+    ),
+}
+
+# System bus group
+SYSTEM_BUS_LINK = "https://t.me/+qon4jktYobA3Mjlk"
+
+
+
+
+"""
+Universal Payment Gate for SLH Bots.
+
+Usage with aiogram:
+    gate = PaymentGate("botshop", bot, dp)
+    gate.register_handlers()
+
+Usage with python-telegram-bot:
+    gate = PaymentGate("wallet", bot_app=app)
+    gate.register_ptb_handlers()
+"""
+import logging
+from typing import Optional
+
+from .config import BOT_PRICING, PAYMENT_INSTRUCTIONS, ADMIN_USER_ID, BotPricing
+from . import db
+
+logger = logging.getLogger("slh.payment_gate")
+
+
+class PaymentGate:
+    def __init__(self, bot_key: str, bot=None, dp=None, bot_app=None):
+        self.bot_key = bot_key
+        self.pricing: BotPricing = BOT_PRICING.get(bot_key, BotPricing(bot_name=bot_key, price_ils=41))
+        self.bot = bot          # aiogram Bot
+        self.dp = dp            # aiogram Dispatcher
+        self.bot_app = bot_app  # python-telegram-bot Application
+
+    # ---- aiogram handlers ----
+
+    def register_handlers(self):
+        """Register payment handlers with aiogram Dispatcher."""
+        if not self.dp:
+            return
+        from aiogram import F
+        from aiogram.filters import Command
+        from aiogram.types import Message, CallbackQuery
+
+        @self.dp.message(Command("premium"))
+        async def premium_cmd(m: Message):
+            await self._handle_premium(m.from_user.id, m.from_user.username, m)
+
+        @self.dp.message(Command("pay"))
+        async def pay_cmd(m: Message):
+            await self._handle_premium(m.from_user.id, m.from_user.username, m)
+
+        @self.dp.message(F.photo)
+        async def photo_handler(m: Message):
+            await self._handle_photo_proof(m)
+
+        @self.dp.callback_query(F.data.startswith("pay_approve:"))
+        async def approve_cb(cb: CallbackQuery):
+            await self._handle_approve(cb)
+
+        @self.dp.callback_query(F.data.startswith("pay_reject:"))
+        async def reject_cb(cb: CallbackQuery):
+            await self._handle_reject(cb)
+
+    async def _handle_premium(self, user_id: int, username: str, message):
+        """Show premium pricing and payment instructions."""
+        is_paid = await db.is_premium(user_id, self.bot_key)
+        if is_paid:
+            await message.answer(
+                "\u2705 \u05d0\u05ea\u05d4 \u05db\u05d1\u05e8 \u05de\u05e0\u05d5\u05d9/\u05d4 \u05e4\u05e8\u05d9\u05de\u05d9\u05d5\u05dd!\n"
+                "\u05db\u05dc \u05d4\u05e4\u05d9\u05e6'\u05e8\u05d9\u05dd \u05d6\u05de\u05d9\u05e0\u05d9\u05dd \u05e2\u05d1\u05d5\u05e8\u05da."
+            )
+            return
+
+        features_text = "\n".join(f"\u2022 {f}" for f in self.pricing.features) if self.pricing.features else ""
+        text = (
+            f"\u2b50 {self.pricing.bot_name} Premium\n\n"
+            f"{self.pricing.description_he}\n\n"
+            f"{features_text}\n\n"
+            f"\U0001f4b0 \u05de\u05d7\u05d9\u05e8: {self.pricing.price_ils} \u20aa"
+            f"{f' / {self.pricing.price_ton} TON' if self.pricing.price_ton else ''}\n\n"
+            f"{PAYMENT_INSTRUCTIONS}"
+        )
+        await message.answer(text)
+        await db.create_payment(user_id, username or "", self.bot_key,
+                                self.pricing.price_ils, "ILS")
+        await db.log_event("payment.started", self.bot_key, user_id)
+
+    async def _handle_photo_proof(self, message):
+        """Handle payment proof screenshot upload."""
+        user_id = message.from_user.id
+        username = message.from_user.username or ""
+        file_id = message.photo[-1].file_id
+
+        submitted = await db.submit_proof(user_id, self.bot_key, file_id)
+        if not submitted:
+            # No pending payment - create one first
+            await db.create_payment(user_id, username, self.bot_key,
+                                    self.pricing.price_ils, "ILS")
+            await db.submit_proof(user_id, self.bot_key, file_id)
+
+        await message.answer(
+            "\u2705 \u05d0\u05d9\u05e9\u05d5\u05e8 \u05d4\u05ea\u05e9\u05dc\u05d5\u05dd \u05d4\u05ea\u05e7\u05d1\u05dc!\n"
+            "\u05de\u05de\u05ea\u05d9\u05df \u05dc\u05d0\u05d9\u05e9\u05d5\u05e8 \u05d0\u05d3\u05de\u05d9\u05df..."
+        )
+
+        # Notify admin
+        from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+        pool = await db.get_pool()
+        async with pool.acquire() as conn:
+            row = await conn.fetchrow(
+                "SELECT id FROM premium_users WHERE user_id=$1 AND bot_name=$2",
+                user_id, self.bot_key,
+            )
+        pid = row["id"] if row else 0
+
+        kb = InlineKeyboardMarkup(inline_keyboard=[
+            [
+                InlineKeyboardButton(text="\u2705 \u05d0\u05e9\u05e8", callback_data=f"pay_approve:{pid}"),
+                InlineKeyboardButton(text="\u274c \u05d3\u05d7\u05d4", callback_data=f"pay_reject:{pid}"),
+            ]
+        ])
+        admin_text = (
+            f"\U0001f4b3 *\u05ea\u05e9\u05dc\u05d5\u05dd \u05d7\u05d3\u05e9!*\n\n"
+            f"\u05d1\u05d5\u05d8: {self.pricing.bot_name}\n"
+            f"\u05de\u05e9\u05ea\u05de\u05e9: @{username} ({user_id})\n"
+            f"\u05e1\u05db\u05d5\u05dd: {self.pricing.price_ils} \u20aa\n"
+            f"ID: {pid}"
+        )
+        try:
+            await self.bot.send_photo(
+                ADMIN_USER_ID, file_id, caption=admin_text,
+                parse_mode="Markdown", reply_markup=kb,
+            )
+        except Exception as e:
+            logger.error("Failed to notify admin: %s", e)
+
+        await db.log_event("payment.submitted", self.bot_key, user_id)
+
+    async def _handle_approve(self, cb):
+        """Admin approves payment."""
+        if cb.from_user.id != ADMIN_USER_ID:
+            await cb.answer("\u274c \u05e8\u05e7 \u05d0\u05d3\u05de\u05d9\u05df", show_alert=True)
+            return
+
+        pid = int(cb.data.split(":")[1])
+        result = await db.approve_payment(pid, cb.from_user.id)
+        if not result:
+            await cb.answer("\u05dc\u05d0 \u05e0\u05de\u05e6\u05d0")
+            return
+
+        user_id = result["user_id"]
+        bot_name = result["bot_name"]
+
+        # Send premium group link if configured
+        if self.pricing.premium_group_link:
+            try:
+                await self.bot.send_message(
+                    user_id,
+                    f"\u2705 *\u05d4\u05ea\u05e9\u05dc\u05d5\u05dd \u05d0\u05d5\u05e9\u05e8!*\n\n"
+                    f"\u05d4\u05e0\u05d4 \u05d4\u05e7\u05d9\u05e9\u05d5\u05e8 \u05dc\u05e7\u05d1\u05d5\u05e6\u05ea \u05d4\u05e4\u05e8\u05d9\u05de\u05d9\u05d5\u05dd:\n"
+                    f"{self.pricing.premium_group_link}\n\n"
+                    f"\u05d1\u05e8\u05d5\u05da \u05d4\u05d1\u05d0 \u05dc-{self.pricing.bot_name} Premium! \U0001f680",
+                    parse_mode="Markdown",
+                )
+                await db.mark_group_invited(user_id, bot_name)
+            except Exception as e:
+                logger.error("Failed to send group link: %s", e)
+        else:
+            try:
+                await self.bot.send_message(
+                    user_id,
+                    f"\u2705 *\u05d4\u05ea\u05e9\u05dc\u05d5\u05dd \u05d0\u05d5\u05e9\u05e8!*\n\n"
+                    f"\u05db\u05dc \u05d4\u05e4\u05d9\u05e6'\u05e8\u05d9\u05dd \u05d4\u05e4\u05e8\u05d9\u05de\u05d9\u05d5\u05dd \u05e9\u05dc {self.pricing.bot_name} \u05d6\u05de\u05d9\u05e0\u05d9\u05dd \u05e2\u05d1\u05d5\u05e8\u05da! \U0001f680",
+                    parse_mode="Markdown",
+                )
+            except Exception as e:
+                logger.error("Failed to send approval: %s", e)
+
+        await cb.message.edit_caption(
+            caption=f"\u2705 \u05d0\u05d5\u05e9\u05e8 \u05e2\u05dc \u05d9\u05d3\u05d9 \u05d0\u05d3\u05de\u05d9\u05df | {bot_name} | user {user_id}"
+        )
+        await cb.answer("\u05d0\u05d5\u05e9\u05e8!")
+        await db.log_event("payment.approved", bot_name, user_id)
+
+    async def _handle_reject(self, cb):
+        """Admin rejects payment."""
+        if cb.from_user.id != ADMIN_USER_ID:
+            await cb.answer("\u274c \u05e8\u05e7 \u05d0\u05d3\u05de\u05d9\u05df", show_alert=True)
+            return
+
+        pid = int(cb.data.split(":")[1])
+        result = await db.reject_payment(pid, cb.from_user.id)
+        if not result:
+            await cb.answer("\u05dc\u05d0 \u05e0\u05de\u05e6\u05d0")
+            return
+
+        user_id = result["user_id"]
+        try:
+            await self.bot.send_message(
+                user_id,
+                "\u274c *\u05d4\u05ea\u05e9\u05dc\u05d5\u05dd \u05e0\u05d3\u05d7\u05d4.*\n\n"
+                "\u05d0\u05e0\u05d0 \u05e0\u05e1\u05d4 \u05e9\u05d5\u05d1 \u05d0\u05d5 \u05e4\u05e0\u05d4 \u05dc\u05ea\u05de\u05d9\u05db\u05d4.",
+                parse_mode="Markdown",
+            )
+        except Exception:
+            pass
+
+        await cb.message.edit_caption(caption=f"\u274c \u05e0\u05d3\u05d7\u05d4 | user {user_id}")
+        await cb.answer("\u05e0\u05d3\u05d7\u05d4")
+        await db.log_event("payment.rejected", result["bot_name"], user_id)
+
+    # ---- Check premium status ----
+
+    async def check_premium(self, user_id: int) -> bool:
+        return await db.is_premium(user_id, self.bot_key)
+
+    async def require_premium(self, message, feature_name: str = "") -> bool:
+        """Returns True if user has premium. If not, shows upsell and returns False."""
+        if await self.check_premium(message.from_user.id):
+            return True
+        label = feature_name or "\u05ea\u05d5\u05db\u05df \u05e4\u05e8\u05d9\u05de\u05d9\u05d5\u05dd"
+        text = (
+            f"\U0001f512 *{label}*\n\n"
+            "\u05e4\u05d9\u05e6'\u05e8 \u05d6\u05d4 \u05d6\u05de\u05d9\u05df \u05e8\u05e7 \u05dc\u05de\u05e0\u05d5\u05d9\u05d9 \u05e4\u05e8\u05d9\u05de\u05d9\u05d5\u05dd.\n"
+            "\u05dc\u05e9\u05d3\u05e8\u05d5\u05d2 \u2192 /premium"
+        )
+        await message.answer(text, parse_mode="Markdown")
+        return False
+
+
+
+
+"""
+SLH Internal Token Ledger
+Fast, reliable token transfers without blockchain dependency.
+Blockchain settlement can happen later.
+"""
+import os
+import asyncpg
+from typing import Optional
+
+_pool = None
+
+async def get_pool():
+    global _pool
+    if _pool is None:
+        # Phase 0B (2026-04-21): unified fail-fast pool via shared_db_core.
+        # max_size standardized 5â†’4.
+        try:
+            from shared_db_core import init_db_pool as _shared_init_db_pool
+            _pool = await _shared_init_db_pool(
+                os.getenv("DATABASE_URL", "postgresql://postgres:slh_secure_2026@postgres:5432/slh_main"),
+            )
+        except Exception:
+            _pool = await asyncpg.create_pool(
+                os.getenv("DATABASE_URL", "postgresql://postgres:slh_secure_2026@postgres:5432/slh_main"),
+                min_size=1, max_size=4,
+            )
+    return _pool
+
+
+async def get_balance(user_id: int, token: str = "SLH") -> float:
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT balance FROM token_balances WHERE user_id=$1 AND token=$2",
+            user_id, token,
+        )
+    return float(row["balance"]) if row else 0.0
+
+
+async def get_all_balances(user_id: int) -> dict:
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            "SELECT token, balance FROM token_balances WHERE user_id=$1",
+            user_id,
+        )
+    return {r["token"]: float(r["balance"]) for r in rows}
+
+
+async def ensure_balance(user_id: int, token: str = "SLH"):
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        await conn.execute(
+            """INSERT INTO token_balances (user_id, token, balance)
+               VALUES ($1, $2, 0) ON CONFLICT DO NOTHING""",
+            user_id, token,
+        )
+
+
+async def transfer(from_uid: int, to_uid: int, token: str, amount: float,
+                   memo: str = "", fee: float = 0) -> tuple:
+    """
+    Transfer tokens between users.
+    Returns: (success, message, new_from_balance, new_to_balance)
+    """
+    if amount <= 0:
+        return False, "×¡×›×•× ï¿½-×™×™×‘ ×œ×”×™×•×ª ï¿½-×™×•×‘×™", 0, 0
+    if from_uid == to_uid:
+        return False, "×œ× × ×™×ª×Ÿ ×œ×”×¢×‘×™×¨ ×œ×¢×¦×ž×š", 0, 0
+
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.transaction():
+            # Check sender balance
+            row = await conn.fetchrow(
+                "SELECT balance FROM token_balances WHERE user_id=$1 AND token=$2 FOR UPDATE",
+                from_uid, token,
+            )
+            if not row or float(row["balance"]) < amount + fee:
+                current = float(row["balance"]) if row else 0
+                return False, f"×™×ª×¨×” ×œ× ×ž×¡×¤×§×ª ({current:.4f} {token})", current, 0
+
+            # Ensure receiver has a balance row
+            await conn.execute(
+                "INSERT INTO token_balances (user_id, token, balance) VALUES ($1, $2, 0) ON CONFLICT DO NOTHING",
+                to_uid, token,
+            )
+
+            # Deduct from sender
+            await conn.execute(
+                "UPDATE token_balances SET balance = balance - $3, updated_at = CURRENT_TIMESTAMP WHERE user_id=$1 AND token=$2",
+                from_uid, token, amount + fee,
+            )
+
+            # Credit receiver
+            await conn.execute(
+                "UPDATE token_balances SET balance = balance + $3, updated_at = CURRENT_TIMESTAMP WHERE user_id=$1 AND token=$2",
+                to_uid, token, amount,
+            )
+
+            # Record transfer
+            await conn.execute(
+                """INSERT INTO token_transfers (from_user_id, to_user_id, token, amount, fee, memo, tx_type)
+                   VALUES ($1, $2, $3, $4, $5, $6, 'transfer')""",
+                from_uid, to_uid, token, amount, fee, memo,
+            )
+
+            # Get new balances
+            from_bal = await conn.fetchval(
+                "SELECT balance FROM token_balances WHERE user_id=$1 AND token=$2", from_uid, token
+            )
+            to_bal = await conn.fetchval(
+                "SELECT balance FROM token_balances WHERE user_id=$1 AND token=$2", to_uid, token
+            )
+
+    return True, "×”×¢×‘×¨×” ×‘×•×¦×¢×”!", float(from_bal), float(to_bal)
+
+
+async def mint(user_id: int, token: str, amount: float, memo: str = "mint"):
+    """Create tokens (admin only)."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        await conn.execute(
+            "INSERT INTO token_balances (user_id, token, balance) VALUES ($1, $2, $3) ON CONFLICT (user_id, token) DO UPDATE SET balance = token_balances.balance + $3",
+            user_id, token, amount,
+        )
+        await conn.execute(
+            "INSERT INTO token_transfers (from_user_id, to_user_id, token, amount, memo, tx_type) VALUES (0, $1, $2, $3, $4, 'mint')",
+            user_id, token, amount, memo,
+        )
+
+
+async def burn(user_id: int, token: str, amount: float, memo: str = "burn"):
+    """Destroy tokens (admin only)."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        current = await conn.fetchval(
+            "SELECT balance FROM token_balances WHERE user_id=$1 AND token=$2", user_id, token
+        )
+        if not current or float(current) < amount:
+            return False
+        await conn.execute(
+            "UPDATE token_balances SET balance = balance - $1 WHERE user_id=$2 AND token=$3",
+            amount, user_id, token,
+        )
+        await conn.execute(
+            "INSERT INTO token_transfers (from_user_id, to_user_id, token, amount, memo, tx_type) VALUES ($1, 0, $2, $3, $4, 'burn')",
+            user_id, token, amount, memo,
+        )
+    return True
+
+
+async def get_history(user_id: int, limit: int = 10) -> list:
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            """SELECT id, from_user_id, to_user_id, token, amount, fee, memo, tx_type, created_at
+               FROM token_transfers
+               WHERE from_user_id=$1 OR to_user_id=$1
+               ORDER BY created_at DESC LIMIT $2""",
+            user_id, limit,
+        )
+    return [dict(r) for r in rows]
+
+
+async def get_leaderboard(token: str = "SLH", limit: int = 10) -> list:
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            "SELECT user_id, balance FROM token_balances WHERE token=$1 AND balance > 0 ORDER BY balance DESC LIMIT $2",
+            token, limit,
+        )
+    return [dict(r) for r in rows]
+
+
+
+
+"""
+SLH Referral System.
+
+Tracks referrals across all bots, calculates commissions,
+and provides easy referral link generation.
+
+Usage:
+    from slh_payments.referrals import ReferralEngine, referral_engine
+    link = referral_engine.get_link(user_id, "botshop")
+    await referral_engine.track_referral(referrer_id, referred_id, "botshop")
+"""
+import os
+import logging
+from typing import Optional
+from . import db
+
+logger = logging.getLogger("slh.referrals")
+
+# Commission rates (SLH points-based)
+COMMISSION_RATE = 0.15  # 15% referral commission in SLH points
+TIER2_RATE = 0.05       # 5% second-tier commission in SLH points
+
+# Bot usernames for link generation
+BOT_USERNAMES = {
+    "botshop": "BotShop_bot",
+    "wallet": "SLH_Wallet_bot",
+    "factory": "SLH_Factory_bot",
+    "academia": "SLH_Academia_bot",
+    "guardian": "Grdian_bot",
+    "community": "SLH_community_bot",
+    "airdrop": "SLH_AIR_bot",
+    "expertnet": "ExpertNetBot",
+    "campaign": "SLH_Campaign_bot",
+    "fun": "SLH_Fun_bot",
+    "admin": "SLH_Admin_bot",
+    "school": "SLH_School_bot",
+    "nfty": "SLH_NFTY_bot",
+    "match": "SLH_Match_bot",
+    "wellness": "SLH_Wellness_bot",
+    "tonmnh": "SLH_TonMnh_bot",
+    "userinfo": "SLH_UserInfo_bot",
+    "osif_shop": "OsifShop_bot",
+    "repair": "SLH_Repair_bot",
+}
+
+# DB schema for referrals
+REFERRAL_SCHEMA = """
+CREATE TABLE IF NOT EXISTS referrals (
+    id BIGSERIAL PRIMARY KEY,
+    referrer_id BIGINT NOT NULL,
+    referred_id BIGINT NOT NULL,
+    bot_name TEXT NOT NULL,
+    status TEXT DEFAULT 'registered',  -- registered, converted, paid
+    commission_amount NUMERIC(18,2) DEFAULT 0,
+    commission_paid BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(referred_id, bot_name)
+);
+
+CREATE TABLE IF NOT EXISTS referral_stats (
+    user_id BIGINT NOT NULL,
+    bot_name TEXT NOT NULL,
+    total_referrals INT DEFAULT 0,
+    converted_referrals INT DEFAULT 0,
+    total_commission NUMERIC(18,2) DEFAULT 0,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, bot_name)
+);
+
+CREATE INDEX IF NOT EXISTS idx_referrals_referrer ON referrals(referrer_id);
+CREATE INDEX IF NOT EXISTS idx_referrals_referred ON referrals(referred_id);
+"""
+
+
+class ReferralEngine:
+    """Manages referral tracking and commission calculation."""
+
+    async def init_schema(self):
+        """Create referral tables if they don't exist."""
+        pool = await db.get_pool()
+        async with pool.acquire() as conn:
+            await conn.execute(REFERRAL_SCHEMA)
+
+    def get_link(self, user_id: int, bot_name: str = "") -> str:
+        """Generate a referral link for a user."""
+        if bot_name and bot_name in BOT_USERNAMES:
+            username = BOT_USERNAMES[bot_name]
+            return f"https://t.me/{username}?start=ref_{user_id}"
+        # Default: link to airdrop bot
+        return f"https://t.me/SLH_AIR_bot?start=ref_{user_id}"
+
+    def get_all_links(self, user_id: int) -> dict:
+        """Generate referral links for all bots."""
+        return {name: self.get_link(user_id, name) for name in BOT_USERNAMES}
+
+    def parse_referral(self, start_param: str) -> Optional[int]:
+        """Extract referrer ID from /start parameter."""
+        if start_param and start_param.startswith("ref_"):
+            try:
+                return int(start_param[4:])
+            except ValueError:
+                pass
+        return None
+
+    async def track_referral(self, referrer_id: int, referred_id: int, bot_name: str) -> bool:
+        """Record a new referral. Returns True if new."""
+        if referrer_id == referred_id:
+            return False
+        pool = await db.get_pool()
+        async with pool.acquire() as conn:
+            try:
+                await conn.execute(
+                    """INSERT INTO referrals (referrer_id, referred_id, bot_name)
+                       VALUES ($1, $2, $3)
+                       ON CONFLICT (referred_id, bot_name) DO NOTHING""",
+                    referrer_id, referred_id, bot_name,
+                )
+                # Update stats
+                await conn.execute(
+                    """INSERT INTO referral_stats (user_id, bot_name, total_referrals)
+                       VALUES ($1, $2, 1)
+                       ON CONFLICT (user_id, bot_name)
+                       DO UPDATE SET total_referrals = referral_stats.total_referrals + 1,
+                                     updated_at = CURRENT_TIMESTAMP""",
+                    referrer_id, bot_name,
+                )
+                logger.info("Referral tracked: %s -> %s (%s)", referrer_id, referred_id, bot_name)
+                return True
+            except Exception as e:
+                logger.error("Failed to track referral: %s", e)
+                return False
+
+    async def mark_converted(self, referred_id: int, bot_name: str, payment_amount: float) -> bool:
+        """Mark a referral as converted (user paid) and calculate commission."""
+        pool = await db.get_pool()
+        async with pool.acquire() as conn:
+            row = await conn.fetchrow(
+                "SELECT referrer_id FROM referrals WHERE referred_id=$1 AND bot_name=$2",
+                referred_id, bot_name,
+            )
+            if not row:
+                return False
+
+            commission = round(payment_amount * COMMISSION_RATE, 2)
+            await conn.execute(
+                """UPDATE referrals SET status='converted', commission_amount=$3
+                   WHERE referred_id=$1 AND bot_name=$2""",
+                referred_id, bot_name, commission,
+            )
+            await conn.execute(
+                """UPDATE referral_stats
+                   SET converted_referrals = converted_referrals + 1,
+                       total_commission = total_commission + $3,
+                       updated_at = CURRENT_TIMESTAMP
+                   WHERE user_id=$1 AND bot_name=$2""",
+                row["referrer_id"], bot_name, commission,
+            )
+            logger.info("Referral converted: user %s, commission %.2f", referred_id, commission)
+            return True
+
+    async def get_user_stats(self, user_id: int) -> dict:
+        """Get referral stats for a user across all bots."""
+        pool = await db.get_pool()
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(
+                """SELECT bot_name, total_referrals, converted_referrals, total_commission
+                   FROM referral_stats WHERE user_id=$1 ORDER BY total_referrals DESC""",
+                user_id,
+            )
+            total_refs = sum(r["total_referrals"] for r in rows) if rows else 0
+            total_converted = sum(r["converted_referrals"] for r in rows) if rows else 0
+            total_commission = sum(float(r["total_commission"]) for r in rows) if rows else 0
+        return {
+            "total_referrals": total_refs,
+            "converted": total_converted,
+            "total_commission": total_commission,
+            "by_bot": [dict(r) for r in rows],
+        }
+
+    async def get_referral_count(self, user_id: int, bot_name: str = "") -> int:
+        """Get total referral count for a user."""
+        pool = await db.get_pool()
+        async with pool.acquire() as conn:
+            if bot_name:
+                return await conn.fetchval(
+                    "SELECT COALESCE(total_referrals, 0) FROM referral_stats WHERE user_id=$1 AND bot_name=$2",
+                    user_id, bot_name,
+                ) or 0
+            return await conn.fetchval(
+                "SELECT COALESCE(SUM(total_referrals), 0) FROM referral_stats WHERE user_id=$1",
+                user_id,
+            ) or 0
+
+    def format_referral_card(self, user_id: int, bot_name: str = "", stats: dict = None) -> str:
+        """Format a referral card message for the user."""
+        link = self.get_link(user_id, bot_name) if bot_name else self.get_link(user_id)
+        total = stats["total_referrals"] if stats else 0
+        converted = stats["converted"] if stats else 0
+        commission = stats["total_commission"] if stats else 0
+
+        return (
+            "ðŸ‘¥ *×”×”×¤× ×™×•×ª ×©×œ×š*\n\n"
+            f"ï¿½- *×”×§×™×©×•×¨ ×”××™×©×™ ×©×œ×š:*\n`{link}`\n\n"
+            f"ðŸ“Š ×”×¤× ×™×•×ª: {total}\n"
+            f"âœ… ×”×¤× ×™×•×ª ×©×”×ž×™×¨×•: {converted}\n"
+            f"ðŸ’° ×¢×ž×œ×”: {commission:.2f} × ×§×•×“×•×ª SLH\n\n"
+            "â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n"
+            "ðŸ’¡ *××™×š ×œ×”×¨×•×•×™ï¿½-?*\n"
+            "1ï¸âƒ£ ×©×ª×£ ××ª ×”×§×™×©×•×¨ ×©×œ×š\n"
+            "2ï¸âƒ£ ï¿½-×‘×¨×™× × ×¨×©×ž×™× ×“×¨×›×š\n"
+            "3ï¸âƒ£ ×›×©×”× ×ž×©×“×¨×’×™× â€” ×ž×§×‘×œ 15% ×¢×ž×œ×” ×‘× ×§×•×“×•×ª SLH!\n\n"
+            "ðŸŽ¯ ×”×–×ž×Ÿ 3 ï¿½-×‘×¨×™× = Community Premium ×‘ï¿½-×™× ×!\n\n"
+            f"ðŸ“‹ *×©×ª×£ ×¢×›×©×™×•:* `{link}`"
+        )
+
+    def format_referral_footer(self, user_id: int, bot_name: str = "") -> str:
+        """Short referral line to append to bot messages."""
+        link = self.get_link(user_id, bot_name)
+        return (
+            f"\n\nâ”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n"
+            f"ðŸ‘¥ *×©×ª×£ ×•×”×¨×•×•×™ï¿½- 15% ×‘× ×§×•×“×•×ª SLH!*\n"
+            f"ï¿½- `{link}`"
+        )
+
+
+# Global singleton
+referral_engine = ReferralEngine()
+
+
+
+
+"""
+SLH Promotions & Deals Engine.
+
+Provides time-limited promotions, bundle deals, and seasonal discounts
+that work across all bots in the ecosystem.
+
+Usage:
+    from slh_payments.promotions import PromoEngine
+    promo = PromoEngine()
+    deal = await promo.get_active_deal("botshop", user_id)
+"""
+import os
+import logging
+from datetime import datetime, timedelta
+from typing import Optional
+from dataclasses import dataclass, field
+
+from . import db
+
+logger = logging.getLogger("slh.promotions")
+
+
+@dataclass
+class Deal:
+    """A promotional deal."""
+    code: str
+    title_he: str
+    title_en: str
+    discount_pct: int  # 0-100
+    bot_names: list  # which bots this applies to, empty = all
+    valid_from: datetime = field(default_factory=datetime.utcnow)
+    valid_until: datetime = field(default_factory=lambda: datetime.utcnow() + timedelta(days=7))
+    max_uses: int = 0  # 0 = unlimited
+    current_uses: int = 0
+    bundle: bool = False  # True = must buy all listed bots
+    bundle_price_ils: float = 0.0
+    bundle_price_ton: float = 0.0
+    min_referrals: int = 0  # require X referrals to unlock
+
+    @property
+    def is_active(self) -> bool:
+        now = datetime.utcnow()
+        if now < self.valid_from or now > self.valid_until:
+            return False
+        if self.max_uses > 0 and self.current_uses >= self.max_uses:
+            return False
+        return True
+
+    @property
+    def remaining_time(self) -> str:
+        delta = self.valid_until - datetime.utcnow()
+        if delta.total_seconds() <= 0:
+            return "× ×’×ž×¨"
+        days = delta.days
+        hours = delta.seconds // 3600
+        if days > 0:
+            return f"{days} ×™×ž×™×, {hours} ×©×¢×•×ª"
+        return f"{hours} ×©×¢×•×ª"
+
+
+# â”€â”€â”€ Active Deals Catalog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+DEALS_CATALOG = [
+    # ðŸ”¥ Launch deal - 30% off everything
+    Deal(
+        code="LAUNCH30",
+        title_he="ðŸ”¥ ×ž×‘×¦×¢ ×”×©×§×”! 30% ×”× ï¿½-×” ×¢×œ ×›×œ ×”×‘×•×˜×™×",
+        title_en="ðŸ”¥ Launch Deal! 30% off all bots",
+        discount_pct=30,
+        bot_names=[],  # all bots
+        valid_from=datetime(2026, 4, 1),
+        valid_until=datetime(2026, 5, 1),
+        max_uses=100,
+    ),
+    # ðŸ’Ž Bundle deal - all 6 bots for 199â‚ª
+    Deal(
+        code="BUNDLE_ALL",
+        title_he="ðŸ’Ž ï¿½-×‘×™×œ×” ×ž×œ××”! ×›×œ 6 ×”×‘×•×˜×™× ×‘×žï¿½-×™×¨ ×ž×™×•ï¿½-×“",
+        title_en="ðŸ’Ž Full Bundle! All 6 bots at special price",
+        discount_pct=0,
+        bot_names=["botshop", "wallet", "factory", "academia", "guardian", "community"],
+        bundle=True,
+        bundle_price_ils=199.0,
+        bundle_price_ton=10.0,
+        valid_from=datetime(2026, 4, 1),
+        valid_until=datetime(2026, 6, 1),
+    ),
+    # ðŸ¤ Refer-3 deal - free Community access
+    Deal(
+        code="REFER3_FREE",
+        title_he="ðŸ¤ ×”×–×ž×Ÿ 3 ï¿½-×‘×¨×™× ×•×§×‘×œ Community Premium ×‘ï¿½-×™× ×!",
+        title_en="ðŸ¤ Invite 3 friends & get Community Premium free!",
+        discount_pct=100,
+        bot_names=["community"],
+        min_referrals=3,
+        valid_from=datetime(2026, 4, 1),
+        valid_until=datetime(2026, 12, 31),
+    ),
+    # ðŸŽ“ Student deal - Academia at 50% off
+    Deal(
+        code="STUDENT50",
+        title_he="ðŸŽ“ ×ž×‘×¦×¢ ×¡×˜×•×“× ×˜×™×! 50% ×”× ï¿½-×” ×¢×œ Academia",
+        title_en="ðŸŽ“ Student Deal! 50% off Academia",
+        discount_pct=50,
+        bot_names=["academia"],
+        valid_from=datetime(2026, 4, 1),
+        valid_until=datetime(2026, 9, 1),
+    ),
+    # ðŸ›¡ï¸ Guardian + Wallet bundle
+    Deal(
+        code="SECURE_PACK",
+        title_he="ðŸ›¡ï¸ ï¿½-×‘×™×œ×ª ××‘×˜ï¿½-×”! Guardian + Wallet ×‘×žï¿½-×™×¨ ×ž×™×•ï¿½-×“",
+        title_en="ðŸ›¡ï¸ Security Pack! Guardian + Wallet special price",
+        discount_pct=0,
+        bot_names=["guardian", "wallet"],
+        bundle=True,
+        bundle_price_ils=99.0,
+        bundle_price_ton=5.0,
+        valid_from=datetime(2026, 4, 1),
+        valid_until=datetime(2026, 7, 1),
+    ),
+]
+
+
+class PromoEngine:
+    """Manages promotions across the SLH ecosystem."""
+
+    def __init__(self):
+        self.deals = DEALS_CATALOG
+
+    def get_active_deals(self, bot_name: str = "") -> list:
+        """Get all active deals, optionally filtered by bot."""
+        active = [d for d in self.deals if d.is_active]
+        if bot_name:
+            active = [d for d in active if not d.bot_names or bot_name in d.bot_names]
+        return active
+
+    def get_deal_by_code(self, code: str) -> Optional[Deal]:
+        """Find a deal by promo code."""
+        code = code.upper().strip()
+        for d in self.deals:
+            if d.code == code and d.is_active:
+                return d
+        return None
+
+    def calculate_price(self, deal: Deal, original_ils: float, original_ton: float) -> tuple:
+        """Calculate discounted price. Returns (ils, ton)."""
+        if deal.bundle:
+            return deal.bundle_price_ils, deal.bundle_price_ton
+        factor = 1 - (deal.discount_pct / 100)
+        return round(original_ils * factor, 2), round(original_ton * factor, 2)
+
+    def format_deals_message(self, bot_name: str = "", lang: str = "he") -> str:
+        """Format active deals as a Telegram message."""
+        deals = self.get_active_deals(bot_name)
+        if not deals:
+            if lang == "he":
+                return "××™×Ÿ ×ž×‘×¦×¢×™× ×¤×¢×™×œ×™× ×›×¨×’×¢. ×¢×§×•×‘ ×ï¿½-×¨×™× ×• ×œ×¢×“×›×•× ×™×!"
+            return "No active deals right now. Follow us for updates!"
+
+        if lang == "he":
+            lines = ["ðŸŽ‰ *×ž×‘×¦×¢×™× ×¤×¢×™×œ×™×*\n"]
+            for d in deals:
+                lines.append(f"*{d.title_he}*")
+                if d.discount_pct > 0 and not d.bundle:
+                    lines.append(f"  ðŸ’° ×”× ï¿½-×”: {d.discount_pct}%")
+                if d.bundle:
+                    lines.append(f"  ðŸ’° ×žï¿½-×™×¨ ï¿½-×‘×™×œ×”: {d.bundle_price_ils}â‚ª / {d.bundle_price_ton} TON")
+                if d.min_referrals > 0:
+                    lines.append(f"  ðŸ‘¥ ×“×¨×•×©: {d.min_referrals} ×”×¤× ×™×•×ª")
+                lines.append(f"  â° × ×•×ª×¨: {d.remaining_time}")
+                lines.append(f"  ðŸ·ï¸ ×§×•×“: `{d.code}`")
+                lines.append("")
+            lines.append("ðŸ’¡ ×©×œï¿½- /promo CODE ×œ×”×¤×¢×œ×”")
+            return "\n".join(lines)
+        else:
+            lines = ["ðŸŽ‰ *Active Deals*\n"]
+            for d in deals:
+                lines.append(f"*{d.title_en}*")
+                if d.discount_pct > 0 and not d.bundle:
+                    lines.append(f"  ðŸ’° Discount: {d.discount_pct}%")
+                if d.bundle:
+                    lines.append(f"  ðŸ’° Bundle: {d.bundle_price_ils}â‚ª / {d.bundle_price_ton} TON")
+                if d.min_referrals > 0:
+                    lines.append(f"  ðŸ‘¥ Requires: {d.min_referrals} referrals")
+                lines.append(f"  â° Time left: {d.remaining_time}")
+                lines.append(f"  ðŸ·ï¸ Code: `{d.code}`")
+                lines.append("")
+            lines.append("ðŸ’¡ Send /promo CODE to activate")
+            return "\n".join(lines)
+
+    def format_upsell_footer(self, bot_name: str = "", user_id: int = 0) -> str:
+        """Short promo line to append to bot responses."""
+        deals = self.get_active_deals(bot_name)
+        if not deals:
+            return ""
+        best = deals[0]
+        return f"\n\nðŸ”¥ *{best.title_he}* â€” â° {best.remaining_time} | /deals"
+
+
+# Global singleton
+promo_engine = PromoEngine()
+
+
+
+
+import asyncio, json, os, asyncpg, logging, re, time
+from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.dispatcher.filters.state import State, StatesGroup
+
+logging.basicConfig(level=logging.INFO)
+
+DB_URL = os.getenv("DATABASE_URL")
+pool = None
+LANG = {}
+
+async def create_pool():
+    global pool
+    pool = await asyncpg.create_pool(DB_URL, min_size=1, max_size=5)
+    logging.info('? DB pool created')
+
+async def check_db_health():
+    try:
+        async with pool.acquire() as conn:
+            start = time.monotonic()
+            await conn.fetchval('SELECT 1')
+            latency = (time.monotonic() - start) * 1000
+            return {"status": "ok", "pool": "active", "latency_ms": round(latency, 2)}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
+
+def load_lang():
+    global LANG
+    with open("lang.json", "r", encoding="utf-8") as f:
+        LANG = json.load(f)
+
+def t(key, lang):
+    return LANG.get(lang, LANG["en"]).get(key, LANG["en"].get(key, key))
+
+def platform_fee(amount):
+    return round(amount * 0.2, 2)
+
+def seller_amount(amount):
+    return amount - platform_fee(amount)
+
+
+async def get_nifti_index():
+    async with pool.acquire() as conn:
+        users = await conn.fetchval('SELECT COUNT(*) FROM users')
+        cards = await conn.fetchval('SELECT COUNT(*) FROM users WHERE card_name IS NOT NULL')
+        # Placeholder for volume (when transactions table exists)
+        volume = await conn.fetchval('SELECT COALESCE(SUM(balance),0) FROM users')
+        # Simple index formula
+        index = round((users * 0.1 + cards * 0.5 + volume * 0.01), 2)
+        return {
+            'users': users,
+            'cards': cards,
+            'volume_tons': float(volume) if volume else 0,
+            'index': index
+        }
+
+def is_valid_ton(address):
+    if not address:
+        return False
+    address = str(address).strip()
+    if not (address.startswith("UQ") or address.startswith("EQ")):
+        return False
+    if len(address) != 48:
+        return False
+    if not re.match(r"^[UE]Q[A-Za-z0-9_-]{46}$", address):
+        return False
+    return True
+
+class CardForm(StatesGroup):
+    waiting_name = State()
+    waiting_prof = State()
+    waiting_wallet = State()
+
+class EditForm(StatesGroup):
+    waiting_name = State()
+    waiting_prof = State()
+    waiting_wallet = State()
+
+def main_menu(lang):
+    kb = ReplyKeyboardMarkup(resize_keyboard=True)
+    kb.add(t("create_card", lang), t("my_card", lang))
+    kb.add(t("premium", lang), t("earnings", lang))
+    kb.add(t("leaderboard", lang), t("settings_menu", lang), t("help", lang))
+    return kb
+
+def all_menu_labels(lang=None):
+    if lang:
+        return set(t(k, lang) for k in ["create_card","my_card","premium","earnings","leaderboard","settings_menu","help"])
+    labels = set()
+    for lang_code in LANG:
+        labels.update(all_menu_labels(lang_code))
+    return labels
+import asyncio, aiohttp, os, asyncpg, logging
+from datetime import datetime
+
+logging.basicConfig(level=logging.INFO)
+WALLET = "UQCr743gEr_nqV_0SBkSp3CtYS_15R3LDLBvLmKeEv7XdGvp"
+TONCENTER_API = "https://toncenter.com/api/v2"
+DB_URL = os.getenv("DATABASE_URL", "postgresql://postgres:slh_secure_2026@localhost:5432/slh_main")
+BOT_TOKEN = "7998856873:AAHq0k3NEstfjbES6zgk6nOCeSycR4iqrO0"
+
+async def get_transactions():
+    url = f"{TONCENTER_API}/getTransactions?address={WALLET}&limit=5"
+    async with aiohttp.ClientSession() as s:
+        async with s.get(url) as resp:
+            if resp.status == 200:
+                data = await resp.json()
+                return data.get("result", [])
+    return []
+
+async def send_telegram(user_id: int, text: str):
+    import aiohttp
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    payload = {"chat_id": user_id, "text": text}
+    async with aiohttp.ClientSession() as session:
+        await session.post(url, json=payload)
+
+async def process_tx(tx, pool):
+    memo = tx.get("comment", "")
+    if memo.startswith("NIFTI_PAY:"):
+        user_id = int(memo.split(":")[1])
+        value = int(tx["in_msg"]["value"]) / 1e9
+        tx_hash = tx["transaction_id"]["hash"]
+        async with pool.acquire() as conn:
+            # Check if already processed
+            exists = await conn.fetchval("SELECT tx_hash FROM premium_users WHERE tx_hash=$1", tx_hash)
+            if exists:
+                return
+            await conn.execute("UPDATE users SET is_premium = TRUE WHERE user_id = $1", user_id)
+            await conn.execute(
+                "INSERT INTO premium_users (user_id, bot_name, amount, tx_hash) VALUES ($1, 'nifti', $2, $3)",
+                user_id, value, tx_hash
+            )
+            logging.info(f"? Premium activated for user {user_id} ({value} TON)")
+            # Notify user
+            await send_telegram(user_id, f"?? Payment of {value} TON received! Your Premium status is now active.")
+            # Notify admin (you)
+            await send_telegram(224223270, f"?? Payment received: {value} TON from user {user_id}")
+
+async def main():
+    pool = await asyncpg.create_pool(DB_URL, min_size=1, max_size=2)
+    logging.info("?? TON Scanner started (with notifications)")
+    while True:
+        try:
+            txs = await get_transactions()
+            for tx in txs:
+                await process_tx(tx, pool)
+        except Exception as e:
+            logging.error(f"Scanner error: {e}")
+        await asyncio.sleep(300)
+
+if __name__ == "__main__":
+    asyncio.run(main())
+
+

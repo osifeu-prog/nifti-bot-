@@ -1,0 +1,119 @@
+﻿
+> server.py:44:            CREATE TABLE IF NOT EXISTS users (
+  server.py:45:                user_id BIGINT PRIMARY KEY, username TEXT, lang TEXT DEFAULT 'en',
+  server.py:46:                card_name TEXT, card_prof TEXT, wallet TEXT, balance FLOAT DEFAULT 0,
+  server.py:47:                price FLOAT DEFAULT 1, share_count INT DEFAULT 0, is_premium BOOLEAN DEFAULT FALSE,
+  server.py:48:                iwa_balance FLOAT DEFAULT 0, points FLOAT DEFAULT 0, role TEXT DEFAULT 'user',
+  server.py:49:                photo_file_id TEXT, state TEXT DEFAULT 'IDLE', community_verified BOOLEAN DEFAULT FALSE,
+  server.py:50:                created_at TIMESTAMP DEFAULT NOW()
+  server.py:51:            )
+  server.py:52:        """)
+  server.py:53:        await conn.execute("""
+> server.py:54:            CREATE TABLE IF NOT EXISTS referrals (
+  server.py:55:                user_id BIGINT, ref_id BIGINT, PRIMARY KEY (user_id, ref_id)
+  server.py:56:            )
+  server.py:57:        """)
+  server.py:58:        await conn.execute("""
+> server.py:59:            CREATE TABLE IF NOT EXISTS premium_users (
+  server.py:60:                id SERIAL PRIMARY KEY, user_id BIGINT, bot_name TEXT, amount FLOAT, tx_hash TEXT
+  server.py:61:            )
+  server.py:62:        """)
+  server.py:63:        await conn.execute("""
+> server.py:64:            CREATE TABLE IF NOT EXISTS casino_settings (
+  server.py:65:                id SERIAL PRIMARY KEY, house_edge FLOAT DEFAULT 0.15, is_active BOOLEAN DEFAULT TRUE
+  server.py:66:            )
+  server.py:67:        """)
+  server.py:68:        await conn.execute("""
+> server.py:69:            CREATE TABLE IF NOT EXISTS admin_logs (
+  server.py:70:                id SERIAL PRIMARY KEY, admin_id BIGINT, action TEXT, details TEXT, ts TIMESTAMP DEFAULT 
+NOW()
+  server.py:71:            )
+  server.py:72:        """)
+  server.py:73:        await conn.execute("""
+> server.py:74:            CREATE TABLE IF NOT EXISTS market_cards (
+  server.py:75:                id SERIAL PRIMARY KEY, seller_id BIGINT, card_name TEXT, card_prof TEXT,
+  server.py:76:                price FLOAT, photo_file_id TEXT, level TEXT DEFAULT 'Newbie',
+  server.py:77:                created_at TIMESTAMP DEFAULT NOW()
+  server.py:78:            )
+  server.py:79:        """)
+  server.py:80:        await conn.execute("""
+> server.py:81:            CREATE TABLE IF NOT EXISTS analytics (
+  server.py:82:                id SERIAL PRIMARY KEY, user_id BIGINT, event_type VARCHAR(50),
+  server.py:83:                metadata JSONB, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  server.py:84:            )
+  server.py:85:        """)
+  server.py:86:        await conn.execute("""
+  server.py:87:            INSERT INTO casino_settings (house_edge, is_active)
+  server.py:88:            SELECT 0.15, TRUE
+  server.py:89:            WHERE NOT EXISTS (SELECT 1 FROM casino_settings)
+  server.py:90:        """)
+  server.py:91:        for col, typ in [('points', 'FLOAT DEFAULT 0'), ('iwa_balance', 'FLOAT DEFAULT 0'),
+> db_init.py:4:CREATE TABLE IF NOT EXISTS users (
+  db_init.py:5:    id BIGINT PRIMARY KEY,
+  db_init.py:6:    username TEXT,
+  db_init.py:7:    created_at TIMESTAMP DEFAULT NOW()
+  db_init.py:8:)
+  db_init.py:9:""")
+  db_init.py:10:
+  db_init.py:11:print("[DB] READY V4")
+  db_init.py:12:
+> migrations.py:7:    CREATE TABLE IF NOT EXISTS users (
+  migrations.py:8:        id BIGINT PRIMARY KEY,
+  migrations.py:9:        balance NUMERIC DEFAULT 0
+  migrations.py:10:    )
+  migrations.py:11:    """)
+  migrations.py:12:
+  migrations.py:13:    engine.execute("""
+> migrations.py:14:    CREATE TABLE IF NOT EXISTS ledger (
+  migrations.py:15:        id SERIAL PRIMARY KEY,
+  migrations.py:16:        user_id BIGINT,
+  migrations.py:17:        amount NUMERIC,
+  migrations.py:18:        type TEXT,
+  migrations.py:19:        created_at TIMESTAMP DEFAULT NOW()
+  migrations.py:20:    )
+  migrations.py:21:    """)
+  migrations.py:22:
+  migrations.py:23:    print("[MIGRATIONS] DONE")
+  migrations.py:24:
+> migrate.py:6:        CREATE TABLE IF NOT EXISTS users (
+  migrate.py:7:            user_id BIGINT PRIMARY KEY,
+  migrate.py:8:            username TEXT,
+  migrate.py:9:            balance REAL DEFAULT 0,
+  migrate.py:10:            ref_id BIGINT,
+  migrate.py:11:            created_at TIMESTAMPTZ DEFAULT NOW(),
+  migrate.py:12:            lang TEXT DEFAULT 'en',
+  migrate.py:13:            card_name TEXT,
+  migrate.py:14:            card_prof TEXT,
+  migrate.py:15:            wallet TEXT,
+  migrate.py:16:            price REAL DEFAULT 1.0,
+> migrate.py:25:        CREATE TABLE IF NOT EXISTS referrals (
+  migrate.py:26:            id SERIAL PRIMARY KEY,
+  migrate.py:27:            user_id BIGINT,
+  migrate.py:28:            ref_id BIGINT,
+  migrate.py:29:            created_at TIMESTAMPTZ DEFAULT NOW(),
+  migrate.py:30:            UNIQUE(user_id)
+  migrate.py:31:        )
+  migrate.py:32:    ''')
+  migrate.py:33:    await conn.execute('''
+> migrate.py:34:        CREATE TABLE IF NOT EXISTS premium_users (
+  migrate.py:35:            user_id BIGINT,
+  migrate.py:36:            bot_name TEXT,
+  migrate.py:37:            amount REAL,
+  migrate.py:38:            tx_hash TEXT PRIMARY KEY,
+  migrate.py:39:            created_at TIMESTAMPTZ DEFAULT NOW()
+  migrate.py:40:        )
+  migrate.py:41:    ''')
+  migrate.py:42:    await conn.execute('''
+> migrate.py:43:        CREATE TABLE IF NOT EXISTS admin_logs (
+  migrate.py:44:            id SERIAL PRIMARY KEY,
+  migrate.py:45:            admin_id BIGINT,
+  migrate.py:46:            action TEXT,
+  migrate.py:47:            details TEXT,
+  migrate.py:48:            created_at TIMESTAMPTZ DEFAULT NOW()
+  migrate.py:49:        )
+  migrate.py:50:    ''')
+  migrate.py:51:    print("✅ Migration complete")
+  migrate.py:52:    await conn.close()
+  migrate.py:53:
+
+

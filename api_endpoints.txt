@@ -1,0 +1,21 @@
+﻿
+  server.py:1002:app = FastAPI(lifespan=lifespan)
+  server.py:1003:
+> server.py:1004:@app.get('/')
+  server.py:1006:    return {'status': 'NIFTI API running'}
+  server.py:1007:
+> server.py:1008:@app.post('/webhook')
+  server.py:1026:    return {'ok': True}
+  server.py:1027:
+> server.py:1028:@app.get('/admin')
+  server.py:1036:    return HTMLResponse(html)
+  server.py:1037:
+> server.py:1038:@app.get('/card/{user_id}')
+  api.py:17:app = FastAPI(lifespan=lifespan)
+  api.py:18:
+> api.py:19:@app.get("/api/card/{user_id}")
+  api.py:26:
+  api.py:27:
+> api.py:28:@app.get("/api/ping")
+
+

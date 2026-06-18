@@ -1,0 +1,345 @@
+﻿
+> server.py:212:@dp.message_handler(commands=['start'])
+  server.py:213:async def start(msg: types.Message):
+  server.py:214:    SystemAudit.log_event('command_start', msg.from_user.id)
+  server.py:215:    ref = int(msg.get_args()) if msg.get_args() and msg.get_args().isdigit() else None
+  server.py:216:    if ref and ref != msg.from_user.id:
+  server.py:217:        await add_referral(msg.from_user.id, ref)
+> server.py:225:@dp.message_handler(commands=['demo'])
+  server.py:226:async def demo_mode(msg: types.Message):
+  server.py:227:    demo_data = {
+  server.py:228:        "card_name": "Osif Ungar",
+  server.py:229:        "card_prof": "Architect & Founder",
+  server.py:230:        "price": "5.0 TON",
+> server.py:256:@dp.callback_query_handler(lambda c: c.data in ['menu_mycard', 'menu_edit', 'menu_create', 
+'menu_market', 'menu_wallet', 'menu_leaderboard', 'menu_community', 'menu_commands', 'verify_join'])
+  server.py:257:async def dashboard_actions(call: types.CallbackQuery):
+  server.py:258:    data = call.data
+  server.py:259:    if data == 'menu_mycard':
+  server.py:260:        await my_card_cmd(call.message)
+  server.py:261:    elif data == 'menu_edit':
+> server.py:286:@dp.message_handler(state=CardForm.waiting_name)
+  server.py:287:async def process_name(msg: types.Message, state: FSMContext):
+  server.py:288:    name = msg.text.strip()
+  server.py:289:    if len(name) < 2:
+  server.py:290:        await msg.answer(t('min_2_chars', msg.from_user.id))
+  server.py:291:        return
+> server.py:296:@dp.message_handler(state=CardForm.waiting_prof)
+  server.py:297:async def process_prof(msg: types.Message, state: FSMContext):
+  server.py:298:    await state.update_data(prof=msg.text.strip())
+  server.py:299:    await msg.answer(t('wallet_prompt', msg.from_user.id))
+  server.py:300:    await CardForm.waiting_wallet.set()
+  server.py:301:
+> server.py:302:@dp.message_handler(state=CardForm.waiting_wallet)
+  server.py:303:async def process_wallet(msg: types.Message, state: FSMContext):
+  server.py:304:    data = await state.get_data()
+  server.py:305:    async with core.pool.acquire() as conn:
+  server.py:306:        await conn.execute('INSERT INTO users (user_id, lang) VALUES ($1, $2) ON CONFLICT DO NOTHING', 
+msg.from_user.id, 'en')
+  server.py:307:        await conn.execute('UPDATE users SET card_name=$1, card_prof=$2, wallet=$3, price=1.0 WHERE 
+user_id=$4',
+> server.py:314:@dp.callback_query_handler(lambda c: c.data == 'menu_edit')
+  server.py:315:async def menu_edit_wizard(call: types.CallbackQuery):
+  server.py:316:    await dp.current_state(user=call.from_user.id).set_state("editing_card")
+  server.py:317:    kb = types.InlineKeyboardMarkup(row_width=2)
+  server.py:318:    kb.add(types.InlineKeyboardButton("📝 Name", callback_data="wizard_name"),
+  server.py:319:           types.InlineKeyboardButton("💼 Prof.", callback_data="wizard_prof"))
+> server.py:326:@dp.callback_query_handler(lambda c: c.data.startswith('wizard_'))
+  server.py:327:async def handle_wizard(call: types.CallbackQuery):
+  server.py:328:    action = call.data.split('_')[1]
+  server.py:329:    if action == 'cancel':
+  server.py:330:        await dp.current_state(user=call.from_user.id).finish()
+  server.py:331:        await call.message.answer("Editing cancelled.")
+> server.py:345:@dp.message_handler(state="editing_card")
+  server.py:346:async def process_wizard_input(msg: types.Message):
+  server.py:347:    data = await dp.current_state(user=msg.from_user.id).get_data()
+  server.py:348:    action = data.get('action')
+  server.py:349:    if not action: return
+  server.py:350:    async with core.pool.acquire() as conn:
+> server.py:377:@dp.message_handler(content_types=['photo'], state="editing_card")
+  server.py:378:async def handle_wizard_photo(msg: types.Message):
+  server.py:379:    data = await dp.current_state(user=msg.from_user.id).get_data()
+  server.py:380:    if data.get('action') == 'photo':
+  server.py:381:        file_id = msg.photo[-1].file_id
+  server.py:382:        async with core.pool.acquire() as conn:
+> server.py:392:@dp.message_handler(commands=['commands'])
+  server.py:393:async def commands_cmd(msg: types.Message):
+  server.py:394:    await commands_list(msg)
+  server.py:395:
+  server.py:396:# ---------- My Card ----------
+> server.py:397:@dp.message_handler(commands=['my_card'])
+  server.py:398:async def my_card_cmd(msg: types.Message):
+  server.py:399:    async with core.pool.acquire() as conn:
+  server.py:400:        u = await conn.fetchrow('SELECT * FROM users WHERE user_id=$1', msg.from_user.id)
+  server.py:401:    if not u or not u.get('card_name'):
+  server.py:402:        await msg.answer(t('no_card', msg.from_user.id))
+> server.py:413:@dp.message_handler(commands=['leaderboard'])
+  server.py:414:async def leaderboard_cmd(msg: types.Message):
+  server.py:415:    async with core.pool.acquire() as conn:
+  server.py:416:        top = await conn.fetch('SELECT card_name, share_count FROM users WHERE card_name IS NOT NULL 
+ORDER BY share_count DESC LIMIT 10')
+  server.py:417:    if top:
+  server.py:418:        lines = '\n'.join(f'{i+1}. {r["card_name"]}  {get_level(r["share_count"])} ({r["share_count"]} 
+refs)' for i, r in enumerate(top))
+> server.py:424:@dp.message_handler(commands=['earnings'])
+  server.py:425:async def earnings_cmd(msg: types.Message):
+  server.py:426:    async with core.pool.acquire() as conn:
+  server.py:427:        u = await conn.fetchrow('SELECT balance, price FROM users WHERE user_id=$1', msg.from_user.id)
+  server.py:428:    if not u:
+  server.py:429:        await msg.answer(t('send_start', msg.from_user.id))
+> server.py:437:@dp.message_handler(commands=['invite'])
+  server.py:438:async def invite_cmd(msg: types.Message):
+  server.py:439:    async with core.pool.acquire() as conn:
+  server.py:440:        count = await conn.fetchval('SELECT COUNT(*) FROM referrals WHERE ref_id=$1', msg.from_user.id)
+  server.py:441:    link = f'https://t.me/NFTY_madness_bot?start={msg.from_user.id}'
+  server.py:442:    qr_url = f'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={link}'
+> server.py:447:@dp.message_handler(commands=['spin'])
+  server.py:448:async def spin_cmd(msg: types.Message):
+  server.py:449:    async with core.pool.acquire() as conn:
+  server.py:450:        user_data = await conn.fetchrow('SELECT is_premium, points FROM users WHERE user_id=$1', 
+msg.from_user.id)
+  server.py:451:        if not user_data:
+  server.py:452:            await msg.reply('Please /start first.')
+> server.py:474:@dp.message_handler(commands=['wallet'])
+  server.py:475:async def wallet_cmd(msg: types.Message):
+  server.py:476:    async with core.pool.acquire() as conn:
+  server.py:477:        u = await conn.fetchrow('SELECT balance, wallet, is_premium, points, iwa_balance FROM users 
+WHERE user_id=$1', msg.from_user.id)
+  server.py:478:    if not u:
+  server.py:479:        await msg.answer("Please /start first.")
+> server.py:492:@dp.callback_query_handler(lambda c: c.data == 'wallet_deposit')
+  server.py:493:async def wallet_deposit(call: types.CallbackQuery):
+  server.py:494:    memo = f'NIFTI_PAY:{call.from_user.id}_{uuid.uuid4().hex[:8]}'
+  server.py:495:    text = f"💵 **Deposit TON**\n━━━━━━━━━━━━━━━\nSend TON to:\n`{TON_WALLET}`\n\nMemo: 
+`{memo}`\n\nThe bot will detect your payment automatically."
+  server.py:496:    await call.message.answer(text, parse_mode='Markdown')
+  server.py:497:    await call.answer()
+> server.py:499:@dp.callback_query_handler(lambda c: c.data == 'wallet_withdraw')
+  server.py:500:async def wallet_withdraw(call: types.CallbackQuery):
+  server.py:501:    await call.message.answer("💸 **Withdraw**\nUse /withdraw <amount> to request a 
+withdrawal.\n(Manual processing for now)")
+  server.py:502:    await call.answer()
+  server.py:503:
+> server.py:504:@dp.message_handler(commands=['withdraw'])
+  server.py:505:async def withdraw_cmd(msg: types.Message):
+  server.py:506:    try:
+  server.py:507:        amount = float(msg.get_args())
+  server.py:508:        async with core.pool.acquire() as conn:
+  server.py:509:            balance = await conn.fetchval('SELECT balance FROM users WHERE user_id=$1', 
+msg.from_user.id)
+> server.py:518:@dp.callback_query_handler(lambda c: c.data == 'wallet_transactions')
+  server.py:519:async def wallet_transactions(call: types.CallbackQuery):
+  server.py:520:    async with core.pool.acquire() as conn:
+  server.py:521:        txs = await conn.fetch('SELECT amount, tx_hash, bot_name FROM premium_users WHERE user_id=$1 
+ORDER BY id DESC LIMIT 10', call.from_user.id)
+  server.py:522:    if not txs:
+  server.py:523:        await call.message.answer("No transactions yet.")
+> server.py:532:@dp.callback_query_handler(lambda c: c.data == 'wallet_set')
+  server.py:533:async def wallet_set_cb(call: types.CallbackQuery):
+  server.py:534:    await call.message.answer("To set your wallet address, use:\n/set_wallet <your_ton_address>")
+  server.py:535:    await call.answer()
+  server.py:536:
+> server.py:537:@dp.message_handler(commands=['set_wallet'])
+  server.py:538:async def set_wallet_cmd(msg: types.Message):
+  server.py:539:    addr = msg.get_args().strip()
+  server.py:540:    if not addr:
+  server.py:541:        await msg.answer("Usage: /set_wallet <your_ton_address>")
+  server.py:542:        return
+> server.py:548:@dp.message_handler(commands=['market'])
+  server.py:549:async def market_cmd(msg: types.Message):
+  server.py:550:    async with core.pool.acquire() as conn:
+  server.py:551:        cards = await conn.fetch('SELECT * FROM market_cards ORDER BY id LIMIT 10')
+  server.py:552:    if not cards:
+  server.py:553:        await msg.answer('No cards in the market yet.')
+> server.py:559:@dp.callback_query_handler(lambda c: c.data == 'menu_edit')
+  server.py:560:async def menu_edit_wizard(call: types.CallbackQuery):
+  server.py:561:    await dp.current_state(user=call.from_user.id).set_state("editing_card")
+  server.py:562:    kb = types.InlineKeyboardMarkup(row_width=2)
+  server.py:563:    kb.add(types.InlineKeyboardButton("📝 Name", callback_data="wizard_name"),
+  server.py:564:           types.InlineKeyboardButton("💼 Prof.", callback_data="wizard_prof"))
+> server.py:571:@dp.callback_query_handler(lambda c: c.data in ['wizard_name', 'wizard_prof', 'wizard_price', 
+'wizard_photo', 'wizard_cancel'])
+  server.py:572:async def handle_wizard(call: types.CallbackQuery):
+  server.py:573:    await call.answer()  # immediate feedback
+  server.py:574:    action = call.data.split('_')[1]
+  server.py:575:    if action == 'cancel':
+  server.py:576:        await dp.current_state(user=call.from_user.id).finish()
+> server.py:588:@dp.message_handler(state="editing_card")
+  server.py:589:async def process_wizard_input(msg: types.Message):
+  server.py:590:    data = await dp.current_state(user=msg.from_user.id).get_data()
+  server.py:591:    action = data.get('action')
+  server.py:592:    if not action: return
+  server.py:593:    async with core.pool.acquire() as conn:
+> server.py:620:@dp.message_handler(content_types=['photo'], state="editing_card")
+  server.py:621:async def handle_wizard_photo(msg: types.Message):
+  server.py:622:    data = await dp.current_state(user=msg.from_user.id).get_data()
+  server.py:623:    if data.get('action') == 'photo':
+  server.py:624:        file_id = msg.photo[-1].file_id
+  server.py:625:        async with core.pool.acquire() as conn:
+> server.py:633:@dp.message_handler(commands=['edit_card'])
+  server.py:634:async def edit_card_cmd(msg: types.Message):
+  server.py:635:    await menu_edit_wizard(types.CallbackQuery(message=msg, from_user=msg.from_user, data='menu_edit'))
+  server.py:636:async def show_market_card(msg: types.Message, cards, index):
+  server.py:637:    c = cards[index]
+  server.py:638:    text = f"🖼️ **NIFTI MARKETPLACE**\n──────────────────────\nCard: {c['card_name']}\nProfession: 
+{c['card_prof']}\nPrice: {c['price']} TON\nLevel: {c['level']}"
+> server.py:649:@dp.callback_query_handler(lambda c: c.data.startswith('mkt_'))
+  server.py:650:async def market_nav(call: types.CallbackQuery):
+  server.py:651:    action, *params = call.data.split('_')[1:]
+  server.py:652:    async with core.pool.acquire() as conn:
+  server.py:653:        cards = await conn.fetch('SELECT * FROM market_cards ORDER BY id LIMIT 10')
+  server.py:654:    if not cards:
+> server.py:707:@dp.message_handler(commands=['verify'])
+  server.py:708:async def verify_cmd(msg: types.Message):
+  server.py:709:    await verify_and_join(msg)
+  server.py:710:
+  server.py:711:# ---------- Admin ----------
+> server.py:712:@dp.message_handler(commands=['admin'])
+  server.py:713:async def admin_cmd(msg: types.Message):
+  server.py:714:    if not await is_admin(msg.from_user.id):
+  server.py:715:        await msg.answer(t('admin_only', msg.from_user.id))
+  server.py:716:        return
+  server.py:717:    async with core.pool.acquire() as conn:
+> server.py:731:@dp.callback_query_handler(lambda c: c.data == 'adm_stats')
+  server.py:732:async def adm_stats(call: types.CallbackQuery):
+  server.py:733:    async with core.pool.acquire() as conn:
+  server.py:734:        total_users = await conn.fetchval('SELECT COUNT(*) FROM users')
+  server.py:735:        total_cards = await conn.fetchval('SELECT COUNT(*) FROM users WHERE card_name IS NOT NULL')
+  server.py:736:        total_volume = await conn.fetchval('SELECT COALESCE(SUM(balance),0) FROM users')
+> server.py:741:@dp.callback_query_handler(lambda c: c.data == 'adm_broadcast')
+  server.py:742:async def adm_broadcast(call: types.CallbackQuery):
+  server.py:743:    await call.message.answer("Write your broadcast message:")
+  server.py:744:    await call.answer()
+  server.py:745:
+> server.py:746:@dp.callback_query_handler(lambda c: c.data == 'adm_airdrop')
+  server.py:747:async def adm_airdrop(call: types.CallbackQuery):
+  server.py:748:    await call.message.answer("Usage: /airdrop <amount>")
+  server.py:749:    await call.answer()
+  server.py:750:
+> server.py:751:@dp.callback_query_handler(lambda c: c.data == 'adm_set_edge')
+  server.py:752:async def adm_set_edge(call: types.CallbackQuery):
+  server.py:753:    await call.message.answer("Usage: /set_edge <0.0-1.0>")
+  server.py:754:    await call.answer()
+  server.py:755:
+  server.py:756:# ---------- Dev Panel ----------
+> server.py:757:@dp.message_handler(commands=['dev'])
+  server.py:758:async def dev_menu(msg: types.Message):
+  server.py:759:    if msg.from_user.id != ADMIN_ID:
+  server.py:760:        await msg.answer("⛔ Access Denied.")
+  server.py:761:        return
+  server.py:762:    kb = types.InlineKeyboardMarkup(row_width=1)
+> server.py:771:@dp.callback_query_handler(lambda c: c.data.startswith('dev_'))
+  server.py:772:async def dev_actions(call: types.CallbackQuery):
+  server.py:773:    action = call.data.split('_')[1]
+  server.py:774:    if action == 'db_setup':
+  server.py:775:        await db_setup_cmd(call.message)
+  server.py:776:    elif action == 'grant_admin':
+> server.py:789:@dp.message_handler(commands=['db_setup'])
+  server.py:790:async def db_setup_cmd(msg: types.Message):
+  server.py:791:    if msg.from_user.id != ADMIN_ID: return
+  server.py:792:    try:
+  server.py:793:        await init_db()
+  server.py:794:        async with core.pool.acquire() as conn:
+> server.py:804:@dp.message_handler(commands=['healthcheck'])
+  server.py:805:async def healthcheck_cmd(msg: types.Message):
+  server.py:806:    if not await is_admin(msg.from_user.id): return
+  server.py:807:    try:
+  server.py:808:        async with core.pool.acquire() as conn:
+  server.py:809:            users = await conn.fetchval('SELECT COUNT(*) FROM users')
+> server.py:815:@dp.message_handler(commands=['check'])
+  server.py:816:async def check_cmd(msg: types.Message):
+  server.py:817:    if not await is_admin(msg.from_user.id): return
+  server.py:818:    try:
+  server.py:819:        async with core.pool.acquire() as conn:
+  server.py:820:            users = await conn.fetchval('SELECT COUNT(*) FROM users')
+> server.py:843:@dp.message_handler(commands=['stats'])
+  server.py:844:async def stats_cmd(msg: types.Message):
+  server.py:845:    if not await is_admin(msg.from_user.id): return
+  server.py:846:    async with core.pool.acquire() as conn:
+  server.py:847:        total_users = await conn.fetchval('SELECT COUNT(*) FROM users')
+  server.py:848:        total_cards = await conn.fetchval('SELECT COUNT(*) FROM users WHERE card_name IS NOT NULL')
+> server.py:869:@dp.message_handler(commands=['analytics'])
+  server.py:870:async def analytics_cmd(msg: types.Message):
+  server.py:871:    if not await is_admin(msg.from_user.id): return
+  server.py:872:    async with core.pool.acquire() as conn:
+  server.py:873:        created_cards = await conn.fetchval("SELECT COUNT(*) FROM analytics WHERE event_type = 
+'card_created'")
+  server.py:874:        started_cards = await conn.fetchval("SELECT COUNT(*) FROM analytics WHERE event_type = 
+'wizard_started'")
+> server.py:881:@dp.message_handler(commands=['seed_market'])
+  server.py:882:async def seed_market_cmd(msg: types.Message):
+  server.py:883:    if msg.from_user.id != ADMIN_ID:
+  server.py:884:        await msg.answer("⛔ Admin only.")
+  server.py:885:        return
+  server.py:886:    try:
+> server.py:908:@dp.message_handler(commands=['docs'])
+  server.py:909:async def docs_cmd(msg: types.Message):
+  server.py:910:    docs_text = "📚 **NIFTI Documentation**\n\n"
+  server.py:911:    docs_text += "• /vision  Project vision\n"
+  server.py:912:    docs_text += "• /architecture  System architecture\n"
+  server.py:913:    docs_text += "• /roadmap  Development roadmap\n"
+> server.py:919:@dp.message_handler(commands=['vision'])
+  server.py:920:async def vision_cmd(msg: types.Message):
+  server.py:921:    await msg.answer(open('docs/vision.md','r').read() if os.path.exists('docs/vision.md') else "No 
+vision file.")
+> server.py:922:@dp.message_handler(commands=['architecture'])
+  server.py:923:async def architecture_cmd(msg: types.Message):
+  server.py:924:    await msg.answer(open('docs/architecture.md','r').read() if os.path.exists('docs/architecture.md') 
+else "No architecture file.")
+> server.py:925:@dp.message_handler(commands=['roadmap'])
+  server.py:926:async def roadmap_cmd(msg: types.Message):
+  server.py:927:    await msg.answer(open('docs/roadmap.md','r').read() if os.path.exists('docs/roadmap.md') else "No 
+roadmap file.")
+> server.py:928:@dp.message_handler(commands=['api'])
+  server.py:929:async def api_cmd(msg: types.Message):
+  server.py:930:    await msg.answer(open('docs/api.md','r').read() if os.path.exists('docs/api.md') else "No API 
+file.")
+> server.py:931:@dp.message_handler(commands=['bugs'])
+  server.py:932:async def bugs_cmd(msg: types.Message):
+  server.py:933:    await msg.answer(open('docs/known_bugs.md','r').read() if os.path.exists('docs/known_bugs.md') 
+else "No bugs file.")
+> server.py:934:@dp.message_handler(commands=['decisions'])
+  server.py:935:async def decisions_cmd(msg: types.Message):
+  server.py:936:    await msg.answer(open('docs/decisions.md','r').read() if os.path.exists('docs/decisions.md') else 
+"No decisions file.")
+> server.py:937:@dp.message_handler(commands=['news'])
+  server.py:938:async def news_cmd(msg: types.Message):
+  server.py:939:    await msg.answer("📢 **Latest Updates**\n• v5.3.3  Demo mode, Analytics, Edit Wizard fix, Stable")
+> server.py:940:@dp.message_handler(commands=['plan'])
+  server.py:941:async def plan_cmd(msg: types.Message):
+  server.py:942:    if os.path.exists('MASTER_PLAN.md'):
+  server.py:943:        await msg.answer(open('MASTER_PLAN.md','r').read())
+  server.py:944:    else:
+  server.py:945:        await msg.answer("MASTER_PLAN.md not found.")
+> server.py:1075:@dp.message_handler(commands=['set_name'])
+  server.py:1076:async def cmd_set_name(msg: types.Message):
+  server.py:1077:    user_id = msg.from_user.id
+  server.py:1078:    name = msg.get_args()
+  server.py:1079:    if not name:
+  server.py:1080:        await msg.reply('Usage: /set_name <your name>')
+> server.py:1089:@dp.message_handler(commands=['set_prof'])
+  server.py:1090:async def cmd_set_prof(msg: types.Message):
+  server.py:1091:    user_id = msg.from_user.id
+  server.py:1092:    prof = msg.get_args()
+  server.py:1093:    if not prof:
+  server.py:1094:        await msg.reply('Usage: /set_prof <profession>')
+> server.py:1103:@dp.message_handler(commands=['set_price'])
+  server.py:1104:async def cmd_set_price(msg: types.Message):
+  server.py:1105:    user_id = msg.from_user.id
+  server.py:1106:    try:
+  server.py:1107:        price = float(msg.get_args())
+  server.py:1108:    except:
+> server.py:1118:@dp.message_handler(commands=['set_photo'], content_types=types.ContentType.PHOTO)
+  server.py:1119:async def cmd_set_photo(msg: types.Message):
+  server.py:1120:    user_id = msg.from_user.id
+  server.py:1121:    photo = msg.photo[-1].file_id
+  server.py:1122:    async with core.pool.acquire() as conn:
+  server.py:1123:        await conn.execute('''
+> server.py:1128:@dp.message_handler(commands=['db_backup'])
+  server.py:1129:async def cmd_db_backup(msg: types.Message):
+  server.py:1130:    user_id = msg.from_user.id
+  server.py:1131:    # Only admin (replace with your actual admin ID or check role)
+  server.py:1132:    if user_id != 224223270:
+  server.py:1133:        await msg.reply("⛔ Admin only.")
+
+

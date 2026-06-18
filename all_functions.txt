@@ -1,0 +1,178 @@
+﻿
+Line                                                                       
+----                                                                       
+async def get_users():                                                     
+async def get_payments():                                                  
+async def send_broadcast(text):                                            
+def index():                                                               
+def broadcast():                                                           
+async def lifespan(app: FastAPI):                                          
+async def get_card_json(user_id: int):                                     
+async def ping():                                                          
+def log_execution(event_name):                                             
+async def check():                                                         
+def load_env():                                                            
+def must(key: str):                                                        
+async def init():                                                          
+def start_tunnel():                                                        
+def start_scanner():                                                       
+def start_api():                                                           
+def start_bot():                                                           
+async def show():                                                          
+async def serve_index():                                                   
+async def get_user(user_id: int):                                          
+async def verify_payment(data: dict):                                      
+async def migrate():                                                       
+def migrate():                                                             
+async def create_pool():                                                   
+async def check_db_health():                                               
+def load_lang():                                                           
+def t(key, lang):                                                          
+def platform_fee(amount):                                                  
+def seller_amount(amount):                                                 
+async def get_nifti_index():                                               
+def is_valid_ton(address):                                                 
+def main_menu(lang):                                                       
+def all_menu_labels(lang=None):                                            
+def root():                                                                
+def t(key, user_id=None, **kwargs):                                        
+async def init_db():                                                       
+async def get_lang(user_id):                                               
+async def apply_rate_limit(user_id):                                       
+async def is_admin(user_id):                                               
+async def log_action(admin_id, action, details=""):                        
+async def set_user_state(user_id, state):                                  
+async def get_user_state(user_id):                                         
+async def add_referral(user_id, ref_id):                                   
+def get_level(shares):                                                     
+async def log_event(user_id, event_type, metadata=None):                   
+async def check_community_member(user_id):                                 
+async def glass_dashboard(msg: types.Message):                             
+async def start(msg: types.Message):                                       
+async def demo_mode(msg: types.Message):                                   
+async def dashboard_actions(call: types.CallbackQuery):                    
+async def menu_create_cb(call: types.CallbackQuery):                       
+async def process_name(msg: types.Message, state: FSMContext):             
+async def process_prof(msg: types.Message, state: FSMContext):             
+async def process_wallet(msg: types.Message, state: FSMContext):           
+async def menu_edit_wizard(call: types.CallbackQuery):                     
+async def handle_wizard(call: types.CallbackQuery):                        
+async def process_wizard_input(msg: types.Message):                        
+async def handle_wizard_photo(msg: types.Message):                         
+async def commands_list(msg: types.Message):                               
+async def commands_cmd(msg: types.Message):                                
+async def my_card_cmd(msg: types.Message):                                 
+async def leaderboard_cmd(msg: types.Message):                             
+async def earnings_cmd(msg: types.Message):                                
+async def invite_cmd(msg: types.Message):                                  
+async def spin_cmd(msg: types.Message):                                    
+async def wallet_cmd(msg: types.Message):                                  
+async def wallet_deposit(call: types.CallbackQuery):                       
+async def wallet_withdraw(call: types.CallbackQuery):                      
+async def withdraw_cmd(msg: types.Message):                                
+async def wallet_transactions(call: types.CallbackQuery):                  
+async def wallet_set_cb(call: types.CallbackQuery):                        
+async def set_wallet_cmd(msg: types.Message):                              
+async def market_cmd(msg: types.Message):                                  
+async def edit_card_cmd(msg: types.Message):                               
+async def show_market_card(msg: types.Message, cards, index):              
+async def market_nav(call: types.CallbackQuery):                           
+async def check_and_lock(user_id, required_state, new_state):              
+async def community_info(msg: types.Message):                              
+async def verify_and_join(call: types.CallbackQuery):                      
+async def verify_cmd(msg: types.Message):                                  
+async def admin_cmd(msg: types.Message):                                   
+async def adm_stats(call: types.CallbackQuery):                            
+async def adm_broadcast(call: types.CallbackQuery):                        
+async def adm_airdrop(call: types.CallbackQuery):                          
+async def adm_set_edge(call: types.CallbackQuery):                         
+async def dev_menu(msg: types.Message):                                    
+async def dev_actions(call: types.CallbackQuery):                          
+async def db_setup_cmd(msg: types.Message):                                
+async def healthcheck_cmd(msg: types.Message):                             
+async def check_cmd(msg: types.Message):                                   
+async def stats_cmd(msg: types.Message):                                   
+async def analytics_cmd(msg: types.Message):                               
+async def seed_market_cmd(msg: types.Message):                             
+async def docs_cmd(msg: types.Message):                                    
+async def vision_cmd(msg: types.Message):                                  
+async def architecture_cmd(msg: types.Message):                            
+async def roadmap_cmd(msg: types.Message):                                 
+async def api_cmd(msg: types.Message):                                     
+async def bugs_cmd(msg: types.Message):                                    
+async def decisions_cmd(msg: types.Message):                               
+async def news_cmd(msg: types.Message):                                    
+async def plan_cmd(msg: types.Message):                                    
+async def heartbeat_monitor():                                             
+async def ton_scanner_loop():                                              
+async def index():                                                         
+async def webhook(request: Request):                                       
+async def admin_page():                                                    
+async def card_page(user_id: int):                                         
+async def cmd_set_name(msg: types.Message):                                
+async def cmd_set_prof(msg: types.Message):                                
+async def cmd_set_price(msg: types.Message):                               
+async def cmd_set_photo(msg: types.Message):                               
+async def cmd_db_backup(msg: types.Message):                               
+async def menu_create(call: types.CallbackQuery, state: FSMContext):       
+async def menu_mycard(call: types.CallbackQuery):                          
+async def menu_market(call: types.CallbackQuery):                          
+async def menu_earnings(call: types.CallbackQuery):                        
+async def menu_leaderboard(call: types.CallbackQuery):                     
+async def menu_settings(call: types.CallbackQuery):                        
+async def status(msg: types.Message):                                      
+async def my_card(msg: types.Message):                                     
+async def earnings(msg: types.Message):                                    
+async def market(msg: types.Message):                                      
+async def buy_card(call: types.CallbackQuery):                             
+async def leaderboard(msg: types.Message):                                 
+async def referrals_cmd(msg: types.Message):                               
+async def set_price_cmd(msg: types.Message):                               
+async def admin_panel_cmd(msg: types.Message):                             
+async def broadcast_cmd(msg: types.Message):                               
+async def airdrop_cmd(msg: types.Message):                                 
+async def grant_admin_cmd(msg: types.Message):                             
+async def handle_spin(msg: types.Message):                                 
+async def set_edge_cmd(msg: types.Message):                                
+async def main_menu(msg: types.Message):                                   
+async def menu_profile(call: types.CallbackQuery):                         
+async def menu_commands(call: types.CallbackQuery):                        
+async def menu_edit(call: types.CallbackQuery):                            
+async def edit_name_start(call: types.CallbackQuery, state: FSMContext):   
+async def edit_prof_start(call: types.CallbackQuery, state: FSMContext):   
+async def edit_photo_start(call: types.CallbackQuery):                     
+async def process_edit_name(msg: types.Message, state: FSMContext):        
+async def process_edit_prof(msg: types.Message, state: FSMContext):        
+async def set_photo_cmd(msg: types.Message):                               
+async def handle_photo(msg: types.Message):                                
+async def mint_cmd(msg: types.Message):                                    
+async def openshop_cmd(msg: types.Message):                                
+async def closeshop_cmd(msg: types.Message):                               
+async def sell_cmd(msg: types.Message):                                    
+async def exchange_cmd(msg: types.Message):                                
+async def set_rate_cmd(msg: types.Message):                                
+async def verify_join_handler(call: types.CallbackQuery):                  
+async def set_name_cmd(msg: types.Message):                                
+async def set_prof_cmd(msg: types.Message):                                
+async def init_db_pool(database_url: Optional[str] = None) -> asyncpg.Pool:
+async def get_db() -> asyncpg.Pool:                                        
+async def db_health() -> bool:                                             
+async def close_db_pool() -> None:                                         
+async def get_transactions():                                              
+async def send_telegram(user_id: int, text: str):                          
+async def process_tx(tx, pool):                                            
+async def main():                                                          
+async def my_card_menu(msg: types.Message):                                
+async def premium_menu(msg: types.Message):                                
+async def earnings_menu(msg: types.Message):                               
+async def leaderboard_menu(msg: types.Message):                            
+async def settings_menu_btn(msg: types.Message):                           
+async def help_menu(msg: types.Message):                                   
+def add_user(user_id, username):                                           
+def start(message):                                                        
+def status(message):                                                       
+def run_bot():                                                             
+def bootstrap():                                                           
+def health_check():                                                        
+
+
