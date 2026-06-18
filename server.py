@@ -2001,7 +2001,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-# app.mount("/assets", StaticFiles(directory="frontend/dist/assets"), name="assets")  # disabled  dist not in Railway
+# # removed  # disabled  dist not in Railway
 
 
 
@@ -2337,3 +2337,4 @@ async def api_card_json(user_id: int):
 # ---------- Marketplace Handlers ----------
 
 from services.marketplace import add_product, list_products, buy_product, get_store, get_user_balance
+
