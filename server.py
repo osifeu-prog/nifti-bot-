@@ -6,7 +6,8 @@ from contextlib import asynccontextmanager
 
 from datetime import datetime, timedelta
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
+from saas_core.api_gateway import app as saas_app, Request
 from fastapi.staticfiles import StaticFiles
 
 from fastapi.responses import HTMLResponse
@@ -2412,3 +2413,7 @@ async def serve_frontend(rest_of_path: str):
     return FileResponse("frontend/dist/index.html")
 
 
+
+@app.get("/ping")
+async def ping():
+    return {"ok": True}
