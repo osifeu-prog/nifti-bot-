@@ -1,4 +1,4 @@
-﻿from fastapi import FastAPI
+﻿from fastapi import FastAPI, HTTPException
 from saas_core.db_manager import DBManager
 
 app = FastAPI(title='NIFTI SAAS API')
@@ -8,11 +8,11 @@ db = DBManager()
 async def startup():
     await db.connect()
 
-@app.get('/health')
-async def health():
-    return {'status': 'online', 'service': 'saas_core'}
-
-@app.get('/user/{user_id}')
-async def get_user(user_id: int):
-    user = await db.get_user_data(user_id)
-    return user if user else {'error': 'User not found'}
+@app.get('/wallet/{user_id}')
+async def get_wallet(user_id: int):
+    user_data = await db.get_user_wallet(user_id)
+    if not user_data:
+        raise HTTPException(status_code=404, detail='User not found')
+    
+    # נחזיר את כל הדיקשנרי כדי שנראה את שמות העמודות האמיתיים
+    return dict(user_data)

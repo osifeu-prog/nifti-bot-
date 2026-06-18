@@ -11,9 +11,10 @@ class DBManager:
             self.pool = await asyncpg.create_pool(self.db_url)
         print('SAAS DB Pool initialized')
 
-    async def get_user_data(self, user_id):
+    async def get_user_wallet(self, user_id):
         async with self.pool.acquire() as conn:
-            return await conn.fetchrow('SELECT * FROM users WHERE id = ', user_id)
+            # בוא נשלוף הכל כדי לראות מה המבנה האמיתי
+            return await conn.fetchrow('SELECT * FROM users WHERE id = $1', user_id)
 
     async def close(self):
         await self.pool.close()

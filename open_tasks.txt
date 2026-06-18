@@ -1,9 +1,13 @@
-﻿## 🔴 High Priority
-- None - core systems stable
+﻿## ✅ Completed Today
+- [x] Fix marketplace tables (products, stores, purchases, etc.)
+- [x] Create demo product (SIF Token Sample)
+- [x] Implement Buy button with callback handler
+- [x] Resolve xp column ambiguity
+- [x] First successful purchase (5 TON + 1 TON fee)
 
 ## 🟡 Medium Priority
-- Fix Buy button (market_cmd syntax)
 - Verify BOC payment verification (TON Center API)
+- Connect Mini App to real API
 
 ## 🟢 Low Priority
 - Create templates/index.html (landing page)
