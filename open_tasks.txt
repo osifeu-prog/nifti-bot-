@@ -1,15 +1,17 @@
-﻿## ✅ Completed Today
-- [x] Marketplace tables + demo product
-- [x] Buy button + first purchase (5 TON + 1 TON fee)
-- [x] Wallet API fixed
-- [x] Mini App connected to real API
+﻿## ✅ Completed (v1.0)
+- [x] Marketplace live with first transaction
+- [x] Database backup created
+- [x] Release notes documented
+- [x] Git anchor point committed
 
-## 🟡 Medium Priority
-- Implement full BOC verification (TON Center API)
-- Add TON payment QR / deep link
+## 🟡 Next Session
+- Serve Mini App from FastAPI (static files)
+- Implement BOC verification
+- SIF Token integration
+- Admin Dashboard
 
-## 🟢 Low Priority
-- Landing page (templates/index.html)
+## 🟢 Backlog
+- Landing page
 - Full i18n (9+ languages)
-- NFT card generation via Pillow
-- Order book / Exchange system
+- NFT card generation
+- Order book / Exchange
