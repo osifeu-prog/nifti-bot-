@@ -2420,13 +2420,6 @@ async def get_payment_qr(user_id: int):
 
 
 
-@app.get("/api/debug/user/{user_id}")
-async def debug_user(user_id: int):
-    async with core.pool.acquire() as conn:
-        row = await conn.fetchrow("SELECT * FROM users WHERE user_id = ", user_id)
-    if not row:
-        return {"error": "User not found"}
-    return dict(row)
 
 
 if __name__ == '__main__':
