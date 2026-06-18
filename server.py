@@ -2297,6 +2297,21 @@ async def cmd_db_backup(msg: types.Message):
 
     await msg.reply_document(InputFile(buf, filename="nifti_backup.json"))
 
+
+
+@dp.callback_query_handler(lambda c: c.data.startswith('buy_'))
+async def process_buy(call: types.CallbackQuery):
+    from services.marketplace import buy_product
+    product_id = int(call.data.split('_')[1])
+    user_id = call.from_user.id
+    result = await buy_product(user_id, product_id)
+    if result['ok']:
+        await call.message.answer(
+            f"✅ Purchased {result['product']} for {result['price']} TON (fee: {result['fee']} TON)"
+        )
+    else:
+        await call.message.answer(f"❌ {result['error']}")
+
 if __name__ == '__main__':
 
     port = int(os.getenv("PORT", 8000))
