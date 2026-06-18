@@ -1,13 +1,8 @@
-﻿## ✅ Completed (v1.1)
-- [x] BOC verification (TON Center API)
-- [x] ton_scanner now verifies each transaction via TON Center
-
-## 🟡 In Progress
-- SIF Token integration
-
-## 🟢 Backlog
-- Admin Dashboard
-- Landing page
-- Full i18n (9+ languages)
-- NFT card generation
-- Order book / Exchange
+﻿## ? In Progress (LOCKED)
+- [x] BOC verification
+- [x] SIF Token integration
+- [x] Admin Dashboard (LOCKED)
+- [x] Landing page (LOCKED)
+- [x] Full i18n (9+ languages) (LOCKED)
+- [x] NFT card generation (LOCKED)
+- [x] Order book / Exchange (LOCKED)
