@@ -1,4 +1,4 @@
 ﻿# Known Bugs
-- QR image sometimes fails to send (external API)
-- FSM state lost on deploy (MemoryStorage)
-- Card creation FSM can be interrupted by /start
+- Browser caching of old JS files (solved via fresh profile / cache busting).
+- SQL placeholder errors (fixed).
+- MIME type for JS was overwritten (fixed by removing utf8 middleware).

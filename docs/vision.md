@@ -1,4 +1,5 @@
 ﻿# NIFTI Vision
-Become the leading digital business card platform on Telegram,
-with viral referral mechanics and a token economy that rewards
-users for sharing and engaging.
+- Give every user a digital identity card.
+- Enable peer-to-peer commerce via TON.
+- Build a community-driven marketplace.
+- Integrate with SLH ecosystem as the economic layer.
